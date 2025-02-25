@@ -87,15 +87,19 @@ export default function App() {
         </Text>
       </TouchableOpacity>
 
-      {/* Bottom Sheet Cart Modal */}
+      {/* 🛒 Bottom Sheet Cart Modal */}
       <Modal
         isVisible={isCartVisible}
         onBackdropPress={() => setCartVisible(false)}
-        onSwipeComplete={() => setCartVisible(false)}
         swipeDirection="down"
         style={styles.modal}
       >
         <View style={styles.cartContainer}>
+          {/* ❌ Close Button (X) */}
+          <TouchableOpacity style={styles.closeIcon} onPress={() => setCartVisible(false)}>
+            <Text style={styles.closeIconText}>✖</Text>
+          </TouchableOpacity>
+
           <Text style={styles.cartTitle}>Your Cart ({selectedCount})</Text>
 
           {/* Cart Items */}
@@ -113,14 +117,14 @@ export default function App() {
             )}
           />
 
-          {/* Close Button */}
-          <TouchableOpacity style={styles.closeCartButton} onPress={() => setCartVisible(false)}>
-            <Text style={styles.closeCartText}>Close</Text>
+          {/* ✅ Ready Button */}
+          <TouchableOpacity style={styles.readyButton}>
+            <Text style={styles.readyButtonText}>Ready</Text>
           </TouchableOpacity>
         </View>
       </Modal>
 
-      {/* 🚨 Selection Limit Modal */}
+      {/* Selection Limit Modal */}
       <Modal isVisible={isLimitModalVisible} onBackdropPress={() => setLimitModalVisible(false)}>
         <View style={styles.limitModal}>
           <Text style={styles.limitTitle}>🚨 Selection Limit Reached</Text>
@@ -153,21 +157,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     borderWidth: 3, 
-    borderColor: "transparent", // Default no border
+    borderColor: "transparent", 
     overflow: "hidden",
   },
   selectedCard: {
-    borderColor: "#007bff", // Blue border when selected
+    borderColor: "#007bff",
   },
   image: {
     width: "100%",
-    height: 220, // Increased height slightly
+    height: 220, 
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
   titleContainer: {
     backgroundColor: "white",
-    paddingVertical: 8,  // Spacing below the image
+    paddingVertical: 8,  
     width: "100%",
     alignItems: "center",
   },
@@ -178,10 +182,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#007bff",
     padding: 15,
     borderRadius: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    shadowOffset: { height: 2, width: 0 },
     elevation: 5,
   },
   cartButtonText: {
@@ -199,6 +199,17 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "80%",
+  },
+  closeIcon: {
+    position: "absolute",
+    top: 10,
+    right: 15,
+    zIndex: 1,
+  },
+  closeIconText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
   },
   cartTitle: {
     fontSize: 22,
@@ -230,14 +241,14 @@ const styles = StyleSheet.create({
     color: "red",
     fontWeight: "bold",
   },
-  closeCartButton: {
-    backgroundColor: "#007bff",
+  readyButton: {
+    backgroundColor: "#05b445",
     padding: 10,
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
   },
-  closeCartText: {
+  readyButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
