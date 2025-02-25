@@ -5,17 +5,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";  // 📌 Import modal
 import { StatusBar } from "expo-status-bar";
-
-const MOVIES_API = [
-  { id: 1, title: "Inception", image: "https://picsum.photos/200/300?random=1" },
-  { id: 2, title: "Interstellar", image: "https://picsum.photos/200/300?random=2" },
-  { id: 3, title: "The Dark Knight", image: "https://picsum.photos/200/300?random=3" },
-  { id: 4, title: "Parasite", image: "https://picsum.photos/200/300?random=4" },
-  { id: 5, title: "The Matrix", image: "https://picsum.photos/200/300?random=5" },
-  { id: 6, title: "Avatar", image: "https://picsum.photos/200/300?random=6" },
-  { id: 7, title: "The Matrix", image: "https://picsum.photos/200/300?random=5" },
-  { id: 8, title: "Avatar", image: "https://picsum.photos/200/300?random=6" },
-];
+import { getMovies } from "./utils/api";
 
 export default function App() {
   const [movies, setMovies] = useState([]);
@@ -26,11 +16,19 @@ export default function App() {
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
-    setTimeout(() => {
-      setMovies(MOVIES_API);
-      setLoading(false);
-    }, 1000);
+    fetchMovies();
   }, []);
+  
+  const fetchMovies = async () => {
+    try {
+      const movieList = await getMovies();
+      setMovies(movieList);
+    } catch (error) {
+      console.error("Failed to fetch movies:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const maxNumber = 3; //subject to change
   const selectedCount = Object.values(selectedMovies).filter(Boolean).length;
@@ -68,7 +66,8 @@ export default function App() {
           key={numColumns} // Forces re-render when layout changes
           contentContainerStyle={{ paddingBottom: 80 }} // Space for the cart button
           renderItem={({ item }) => (
-            <View
+            <TouchableOpacity
+              onPress={() => toggleSelectMovie(item.id)}
               style={[
                 styles.movieCard,
                 selectedMovies[item.id] && styles.selectedCard,
@@ -76,18 +75,7 @@ export default function App() {
             >
               <Image source={{ uri: item.image }} style={styles.image} />
               <Text style={styles.movieTitle}>{item.title}</Text>
-              <TouchableOpacity
-                onPress={() => toggleSelectMovie(item.id)}
-                style={[
-                  styles.selectButton,
-                  { backgroundColor: selectedMovies[item.id] ? "red" : "blue" },
-                ]}
-              >
-                <Text style={styles.buttonText}>
-                  {selectedMovies[item.id] ? "Remove" : "Select"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -162,32 +150,26 @@ const styles = StyleSheet.create({
   movieCard: {
     flex: 1,
     margin: 10,
-    padding: 10,
-    backgroundColor: "#fff",
     borderRadius: 10,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
+    borderWidth: 3, 
+    borderColor: "transparent", // Default no border
+    overflow: "hidden",
   },
   selectedCard: {
-    backgroundColor: "#e0ffe0",
+    borderColor: "#007bff", // Blue border when selected
   },
   image: {
-    width: 100,
-    height: 150,
-    borderRadius: 8,
+    width: "100%",
+    height: 220, // Increased height slightly
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
-  movieTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 5,
-  },
-  selectButton: {
-    padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "white",
+  titleContainer: {
+    backgroundColor: "white",
+    paddingVertical: 8,  // Spacing below the image
+    width: "100%",
+    alignItems: "center",
   },
   cartButton: {
     position: "absolute",
