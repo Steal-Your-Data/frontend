@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
-  Image, Dimensions, StyleSheet,
+  Image, Dimensions, StyleSheet, TextInput
 } from "react-native";
 import Modal from "react-native-modal";  // 📌 Import modal
 import { StatusBar } from "expo-status-bar";
@@ -14,6 +14,7 @@ export default function Catalog() {
   const [selectedMovies, setSelectedMovies] = useState({});
   const [isCartVisible, setCartVisible] = useState(false);
   const [isLimitModalVisible, setLimitModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
@@ -50,18 +51,28 @@ export default function Catalog() {
 
   const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
   
-  
+  const filteredMovies = movies.filter(movie =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
       <Text style={styles.header}>Movie Catalog</Text>
 
+      {/* Search Input */}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search movies..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
       {loading ? (
         <ActivityIndicator size="large" color="blue" style={{ marginTop: 20 }} />
       ) : (
         <FlatList
-          data={movies}
+          data={filteredMovies}
           keyExtractor={(item) => item.id.toString()}
           numColumns={numColumns}
           key={numColumns} // Forces re-render when layout changes
@@ -182,13 +193,25 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
   header: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 10 },
-  flipContainer: { margin: 10, borderRadius: 10, alignItems: "center", overflow: "hidden" },
-  card: { width: 150, height: 300, backfaceVisibility: "hidden", justifyContent: "center", alignItems: "center" },
+  flipContainer: { 
+    margin: 5,  
+    borderRadius: 10, 
+    alignItems: "center", 
+    overflow: "hidden", 
+    width: 150, 
+    height: 250, 
+  },
+  card: { width: 150, height: 250, backfaceVisibility: "hidden", justifyContent: "center", alignItems: "center" },
   backCard: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#f8f8f8", padding: 10, justifyContent: "center", alignItems: "center" },
-  selectedCard: { borderColor: "#007bff", borderWidth: 3 },
+  selectedCard: { 
+    borderColor: "#00eb3f", 
+    borderWidth: 4,  
+    borderRadius: 10,  
+    overflow: "hidden" 
+  },
   image: { width: "100%", height: "80%", borderRadius: 10 },
   placeholderText: { fontSize: 14, color: "gray", textAlign: "center" },
-  titleContainer: { paddingVertical: 8, alignItems: "center" },
+  titleContainer: { paddingVertical: 8, alignItems: "center"},
   movieTitle: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
   description: { fontSize: 14, textAlign: "center", color: "#333" },
   cartButton: {
@@ -311,5 +334,13 @@ const styles = StyleSheet.create({
   flipCardContainer: {
     alignItems: "center",
     margin: 10,
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingLeft: 10,
+    marginBottom: 10,
   },
 });
