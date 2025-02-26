@@ -13,9 +13,10 @@ export default function App() {
     const [inSession, setInSession] = useState(false);
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
+
+    const [goCatalog, setGoCatalog] = useState(false); //temporary catalog access
     
     function handleHostSession(sessionCode, hostName) {
-        // TODO
         setSessionCode(sessionCode);
         setName(hostName);
         setIsHosting(false);
@@ -23,7 +24,6 @@ export default function App() {
     }
 
     function handleJoinSession(code, name) {
-        // TODO
         setSessionCode(code);
         setName(name);
         setIsJoining(false);
@@ -35,8 +35,10 @@ export default function App() {
     } else if (isJoining) {
         return <Join handleJoinSession={handleJoinSession}/>;
     } else if (inSession) {
-        return <Session sessionCode={sessionCode} hostName={hostName} name={name}/>;
+        return <Session sessionCode={sessionCode} hostName={hostName} code={code} name={name}/>;
+    } else if (goCatalog) { //temporary catalog access
+        return <Catalog setGoCatalog={setGoCatalog}/>;
     }
 
-    return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining}/>;
+    return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog}/>; //remember to remove setGoCatalog
 }

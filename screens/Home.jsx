@@ -1,6 +1,6 @@
 import { View, Text, Button, Image, StyleSheet } from "react-native";
 
-function Home(props) {    
+function Home(props) { //remember to delete catalog button
     return (
         <View style={styles.container}>
             <Image source={require('../assets/app-logo.png')} style={styles.image}/>
@@ -8,6 +8,7 @@ function Home(props) {
             <Text style={styles.text}>Find something to watch by joining a matching session or hosting your own!</Text>
             <Button title="Join" onPress={() => props.setIsJoining(true)}/>
             <Button title="Host" onPress={() => props.setIsHosting(true)}/>
+            <Button title="Catalog" onPress={() => props.setGoCatalog(true)}/>
         </View>
   );
 }
