@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { View, Text } from "react-native";
-
+import Winner from './screens/Winner';
 import Home from './screens/Home';
 import Host from './screens/Host';
 import Join from './screens/Join';
 import Session from './screens/Session';
 import Catalog from './screens/Catalog';
 import Waiting from './screens/Waiting';
+import Voting from './screens/Voting'; // Import Voting Screen
 
 export default function App() {
     const [isHosting, setIsHosting] = useState(false);
@@ -14,9 +15,10 @@ export default function App() {
     const [inSession, setInSession] = useState(false);
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
-
-    const [goCatalog, setGoCatalog] = useState(false); //temporary catalog access
+    const [goWinner, setGoWinner] = useState(false);
+    const [goCatalog, setGoCatalog] = useState(false); // Temporary catalog access
     const [goWaiting, setGoWaiting] = useState(false);
+    const [goVoting, setGoVoting] = useState(false); // NEW: Add voting state
 
     function handleHostSession(sessionCode, hostName) {
         setSessionCode(sessionCode);
@@ -38,11 +40,15 @@ export default function App() {
         return <Join handleJoinSession={handleJoinSession}/>;
     } else if (inSession) {
         return <Session sessionCode={sessionCode} hostName={hostName} code={code} name={name}/>;
-    } else if (goCatalog) { //temporary catalog access
+    } else if (goCatalog) {
         return <Catalog setGoCatalog={setGoCatalog}/>;
     } else if (goWaiting) {
-        return <Waiting setGoWaiting={setGoWaiting}/>;
-    }
+        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
+    } else if (goVoting) {
+      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} />;
+  } else if (goWinner) {
+      return <Winner />;
+  }
 
-    return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting}/>; //remember to remove setGoCatalog
+    return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting}/>; // Remove setGoCatalog in final version
 }
