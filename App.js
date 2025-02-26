@@ -6,6 +6,7 @@ import Host from './screens/Host';
 import Join from './screens/Join';
 import Session from './screens/Session';
 import Catalog from './screens/Catalog';
+import Waiting from './screens/Waiting';
 
 export default function App() {
     const [isHosting, setIsHosting] = useState(false);
@@ -15,7 +16,8 @@ export default function App() {
     const [doneVoting, setDoneVoting] = useState(false);
 
     const [goCatalog, setGoCatalog] = useState(false); //temporary catalog access
-    
+    const [goWaiting, setGoWaiting] = useState(false);
+
     function handleHostSession(sessionCode, hostName) {
         setSessionCode(sessionCode);
         setName(hostName);
@@ -38,7 +40,9 @@ export default function App() {
         return <Session sessionCode={sessionCode} hostName={hostName} code={code} name={name}/>;
     } else if (goCatalog) { //temporary catalog access
         return <Catalog setGoCatalog={setGoCatalog}/>;
+    } else if (goWaiting) {
+        return <Waiting setGoWaiting={setGoWaiting}/>;
     }
 
-    return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog}/>; //remember to remove setGoCatalog
+    return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting}/>; //remember to remove setGoCatalog
 }

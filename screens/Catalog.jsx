@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
-  Image, Dimensions, StyleSheet,
+  Image, Dimensions, StyleSheet, TextInput
 } from "react-native";
 import Modal from "react-native-modal";  // 📌 Import modal
 import { StatusBar } from "expo-status-bar";
 import { getMovies } from "../utils/api";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from "react-native-reanimated";
 
 export default function Catalog() {
   const [movies, setMovies] = useState([]);
@@ -13,6 +14,7 @@ export default function Catalog() {
   const [selectedMovies, setSelectedMovies] = useState({});
   const [isCartVisible, setCartVisible] = useState(false);
   const [isLimitModalVisible, setLimitModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
@@ -49,33 +51,38 @@ export default function Catalog() {
 
   const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
   
-  
+  const filteredMovies = movies.filter(movie =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
       <Text style={styles.header}>Movie Catalog</Text>
 
+      {/* Search Input */}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search movies..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
       {loading ? (
         <ActivityIndicator size="large" color="blue" style={{ marginTop: 20 }} />
       ) : (
         <FlatList
-          data={movies}
+          data={filteredMovies}
           keyExtractor={(item) => item.id.toString()}
           numColumns={numColumns}
           key={numColumns} // Forces re-render when layout changes
           contentContainerStyle={{ paddingBottom: 80 }} // Space for the cart button
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => toggleSelectMovie(item.id)}
-              style={[
-                styles.movieCard,
-                selectedMovies[item.id] && styles.selectedCard,
-              ]}
-            >
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <Text style={styles.movieTitle}>{item.title}</Text>
-            </TouchableOpacity>
+            <FlipCard 
+              movie={item} 
+              isSelected={selectedMovies[item.id]} 
+              toggleSelectMovie={toggleSelectMovie}
+            />
           )}
         />
       )}
@@ -139,42 +146,74 @@ export default function Catalog() {
   );
 }
 
+const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
+  const isFlipped = useSharedValue(0);
+
+  const handleFlip = () => {
+    isFlipped.value = isFlipped.value ? 0 : 1;
+  };
+
+  const frontAnimatedStyle = useAnimatedStyle(() => {
+    const spin = interpolate(isFlipped.value, [0, 1], [0, 180]);
+    return { transform: [{ rotateY: withTiming(`${spin}deg`, { duration: 500 }) }] };
+  });
+
+  const backAnimatedStyle = useAnimatedStyle(() => {
+    const spin = interpolate(isFlipped.value, [0, 1], [180, 360]);
+    return { transform: [{ rotateY: withTiming(`${spin}deg`, { duration: 500 }) }] };
+  });
+
+  return (
+    <View style={styles.flipCardContainer}>
+      {/* Flip Animation on tap */}
+      <TouchableOpacity onPress={handleFlip} style={[styles.flipContainer, isSelected && styles.selectedCard]}>
+        <Animated.View style={[styles.card, frontAnimatedStyle]}>
+          {movie.image ? (
+            <Image source={{ uri: movie.image }} style={styles.image} />
+          ) : (
+            <Text style={styles.placeholderText}>Image not available</Text>
+          )}
+          <View style={styles.titleContainer}>
+            <Text style={styles.movieTitle}>{movie.title}</Text>
+          </View>
+        </Animated.View>
+        <Animated.View style={[styles.card, styles.backCard, backAnimatedStyle]}>
+          <Text style={styles.description}>{movie.title} - Movie Description</Text>
+        </Animated.View>
+      </TouchableOpacity>
+
+      {/* "+" Button to add to cart */}
+      <TouchableOpacity onPress={() => toggleSelectMovie(movie.id)} style={styles.addButton}>
+        <Text style={styles.addButtonText}>{isSelected ? "✓ Selected" : "+"}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  header: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 10 },
+  flipContainer: { 
+    margin: 5,  
+    borderRadius: 10, 
+    alignItems: "center", 
+    overflow: "hidden", 
+    width: 150, 
+    height: 250, 
   },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
+  card: { width: 150, height: 250, backfaceVisibility: "hidden", justifyContent: "center", alignItems: "center" },
+  backCard: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#f8f8f8", padding: 10, justifyContent: "center", alignItems: "center" },
+  selectedCard: { 
+    borderColor: "#00eb3f", 
+    borderWidth: 4,  
+    borderRadius: 10,  
+    overflow: "hidden" 
   },
-  movieCard: {
-    flex: 1,
-    margin: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    borderWidth: 3, 
-    borderColor: "transparent", 
-    overflow: "hidden",
-  },
-  selectedCard: {
-    borderColor: "#007bff",
-  },
-  image: {
-    width: "100%",
-    height: 220, 
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  titleContainer: {
-    backgroundColor: "white",
-    paddingVertical: 8,  
-    width: "100%",
-    alignItems: "center",
-  },
+  image: { width: "100%", height: "80%", borderRadius: 10 },
+  placeholderText: { fontSize: 14, color: "gray", textAlign: "center" },
+  titleContainer: { paddingVertical: 8, alignItems: "center"},
+  movieTitle: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
+  description: { fontSize: 14, textAlign: "center", color: "#333" },
   cartButton: {
     position: "absolute",
     bottom: 20,
@@ -278,5 +317,30 @@ const styles = StyleSheet.create({
   closeLimitText: {
     color: "white",
     fontWeight: "bold",
+  },
+  addButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignSelf: "center",
+    marginTop: 10,
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  flipCardContainer: {
+    alignItems: "center",
+    margin: 10,
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingLeft: 10,
+    marginBottom: 10,
   },
 });
