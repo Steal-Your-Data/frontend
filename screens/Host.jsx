@@ -12,6 +12,7 @@ function Host(props) {
 
     return (
         <View style={styles.container}>
+            <Button title="Back to Home" onPress={() => props.setIsHosting(false)}/>
             <Text style={styles.title}>Host a Session</Text>
             <Text>Your Session Code</Text>
             <Text style={styles.code}>{sessionCode}</Text>
@@ -21,7 +22,11 @@ function Host(props) {
                 onChangeText={setHostName}
                 style={styles.input}
             />
-            <Button title="HOST" onPress={() => props.handleHostSession(sessionCode, hostName)}/>
+            <Button
+                title="HOST"
+                onPress={() => props.handleHostSession(sessionCode, hostName)}
+                disabled={hostName.trim() === ''}
+            />
         </View>
     );
 }
