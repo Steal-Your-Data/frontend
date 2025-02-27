@@ -16,9 +16,11 @@ export default function App() {
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
     const [goWinner, setGoWinner] = useState(false);
+    const [finalVotes, setFinalVotes] = useState({});
     const [goCatalog, setGoCatalog] = useState(false); // Temporary catalog access
     const [goWaiting, setGoWaiting] = useState(false);
-    const [goVoting, setGoVoting] = useState(false); // NEW: Add voting state
+    const [goVoting, setGoVoting] = useState(false); 
+    const [goHome, setGoHome] = useState(false);
 
     function handleHostSession(sessionCode, hostName) {
         setSessionCode(sessionCode);
@@ -45,10 +47,12 @@ export default function App() {
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
     } else if (goVoting) {
-      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} />;
-  } else if (goWinner) {
-      return <Winner />;
-  }
+      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} />;
+    } else if (goWinner) {
+      return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} />;
+    } else if (goHome) {
+        return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting} />;
+    }
 
     return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting}/>; // Remove setGoCatalog in final version
 }

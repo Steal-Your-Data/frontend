@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { getMovies } from '../utils/api'; // Import API function
 
-function Voting({ setGoVoting, setGoWinner }) { // Updated to setGoWinner
+function Voting({ setGoVoting, setGoWinner, setFinalVotes }) { // Pass setFinalVotes
     const [movies, setMovies] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [votes, setVotes] = useState({});
@@ -27,20 +27,19 @@ function Voting({ setGoVoting, setGoWinner }) { // Updated to setGoWinner
     const handleVote = (movieId, voteType) => {
         setVotes(prevVotes => ({
             ...prevVotes,
-            [movieId]: voteType
+            [movieId]: (prevVotes[movieId] || 0) + (voteType === "yes" ? 1 : 0) // Store "yes" votes
         }));
 
         setVoted(true);
 
-        // Move to the next movie after a short delay
         setTimeout(() => {
             if (currentIndex < movies.length - 1) {
                 setCurrentIndex(currentIndex + 1);
                 setVoted(false);
             } else {
-                // If it's the last movie, navigate to Winner screen
                 setGoVoting(false);
-                setGoWinner(true); // Navigate to Winner.jsx
+                setFinalVotes(votes); // Pass votes to Winner screen
+                setGoWinner(true);
             }
         }, 1000);
     };
