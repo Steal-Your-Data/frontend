@@ -10,38 +10,104 @@ export default function App() {
     const [isHosting, setIsHosting] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [inSession, setInSession] = useState(false);
-
     const [sessionCode, setSessionCode] = useState('');
     const [hostName, setHostName] = useState('');
     const [name, setName] = useState('');
     const [participants, setParticipants] = useState([]);
-
     const [goCatalog, setGoCatalog] = useState(false); //temporary catalog access
     const [goWaiting, setGoWaiting] = useState(false);
-
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
 
-    function handleHostSession(sessionCode, hostName) {
-        setSessionCode(sessionCode);
-        setHostName(hostName);
-        setParticipants([hostName]);
-        setIsHosting(false);
-        setInSession(true);
+    async function handleHostSession(hostName) {
+        try {
+            const response = await fetch("http://localhost:8081/session/start", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ host_name: hostName })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                setSessionCode(data.session_id);
+                setHostName(hostName);
+                setParticipants([hostName]);
+                setIsHosting(false);
+                setInSession(true);
+            } else {
+                console.error("Error hosting session:", data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     }
 
-    function handleJoinSession(code, name) {
-        setSessionCode(code);
-        setName(name);
-        setParticipants((prev) => [...prev, name]);
-        setIsJoining(false);
-        setInSession(true);
+    async function handleJoinSession(sessionCode, name) {
+        try {
+            const response = await fetch("http://localhost:8081/session/join", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ session_id: sessionCode, name })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                setSessionCode(code);
+                setName(name);
+                setParticipants((prev) => [...prev, name]);
+                setIsJoining(false);
+                setInSession(true);
+            } else {
+                console.error("Error joining session:", data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+    
+    async function handleStartSession() {
+        try {
+            const response = await fetch("http://localhost:8081/session/begin", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ session_id: sessionCode })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                setGoCatalog(true);
+                setInSession(false);
+            } else {
+                console.error("Error starting session:", data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     }
 
-    function handleStartSession() {
-        setGoCatalog(true);
-        setInSession(false);
-    }
+    async function fetchParticipants() {
+        try {
+            const response = await fetch(`http://localhost:8081/session/list_join_participants?session_id=${sessionCode}`);
+            const data = await response.json();
+    
+            if (response.ok) {
+                setParticipants(data.participants_name);
+            } else {
+                console.error("Error fetching participants:", data.error);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }    
 
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
@@ -55,7 +121,7 @@ export default function App() {
             participants={participants}
             handleStartSession={handleStartSession}
         />;
-    } else if (goCatalog) { //temporary catalog access
+    } else if (goCatalog) { // temporary catalog access
         return <Catalog setGoCatalog={setGoCatalog}/>;
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting}/>;

@@ -31,7 +31,7 @@ function Join(props) {
             <Button
                 title="JOIN"
                 onPress={() => props.handleJoinSession(code, name)}
-                disabled={code.trim() === '' && name.trim() === ''}
+                disabled={code.trim() === '' || name.trim() === ''}
             />
         </View>
     );
