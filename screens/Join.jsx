@@ -5,12 +5,21 @@ function Join(props) {
     const [code, setCode] = useState('');
     const [name, setName] = useState('');
 
+    const handleInputCode = (text) => {
+        const numericText = text.replace(/[^0-9]/g, '');
+        setCode(numericText);
+    };
+
     return (
         <View style={styles.container}>
+            <Button title="Back to Home" onPress={() => props.setIsJoining(false)}/>
             <Text style={styles.title}>Join a Session</Text>
             <Text>Enter Session Code</Text>
             <TextInput
                 value={code}
+                onChangeText={handleInputCode}
+                keyboardType="numeric"
+                maxLength={6}
                 style={styles.input}
             />
             <Text>Enter Your Name</Text>
@@ -19,7 +28,11 @@ function Join(props) {
                 onChangeText={setName}
                 style={styles.input}
             />
-            <Button title="JOIN" onPress={() => props.handleJoinSession(code, name)}/>
+            <Button
+                title="JOIN"
+                onPress={() => props.handleJoinSession(code, name)}
+                disabled={code.trim() === '' || name.trim() === ''}
+            />
         </View>
     );
 }
