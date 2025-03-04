@@ -26,30 +26,40 @@ export default function App() {
     const [doneVoting, setDoneVoting] = useState(false);
     const [finalVotes, setFinalVotes] = useState({});
 
-    async function handleHostSession(hostName) {
-        try {
-            const response = await fetch("http://localhost:8081/session/start", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ host_name: hostName })
-            });
+    // will uncomment once integration begins
+    // async function handleHostSession(hostName) {
+    //     try {
+    //         const response = await fetch("http://localhost:8081/session/start", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify({ host_name: hostName })
+    //         });
     
-            const data = await response.json();
+    //         const data = await response.json();
     
-            if (response.ok) {
-                setSessionCode(data.session_id);
-                setHostName(hostName);
-                setParticipants([hostName]);
-                setIsHosting(false);
-                setInSession(true);
-            } else {
-                console.error("Error hosting session:", data.message);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
+    //         if (response.ok) {
+    //             setSessionCode(data.session_id);
+    //             setHostName(hostName);
+    //             setParticipants([hostName]);
+    //             setIsHosting(false);
+    //             setInSession(true);
+    //         } else {
+    //             console.error("Error hosting session:", data.message);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error:", error);
+    //     }
+    // }
+
+    // temporary hostSession function for class demo purposes
+    function handleHostSession(sessionCode, hostName){
+        setSessionCode(sessionCode);
+        setHostName(hostName);
+        setParticipants([hostName]);
+        setIsHosting(false);
+        setInSession(true);
     }
 
     async function handleJoinSession(sessionCode, name) {
@@ -78,27 +88,34 @@ export default function App() {
         }
     }
     
-    async function handleStartSession() {
-        try {
-            const response = await fetch("http://localhost:8081/session/begin", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ session_id: sessionCode })
-            });
+    // will uncomment once integration begins
+    // async function handleStartSession() {
+    //     try {
+    //         const response = await fetch("http://localhost:8081/session/begin", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify({ session_id: sessionCode })
+    //         });
     
-            const data = await response.json();
+    //         const data = await response.json();
     
-            if (response.ok) {
-                setGoCatalog(true);
-                setInSession(false);
-            } else {
-                console.error("Error starting session:", data.message);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
+    //         if (response.ok) {
+    //             setGoCatalog(true);
+    //             setInSession(false);
+    //         } else {
+    //             console.error("Error starting session:", data.message);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error:", error);
+    //     }
+    // }
+
+    // temporary startSession function for class demo purposes
+    function handleStartSession() {
+        setGoCatalog(true);
+        setInSession(false);
     }
 
     async function fetchParticipants() {
@@ -114,7 +131,13 @@ export default function App() {
         } catch (error) {
             console.error("Error:", error);
         }
-    }    
+    }
+
+    // temporary goWaiting function for class demo purposes
+    function handleGoWaiting() {
+        setGoCatalog(false);
+        setGoWaiting(true);
+    }
 
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
@@ -129,7 +152,7 @@ export default function App() {
             handleStartSession={handleStartSession}
         />;
     } else if (goCatalog) { // temporary catalog access
-        return <Catalog setGoCatalog={setGoCatalog}/>;
+        return <Catalog setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting} handleGoWaiting={handleGoWaiting}/>;
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
     } else if (goVoting) {

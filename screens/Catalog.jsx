@@ -8,7 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { getMovies } from "../utils/api";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from "react-native-reanimated";
 
-export default function Catalog() {
+export default function Catalog(props) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMovies, setSelectedMovies] = useState({});
@@ -125,7 +125,8 @@ export default function Catalog() {
           />
 
           {/* ✅ Ready Button */}
-          <TouchableOpacity style={styles.readyButton}>
+          {/* added onPress functionality to go to next screen */}
+          <TouchableOpacity style={styles.readyButton} onPress={props.handleGoWaiting}>
             <Text style={styles.readyButtonText}>Ready</Text>
           </TouchableOpacity>
         </View>
