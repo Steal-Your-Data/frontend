@@ -9,7 +9,7 @@ function Home(props) { //remember to delete catalog button
             <Button title="Join" onPress={() => props.setIsJoining(true)}/>
             <Button title="Host" onPress={() => props.setIsHosting(true)}/>
             <Button title="Catalog" onPress={() => props.setGoCatalog(true)}/>
-            <Button title="Voting" onPress={() => props.setGoWaiting(true)} />
+            <Button title="Waiting" onPress={() => props.setGoWaiting(true)} />
         </View>
   );
 }
