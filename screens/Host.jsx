@@ -2,20 +2,12 @@ import { useState } from "react";
 import { View, Text, Button, TextInput, StyleSheet } from "react-native";
 
 function Host(props) {
-    const [sessionCode, setSessionCode] = useState(generateCode());
     const [hostName, setHostName] = useState('');
-
-    function generateCode() {
-        random_num = Math.floor(Math.random() * 1000000);
-        return random_num.toString().padStart(6, '0');
-    }
 
     return (
         <View style={styles.container}>
             <Button title="Back to Home" onPress={() => props.setIsHosting(false)}/>
             <Text style={styles.title}>Host a Session</Text>
-            <Text>Your Session Code</Text>
-            <Text style={styles.code}>{sessionCode}</Text>
             <Text>Enter Your Name</Text>
             <TextInput
                 value={hostName}
@@ -24,7 +16,7 @@ function Host(props) {
             />
             <Button
                 title="HOST"
-                onPress={() => props.handleHostSession(sessionCode, hostName)}
+                onPress={() => props.handleHostSession(hostName)}
                 disabled={hostName.trim() === ''}
             />
         </View>

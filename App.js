@@ -8,6 +8,30 @@ import Catalog from './screens/Catalog';
 import Waiting from './screens/Waiting';
 import Voting from './screens/Voting'; // Import Voting Screen
 import Winner from './screens/Winner';
+import io from 'socket.io-client';  // Used for interacting with backend
+ 
+const socket = io('http://localhost:5000', {
+
+  transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
+
+});
+ 
+// Listen for incoming messages or events
+
+socket.on('user_joined', (data) => {
+
+  console.log('User joined:', data);
+
+});
+ 
+socket.on('user_left', (data) => {
+
+  console.log('User left:', data);
+
+});
+
+ 
+
 
 export default function App() {
     const [isHosting, setIsHosting] = useState(false);
@@ -28,20 +52,43 @@ export default function App() {
 
     async function handleHostSession(hostName) {
         try {
-            const response = await fetch("http://localhost:8081/session/start", {
+            const response = await fetch("http://localhost:5000/session/start", {
                 method: "POST",
                 headers: {
+                    'Access-Control-Allow-Origin': '*', // USE THIS FOR EVERY FETCH!!!!
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ host_name: hostName })
             });
     
             const data = await response.json();
+
+
+            // This is used for talking to sockets & putting names into the database
+            const startSession = (session_id, hostName) => {
+
+                socket.emit('join_session_room', {
+              
+                  session_id: session_id,
+              
+                  name: hostName,
+              
+                });
+              
+            };
+
+            // Displays if user joined for debugging purposes
+            socket.on('user_joined', (data) => {
+
+                console.log('User joined:', data);
+              
+            });
     
             if (response.ok) {
                 setSessionCode(data.session_id);
                 setHostName(hostName);
                 setParticipants([hostName]);
+                startSession(data.session_id, hostName); // socket function must be called in here
                 setIsHosting(false);
                 setInSession(true);
             } else {
@@ -54,20 +101,40 @@ export default function App() {
 
     async function handleJoinSession(sessionCode, name) {
         try {
-            const response = await fetch("http://localhost:8081/session/join", {
+            const response = await fetch("http://localhost:5000/session/join", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*' // USE THIS FOR EVERY FETCH!!!!
                 },
-                body: JSON.stringify({ session_id: sessionCode, name })
+                body: JSON.stringify({ session_id: sessionCode, name: name})
             });
     
+            const joinSession = (sessionCode, name) => {
+
+                socket.emit('join_session_room', {
+              
+                  session_id: sessionCode,
+              
+                  name: name,
+              
+                });
+              
+            };
+
+            socket.on('user_joined', (data) => {
+
+                console.log('User joined:', data);
+              
+            });
+
             const data = await response.json();
     
             if (response.ok) {
-                setSessionCode(code);
+                setSessionCode(sessionCode);
                 setName(name);
                 setParticipants((prev) => [...prev, name]);
+                joinSession(sessionCode, name);
                 setIsJoining(false);
                 setInSession(true);
             } else {
@@ -80,10 +147,11 @@ export default function App() {
     
     async function handleStartSession() {
         try {
-            const response = await fetch("http://localhost:8081/session/begin", {
+            const response = await fetch("http://localhost:5000/session/begin", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*'
                 },
                 body: JSON.stringify({ session_id: sessionCode })
             });
@@ -103,7 +171,7 @@ export default function App() {
 
     async function fetchParticipants() {
         try {
-            const response = await fetch(`http://localhost:8081/session/list_join_participants?session_id=${sessionCode}`);
+            const response = await fetch(`http://localhost:5000/session/list_join_participants?session_id=${sessionCode}`);
             const data = await response.json();
     
             if (response.ok) {
