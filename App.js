@@ -77,7 +77,7 @@ export default function App() {
               
             };
 
-            // Displays if user joined for debugging purposes
+            // Displays if user joined
             socket.on('user_joined', (data) => {
 
                 console.log('User joined:', data);
