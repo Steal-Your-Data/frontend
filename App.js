@@ -9,6 +9,7 @@ import Waiting from './screens/Waiting';
 import Voting from './screens/Voting'; // Import Voting Screen
 import Winner from './screens/Winner';
 import io from 'socket.io-client';  // Used for interacting with backend
+import { useEffect } from "react";
  
 const socket = io('http://localhost:5000', {
 
@@ -30,9 +31,6 @@ socket.on('user_left', (data) => {
 
 });
 
- 
-
-
 export default function App() {
     const [isHosting, setIsHosting] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
@@ -49,6 +47,20 @@ export default function App() {
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
     const [finalVotes, setFinalVotes] = useState({});
+    
+    // This useEffect is for switching Session for nonHost participants
+    useEffect(() => {
+        // Wait for a session_begin signal by backend
+        socket.on('session_begin', (data) => {
+            console.log("Session begin:", data);
+            setGoCatalog(true); // Move all clients to the Catalog page
+            setInSession(false);
+        });
+     
+        return () => {
+            socket.off('session_begin'); // Clean up event listener
+        };
+    }, []);
 
     async function handleHostSession(hostName) {
         try {
@@ -144,7 +156,8 @@ export default function App() {
             console.error("Error:", error);
         }
     }
-    
+
+    // Handler is for when Host clicks "Start" button
     async function handleStartSession() {
         try {
             const response = await fetch("http://localhost:5000/session/begin", {
