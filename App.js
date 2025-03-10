@@ -16,20 +16,6 @@ const socket = io('http://localhost:5000', {
   transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
 
 });
- 
-// Listen for incoming messages or events
-
-socket.on('user_joined', (data) => {
-
-  console.log('User joined:', data);
-
-});
- 
-socket.on('user_left', (data) => {
-
-  console.log('User left:', data);
-
-});
 
 export default function App() {
     const [isHosting, setIsHosting] = useState(false);
@@ -48,6 +34,38 @@ export default function App() {
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
     const [finalVotes, setFinalVotes] = useState({});
+
+    // Listen for user_joined and user_left events
+    useEffect(() => {
+        socket.on("user_joined", (data) => {
+            console.log("User joined:", data);
+            setParticipants((prev) => { // update list of participants when someone joins
+                if (!prev.includes(data.name)) {
+                    return [...prev, data.name];
+                }
+                return prev;
+            });
+        });
+    
+        socket.on("user_left", (data) => {
+            console.log("User left:", data);
+            setParticipants((prev) => // update list of participants when someone leaves
+                prev.filter((participant) => participant !== data.name)
+            );
+        });
+
+        socket.on('selection_complete', (data) => {
+
+            console.log('Selection Completed:', data);
+            setGoVoting(true); // Move all clients to the Voting page
+            setGoWaiting(false); // Might have to change???
+        });
+    
+        return () => {
+            socket.off("user_joined");
+            socket.off("user_left");
+        };
+    }, []);
     
     // This useEffect is for switching Session for nonHost participants
     useEffect(() => {
@@ -63,19 +81,6 @@ export default function App() {
         };
     }, []);
 
-    // This useEffect is for switching from Catalog to movie voting
-    useEffect(() => {
-        // Wait for a session_begin signal by backend
-        socket.on('all_done_selecting', (data) => {
-            console.log("Voting begin:", data);
-            setGoWaiting(false); // Exit Waiting
-            setGoVoting(true);  // Go to Voting
-        });
-     
-        return () => {
-            socket.off('all_done_selecting'); // Clean up event listener
-        };
-    }, []);
 
     // This useEffect is for switching from Voting to movie voting
     useEffect(() => {
@@ -268,21 +273,7 @@ export default function App() {
               
             });
 
-            socket.on('selection_complete', (data) => {
-
-                console.log('Selection Completed:', data);
-
-                const complete_selection = (sessionCode) => {
-
-                    socket.emit('all_done_selecting', {
-                  
-                      session_id: sessionCode
-                  
-                    });
-                  
-                };
-              
-            });
+  
     
             if (response.ok) {
                 console.log(data.message);  
