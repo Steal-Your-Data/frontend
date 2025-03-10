@@ -1,34 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import io from 'socket.io-client';  // Used for interacting with backend
+
+const socket = io('http://localhost:5000', {
+
+    transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
+  
+  });
+   
 
 function Waiting({ setGoWaiting, setGoVoting }) { // Accept setGoVoting as prop
     const totalUsers = 4; // Change dynamically if needed
     const [finishedUsers, setFinishedUsers] = useState(0);
-    const [countdown, setCountdown] = useState(10); // Simulated countdown
+    const [countdown, setCountdown] = useState(1); // Simulated countdown
 
-    useEffect(() => {
-        const progressInterval = setInterval(() => {
-            setFinishedUsers(prev => (prev < totalUsers ? prev + 1 : prev));
-        }, 2000); // Simulated user voting completion
-
-        const timer = setInterval(() => {
-            setCountdown(prev => {
-                if (prev <= 1 || finishedUsers >= totalUsers) {
-                    clearInterval(timer);
-                    clearInterval(progressInterval);
-                    setGoWaiting(false); // Exit Waiting
-                    setGoVoting(true);  // Go to Voting
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => {
-            clearInterval(timer);
-            clearInterval(progressInterval);
-        };
-    }, [finishedUsers]);
+    
 
     return (
         <View style={styles.container}>

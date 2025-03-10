@@ -38,7 +38,8 @@ export default function App() {
     const [sessionCode, setSessionCode] = useState('');
     const [hostName, setHostName] = useState('');
     const [name, setName] = useState('');
-    const [participants, setParticipants] = useState([]);
+    const [participantID, setParticipantID] = useState(0);
+    const [participants, setParticipants] = useState('');
     const [goCatalog, setGoCatalog] = useState(false); // temporary catalog access
     const [goWaiting, setGoWaiting] = useState(false);
     const [goVoting, setGoVoting] = useState(false);
@@ -59,6 +60,34 @@ export default function App() {
      
         return () => {
             socket.off('session_begin'); // Clean up event listener
+        };
+    }, []);
+
+    // This useEffect is for switching from Catalog to movie voting
+    useEffect(() => {
+        // Wait for a session_begin signal by backend
+        socket.on('all_done_selecting', (data) => {
+            console.log("Voting begin:", data);
+            setGoWaiting(false); // Exit Waiting
+            setGoVoting(true);  // Go to Voting
+        });
+     
+        return () => {
+            socket.off('all_done_selecting'); // Clean up event listener
+        };
+    }, []);
+
+    // This useEffect is for switching from Voting to movie voting
+    useEffect(() => {
+        // Wait for a session_begin signal by backend
+        socket.on('dummy', (data) => {
+            console.log("Voting begin:", data);
+            setGoWinner(true); // Move all clients to the Voting page
+            setFinalVotes(false); // Might have to change???
+        });
+     
+        return () => {
+            socket.off('dummy'); // Clean up event listener
         };
     }, []);
 
@@ -96,10 +125,13 @@ export default function App() {
               
             });
     
+            
             if (response.ok) {
                 setSessionCode(data.session_id);
                 setHostName(hostName);
                 setParticipants([hostName]);
+                setParticipantID(data.participant_id);
+                console.log(data.participant_id)
                 startSession(data.session_id, hostName); // socket function must be called in here
                 setIsHosting(false);
                 setInSession(true);
@@ -146,6 +178,7 @@ export default function App() {
                 setSessionCode(sessionCode);
                 setName(name);
                 setParticipants((prev) => [...prev, name]);
+                setParticipantID(data.participant_ID);
                 joinSession(sessionCode, name);
                 setIsJoining(false);
                 setInSession(true);
@@ -182,6 +215,88 @@ export default function App() {
         }
     }
 
+    async function handleSendMovies(movieIDs) {
+        const ids = Object.keys(movieIDs);
+        //console.log(participantID);
+        for (i = 0; i < ids.length; i++) {
+            try {
+                const response = await fetch("http://localhost:5000/session/add_movie", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    body: JSON.stringify({ session_id: sessionCode,
+                                           participant_ID: participantID,
+                                           movie_id: ids[i]})
+                });
+        
+                const data = await response.json();
+
+                socket.on('movie_added', (data) => {
+
+                    console.log('Movie Info:', data);
+                  
+                });
+        
+                if (response.ok) {
+
+                } else {
+                    console.error("Error starting session:", data.message);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+        
+        try {
+            const response = await fetch("http://localhost:5000/session/finish_selection", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify({ session_id: sessionCode,
+                                       participant_id: participantID})
+            });
+    
+            const data = await response.json();
+
+            socket.on('selection_progress', (data) => {
+
+                console.log('Selection Progress:', data);
+              
+            });
+
+            socket.on('selection_complete', (data) => {
+
+                console.log('Selection Completed:', data);
+
+                const complete_selection = (sessionCode) => {
+
+                    socket.emit('all_done_selecting', {
+                  
+                      session_id: sessionCode
+                  
+                    });
+                  
+                };
+              
+            });
+    
+            if (response.ok) {
+                console.log(data.message);  
+                setGoWaiting(true);
+                setGoCatalog(false);
+            } else {
+                console.error("Error starting session:", data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+
+    } 
+
     async function fetchParticipants() {
         try {
             const response = await fetch(`http://localhost:5000/session/list_join_participants?session_id=${sessionCode}`);
@@ -210,7 +325,7 @@ export default function App() {
             handleStartSession={handleStartSession}
         />;
     } else if (goCatalog) { // temporary catalog access
-        return <Catalog setGoCatalog={setGoCatalog}/>;
+        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies}/>;
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
     } else if (goVoting) {

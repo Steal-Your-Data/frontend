@@ -8,7 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { getMovies } from "../utils/api";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from "react-native-reanimated";
 
-export default function Catalog() {
+export default function Catalog(props) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMovies, setSelectedMovies] = useState({});
@@ -23,8 +23,10 @@ export default function Catalog() {
   
   const fetchMovies = async () => {
     try {
-      const movieList = await getMovies();
-      setMovies(movieList);
+      const movieList = await fetch(`http://localhost:5000/movies/get_all_movies`);
+      const data = await movieList.json();
+      //const movieList = await getMovies();
+      setMovies(data);
     } catch (error) {
       console.error("Failed to fetch movies:", error);
     } finally {
@@ -115,7 +117,7 @@ export default function Catalog() {
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.cartItem}>
-                <Image source={{ uri: item.image }} style={styles.cartImage} />
+                <Image source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`}} style={styles.cartImage} />
                 <Text style={styles.cartMovieTitle}>{item.title}</Text>
                 <TouchableOpacity onPress={() => removeFromCart(item.id)}>
                   <Text style={styles.removeButton}>❌</Text>
@@ -125,7 +127,7 @@ export default function Catalog() {
           />
 
           {/* ✅ Ready Button */}
-          <TouchableOpacity style={styles.readyButton}>
+          a<TouchableOpacity style={styles.readyButton} onPress={() => props.handleSendMovies(selectedMovies)}>
             <Text style={styles.readyButtonText}>Ready</Text>
           </TouchableOpacity>
         </View>
@@ -168,8 +170,8 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
       {/* Flip Animation on tap */}
       <TouchableOpacity onPress={handleFlip} style={[styles.flipContainer, isSelected && styles.selectedCard]}>
         <Animated.View style={[styles.card, frontAnimatedStyle]}>
-          {movie.image ? (
-            <Image source={{ uri: movie.image }} style={styles.image} />
+          {movie.poster_path ? (
+            <Image source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }} style={styles.image} />
           ) : (
             <Text style={styles.placeholderText}>Image not available</Text>
           )}
