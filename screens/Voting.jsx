@@ -12,10 +12,11 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes }) { // Pass setFinalV
     useEffect(() => {
         const fetchMovies = async () => {
             try {
-                const movieList = await getMovies();
-                setMovies(movieList);
+                const movieList = await fetch(`http://localhost:5000/movies_in_pocket`);
+                const data = await movieList.json();
+                setMovies(data[1]);
             } catch (error) {
-                console.error("Error fetching movies:", error);
+                console.error("Error fetching movies in pocket:", error);
             } finally {
                 setLoading(false);
             }

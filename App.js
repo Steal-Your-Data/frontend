@@ -53,17 +53,22 @@ export default function App() {
                 prev.filter((participant) => participant !== data.name)
             );
         });
-
-        socket.on('selection_complete', (data) => {
-
-            console.log('Selection Completed:', data);
-            setGoVoting(true); // Move all clients to the Voting page
-            setGoWaiting(false); // Might have to change???
-        });
     
         return () => {
             socket.off("user_joined");
             socket.off("user_left");
+        };
+    }, []);
+
+    useEffect(() => {
+        socket.on('selection_complete', (data) => {
+            console.log('Selection Completed:', data);
+            setGoVoting(true); // Move all clients to the Voting page
+            setGoWaiting(false);
+        });
+     
+        return () => {
+            socket.off('selection_complete'); // Cleanup listener
         };
     }, []);
     
@@ -78,21 +83,6 @@ export default function App() {
      
         return () => {
             socket.off('session_begin'); // Clean up event listener
-        };
-    }, []);
-
-
-    // This useEffect is for switching from Voting to movie voting
-    useEffect(() => {
-        // Wait for a session_begin signal by backend
-        socket.on('dummy', (data) => {
-            console.log("Voting begin:", data);
-            setGoWinner(true); // Move all clients to the Voting page
-            setFinalVotes(false); // Might have to change???
-        });
-     
-        return () => {
-            socket.off('dummy'); // Clean up event listener
         };
     }, []);
 
@@ -273,11 +263,13 @@ export default function App() {
               
             });
 
-  
-    
-            if (response.ok) {
+            if (data.total_participants !== data.done_participants) {
                 console.log(data.message);  
                 setGoWaiting(true);
+                setGoCatalog(false);
+            } else if (data.total_participants == data.done_participants) {
+                console.log(data.message);  
+                setGoVoting(true);
                 setGoCatalog(false);
             } else {
                 console.error("Error starting session:", data.message);
