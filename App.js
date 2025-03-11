@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text } from "react-native";
 import Home from './screens/Home';
 import Host from './screens/Host';
@@ -73,6 +73,18 @@ export default function App() {
         };
     }, []);
     
+    useEffect(() => {
+        socket.on('voting_complete', (data) => {
+            console.log('Voting Completed:', data);
+            setGoWinner(true); // Move all clients to the Voting page
+            setGoWaiting(false);
+        });
+     
+        return () => {
+            socket.off('voting_complete'); // Cleanup listener
+        };
+    }, []);
+
     // This useEffect is for switching Session for nonHost participants
     useEffect(() => {
         // Wait for a session_begin signal by backend
@@ -87,7 +99,7 @@ export default function App() {
         };
     }, []);
 
-    async function fetchMovies () {
+    const fetchMovies = useCallback(async () => {
         try {
             // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
             console.log("Fetching movies in pocket");
@@ -128,12 +140,58 @@ export default function App() {
             console.log(movieInfoData);
     
             // Step 4: Update state with full movie details
-            //return movieInfoData;\
-            setMovies(movieInfoData);
+            //setMovies(movieInfoData);
+            return movieInfoData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
         }
-    }; 
+    }, [sessionCode, participantID]); 
+
+    const fetchWinner = useCallback(async () => {
+        try {
+            // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
+            console.log("Fetching winner");
+            const movieWinner = await fetch('http://localhost:5000/session/final_movie', {
+                method: "POST",  // Use POST to send JSON body
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ session_id: sessionCode }),
+            });
+            
+            const movieWinnerData = await movieWinner.json();
+
+            console.log(movieWinnerData)
+    
+    
+            // Step 2: Extract movie ID
+            const movieId = movieWinnerData.movie_id;
+
+            console.log(movieId)
+    
+            // Step 3: Fetch full movie details
+            const movieInfoResponse = await fetch('http://localhost:5000/movies/get_movie_info_by_id', {
+                method: "POST",  // Use POST to send JSON body
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id: movieId }),
+            });
+    
+            const movieInfoData = await movieInfoResponse.json();
+            console.log(movieInfoData);
+    
+            return {
+                movieInfo: movieInfoData,
+                votes: movieWinnerData.votes
+            };
+        } catch (error) {
+            console.error("Error fetching movies in pocket:", error);
+        }
+    }, [sessionCode]); 
+
 
     async function handleHostSession(hostName) {
         try {
@@ -259,6 +317,44 @@ export default function App() {
         }
     }
 
+    async function handleFinalVote() {
+        try {
+            const response = await fetch("http://localhost:5000/session/finish_voting", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID })
+            });
+    
+            const data = await response.json();
+
+            console.log(data);
+
+            socket.on('voting_progress', (data) => {
+
+                console.log('Voting status:', data);
+              
+            });
+    
+            if (data.total_participants !== data.done_participants) {
+                console.log(data.message);  
+                setGoWaiting(true);
+                setGoVoting(false);
+            } else if (data.total_participants === data.done_participants) {
+                console.log(data.message);  
+                setGoWinner(true);
+                setGoVoting(false);
+                //fetchMovies(); May need to change this to get the winner
+            } else {
+                console.error("Error starting session:", data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
         // Handler is for when we have a yes vote
         async function handleYes(movieID) {
             try {
@@ -272,6 +368,8 @@ export default function App() {
                 });
         
                 const data = await response.json();
+
+                console.log(data);
 
                 socket.on('vote_update', (data) => {
 
@@ -350,7 +448,7 @@ export default function App() {
                 console.log(data.message);  
                 setGoVoting(true);
                 setGoCatalog(false);
-                fetchMovies();
+                //fetchMovies();
             } else {
                 console.error("Error starting session:", data.message);
             }
@@ -377,9 +475,9 @@ export default function App() {
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
     } else if (goVoting) {
-      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} movies={movies} handleYes={handleYes}/>;
+      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} handleYes={handleYes} handleFinalVote={handleFinalVote} fetchMovies={fetchMovies}/>;
     } else if (goWinner) {
-      return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} />;
+      return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} fetchWinner={fetchWinner}/>;
     } else if (goHome) {
         return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting} />;
     }

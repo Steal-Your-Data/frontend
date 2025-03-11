@@ -2,12 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { getMovies } from '../utils/api'; // Import API function
 
-function Voting({ setGoVoting, setGoWinner, setFinalVotes, movies, props }) { // Pass setFinalVotes
+function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFinalVote, fetchMovies}) { // Pass setFinalVotes
     const [currentIndex, setCurrentIndex] = useState(0);
     const [votes, setVotes] = useState({});
     const [voted, setVoted] = useState(false);
     const [loading, setLoading] = useState(false); // Was defaulted to false
+    const [movies, setMovies] = useState([])
 
+    // Use useEffect to fetch movies once when component mounts
+    useEffect(() => {
+        const loadMovies = async () => {
+            setLoading(true); // Set loading state before fetching
+            const fetchedMovies = await fetchMovies(); // Call the async function
+            setMovies(fetchedMovies); // Set the movies state
+            setLoading(false); // Mark loading as false after fetching
+        };
+ 
+        loadMovies();
+    }, []); // Dependency array ensures it runs once
+ 
+    console.log(movies); // Now movies will be properly set
+ 
     const handleVote = (movieId, voteType) => {
         setVotes(prevVotes => ({
             ...prevVotes,
@@ -21,9 +36,10 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, movies, props }) { //
                 setCurrentIndex(currentIndex + 1);
                 setVoted(false);
             } else {
-                setGoVoting(false);
+                //setGoVoting(false);
                 setFinalVotes(votes); // Pass votes to Winner screen
-                setGoWinner(true);
+                //setGoWaiting(true);
+                handleFinalVote();
             }
         }, 1000);
     };
@@ -57,7 +73,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, movies, props }) { //
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={[styles.button, styles.yesButton, voted && styles.disabledButton]}
-                    onPress={() => {handleVote(movie.id, "yes"); props.handleYes(movie.id);}}
+                    onPress={() => {handleVote(movie.id, "yes"); handleYes(movie.id);}}
                     disabled={voted}
                 >
                     <Text style={styles.buttonText}>Yes</Text>

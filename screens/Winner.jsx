@@ -2,31 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { getMovies } from '../utils/api';
 
-function Winner({ finalVotes, setGoWinner, setGoHome }) { // Accept setGoHome
-    const [movies, setMovies] = useState([]);
+function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner}) { // Accept setGoHome
+    const [movie, setMovie] = useState([]);
     const [winningMovies, setWinningMovies] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [votes, setVotes] = useState(0);
+
+
+     // Use useEffect to fetch movies once when component mounts
+    useEffect(() => {
+        const loadWinner = async () => {
+            setLoading(true); // Set loading state before fetching
+            const fetchedWinner = await fetchWinner(); // Call the async function
+            setMovie(fetchedWinner.movieInfo);
+            setVotes(fetchedWinner.votes); // Set the movies state
+            setLoading(false); // Mark loading as false after fetching
+        };
+     
+            loadWinner();
+    }, []); // Dependency array ensures it runs once
 
     useEffect(() => {
-        const fetchMovies = async () => {
-            try {
-                const movieList = await getMovies();
-                setMovies(movieList);
-
-                // Find the movie(s) with the highest vote count
-                const highestVoteCount = Math.max(...Object.values(finalVotes));
-                const winners = movieList.filter(movie => finalVotes[movie.id] === highestVoteCount);
-                
-                setWinningMovies(winners);
-            } catch (error) {
-                console.error("Error fetching movies:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMovies();
-    }, [finalVotes]);
+        setWinningMovies(Array.isArray(movie) ? movie : [movie]); // Ensure it's an array
+    }, [movie]);
 
     const handleReturnHome = () => {
         setGoWinner(false); // Exit Winner Screen
@@ -49,10 +47,10 @@ function Winner({ finalVotes, setGoWinner, setGoHome }) { // Accept setGoHome
 
             {winningMovies.map((movie) => (
                 <View key={movie.id} style={styles.movieContainer}>
-                    <Image source={{ uri: movie.image }} style={styles.movieImage} />
+                    <Image source={{ uri:`https://image.tmdb.org/t/p/w500${movie.poster_path}` }} style={styles.movieImage} />
                     <Text style={styles.movieTitle}>{movie.title}</Text>
-                    <Text style={styles.description}>{movie.description}</Text>
-                    <Text style={styles.voteCount}>Votes: {finalVotes[movie.id] || 0}</Text>
+                    <Text style={styles.description}>{movie.overview}</Text>
+                    <Text style={styles.voteCount}>Votes: { votes || 0}</Text>
                 </View>
             ))}
 
