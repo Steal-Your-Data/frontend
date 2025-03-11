@@ -23,7 +23,7 @@ export default function Catalog(props) {
   
   const fetchMovies = async () => {
     try {
-      const movieList = await fetch(`http://localhost:5000/movies/get_all_movies`);
+      const movieList = await fetch(`https://backend-production-e0e1.up.railway.app/movies/get_all_movies`);
       const data = await movieList.json();
       //const movieList = await getMovies();
       setMovies(data);

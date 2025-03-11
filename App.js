@@ -11,7 +11,7 @@ import Winner from './screens/Winner';
 import io from 'socket.io-client';  // Used for interacting with backend
 import { useEffect } from "react";
  
-const socket = io('http://localhost:5000', {
+const socket = io('https://backend-production-e0e1.up.railway.app', {
 
   transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
 
@@ -103,7 +103,7 @@ export default function App() {
         try {
             // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
             console.log("Fetching movies in pocket");
-            const movieListResponse = await fetch('http://localhost:5000/session/movies_in_pocket', {
+            const movieListResponse = await fetch('https://backend-production-e0e1.up.railway.app/session/movies_in_pocket', {
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -127,7 +127,7 @@ export default function App() {
             console.log(movieIds)
     
             // Step 3: Fetch full movie details
-            const movieInfoResponse = await fetch('http://localhost:5000/movies/get_movie_info_by_ids', {
+            const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_ids', {
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -151,7 +151,7 @@ export default function App() {
         try {
             // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
             console.log("Fetching winner");
-            const movieWinner = await fetch('http://localhost:5000/session/final_movie', {
+            const movieWinner = await fetch('https://backend-production-e0e1.up.railway.app/session/final_movie', {
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -171,7 +171,7 @@ export default function App() {
             console.log(movieId)
     
             // Step 3: Fetch full movie details
-            const movieInfoResponse = await fetch('http://localhost:5000/movies/get_movie_info_by_id', {
+            const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_id', {
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -195,7 +195,7 @@ export default function App() {
 
     async function handleHostSession(hostName) {
         try {
-            const response = await fetch("http://localhost:5000/session/start", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/start", {
                 method: "POST",
                 headers: {
                     'Access-Control-Allow-Origin': '*', // USE THIS FOR EVERY FETCH!!!!
@@ -247,7 +247,7 @@ export default function App() {
 
     async function handleJoinSession(sessionCode, name) {
         try {
-            const response = await fetch("http://localhost:5000/session/join", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/join", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -295,7 +295,7 @@ export default function App() {
     // Handler is for when Host clicks "Start" button
     async function handleStartSession() {
         try {
-            const response = await fetch("http://localhost:5000/session/begin", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/begin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -319,7 +319,7 @@ export default function App() {
 
     async function handleFinalVote() {
         try {
-            const response = await fetch("http://localhost:5000/session/finish_voting", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_voting", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -358,7 +358,7 @@ export default function App() {
         // Handler is for when we have a yes vote
         async function handleYes(movieID) {
             try {
-                const response = await fetch("http://localhost:5000/session/vote", {
+                const response = await fetch("https://backend-production-e0e1.up.railway.app/session/vote", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -392,7 +392,7 @@ export default function App() {
         //console.log(participantID);
         for (i = 0; i < ids.length; i++) {
             try {
-                const response = await fetch("http://localhost:5000/session/add_movie", {
+                const response = await fetch("https://backend-production-e0e1.up.railway.app/session/add_movie", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -422,7 +422,7 @@ export default function App() {
         }
         
         try {
-            const response = await fetch("http://localhost:5000/session/finish_selection", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_selection", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import io from 'socket.io-client';  // Used for interacting with backend
 
-const socket = io('http://localhost:5000', {
+const socket = io('https://backend-production-e0e1.up.railway.app', {
 
     transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
   
