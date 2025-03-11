@@ -125,9 +125,11 @@ export default function App() {
             });
     
             const movieInfoData = await movieInfoResponse.json();
+            console.log(movieInfoData);
     
             // Step 4: Update state with full movie details
-            return movieInfoData;
+            //return movieInfoData;\
+            setMovies(movieInfoData);
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
         }
@@ -257,6 +259,36 @@ export default function App() {
         }
     }
 
+        // Handler is for when we have a yes vote
+        async function handleYes(movieID) {
+            try {
+                const response = await fetch("http://localhost:5000/session/vote", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    body: JSON.stringify({ session_id: sessionCode, participant_id: participantID, movie_id: movieID })
+                });
+        
+                const data = await response.json();
+
+                socket.on('vote_update', (data) => {
+
+                    console.log('Vote status:', data);
+                  
+                });
+        
+                if (response.ok) {
+                     // Change to next movie handled in Voting.jsx
+                } else {
+                    console.error("Error starting session:", data.message);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
     async function handleSendMovies(movieIDs) {
         const ids = Object.keys(movieIDs);
         //console.log(participantID);
@@ -318,6 +350,7 @@ export default function App() {
                 console.log(data.message);  
                 setGoVoting(true);
                 setGoCatalog(false);
+                fetchMovies();
             } else {
                 console.error("Error starting session:", data.message);
             }
@@ -325,22 +358,7 @@ export default function App() {
             console.error("Error:", error);
         }
 
-    } 
-
-    async function fetchParticipants() {
-        try {
-            const response = await fetch(`http://localhost:5000/session/list_join_participants?session_id=${sessionCode}`);
-            const data = await response.json();
-    
-            if (response.ok) {
-                setParticipants(data.participants_name);
-            } else {
-                console.error("Error fetching participants:", data.error);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    }    
+    }   
 
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
@@ -359,7 +377,7 @@ export default function App() {
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
     } else if (goVoting) {
-      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} fetchMovies={fetchMovies}/>;
+      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} movies={movies} handleYes={handleYes}/>;
     } else if (goWinner) {
       return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} />;
     } else if (goHome) {

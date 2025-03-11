@@ -2,16 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { getMovies } from '../utils/api'; // Import API function
 
-function Voting({ setGoVoting, setGoWinner, setFinalVotes, fetchMovies }) { // Pass setFinalVotes
-    const [movies, setMovies] = useState([]);
+function Voting({ setGoVoting, setGoWinner, setFinalVotes, movies, props }) { // Pass setFinalVotes
     const [currentIndex, setCurrentIndex] = useState(0);
     const [votes, setVotes] = useState({});
     const [voted, setVoted] = useState(false);
-    const [loading, setLoading] = useState(true);
-
-    setMovies(fetchMovies());
-
-    console.log(movies);
+    const [loading, setLoading] = useState(false); // Was defaulted to false
 
     const handleVote = (movieId, voteType) => {
         setVotes(prevVotes => ({
@@ -55,14 +50,14 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, fetchMovies }) { // P
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Vote on this Movie ({currentIndex + 1}/{movies.length})</Text>
-            <Image source={{ uri: movie.image }} style={styles.movieImage} />
+            <Image source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }} style={styles.movieImage} />
             <Text style={styles.movieTitle}>{movie.title}</Text>
-            <Text style={styles.description}>{movie.description}</Text>
+            <Text style={styles.description}>{movie.overview}</Text>
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={[styles.button, styles.yesButton, voted && styles.disabledButton]}
-                    onPress={() => handleVote(movie.id, "yes")}
+                    onPress={() => {handleVote(movie.id, "yes"); props.handleYes(movie.id);}}
                     disabled={voted}
                 >
                     <Text style={styles.buttonText}>Yes</Text>
