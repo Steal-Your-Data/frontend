@@ -2,28 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { getMovies } from '../utils/api'; // Import API function
 
-function Voting({ setGoVoting, setGoWinner, setFinalVotes }) { // Pass setFinalVotes
+function Voting({ setGoVoting, setGoWinner, setFinalVotes, fetchMovies }) { // Pass setFinalVotes
     const [movies, setMovies] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [votes, setVotes] = useState({});
     const [voted, setVoted] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchMovies = async () => {
-            try {
-                const movieList = await fetch(`http://localhost:5000/movies_in_pocket`);
-                const data = await movieList.json();
-                setMovies(data[1]);
-            } catch (error) {
-                console.error("Error fetching movies in pocket:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    setMovies(fetchMovies());
 
-        fetchMovies();
-    }, []);
+    console.log(movies);
 
     const handleVote = (movieId, voteType) => {
         setVotes(prevVotes => ({

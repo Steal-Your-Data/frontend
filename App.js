@@ -34,6 +34,7 @@ export default function App() {
     const [doneSelecting, setDoneSelecting] = useState(false);
     const [doneVoting, setDoneVoting] = useState(false);
     const [finalVotes, setFinalVotes] = useState({});
+    const [movies, setMovies] = useState([]);
 
     // Listen for user_joined and user_left events
     useEffect(() => {
@@ -85,6 +86,52 @@ export default function App() {
             socket.off('session_begin'); // Clean up event listener
         };
     }, []);
+
+    async function fetchMovies () {
+        try {
+            // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
+            console.log("Fetching movies in pocket");
+            const movieListResponse = await fetch('http://localhost:5000/session/movies_in_pocket', {
+                method: "POST",  // Use POST to send JSON body
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID }),
+            });
+            
+            const movieListData = await movieListResponse.json();
+
+            console.log(movieListData)
+    
+            if (!movieListData.movies || movieListData.movies.length === 0) {
+                setMovies([]);  // No movies in pocket
+                return;
+            }
+    
+            // Step 2: Extract movie IDs
+            const movieIds = movieListData.movies.map(movie => movie.movie_id);
+
+            console.log(movieIds)
+    
+            // Step 3: Fetch full movie details
+            const movieInfoResponse = await fetch('http://localhost:5000/movies/get_movie_info_by_ids', {
+                method: "POST",  // Use POST to send JSON body
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ ids: movieIds }),
+            });
+    
+            const movieInfoData = await movieInfoResponse.json();
+    
+            // Step 4: Update state with full movie details
+            return movieInfoData;
+        } catch (error) {
+            console.error("Error fetching movies in pocket:", error);
+        }
+    }; 
 
     async function handleHostSession(hostName) {
         try {
@@ -267,7 +314,7 @@ export default function App() {
                 console.log(data.message);  
                 setGoWaiting(true);
                 setGoCatalog(false);
-            } else if (data.total_participants == data.done_participants) {
+            } else if (data.total_participants === data.done_participants) {
                 console.log(data.message);  
                 setGoVoting(true);
                 setGoCatalog(false);
@@ -312,7 +359,7 @@ export default function App() {
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
     } else if (goVoting) {
-      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} />;
+      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} fetchMovies={fetchMovies}/>;
     } else if (goWinner) {
       return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} />;
     } else if (goHome) {
