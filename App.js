@@ -40,12 +40,7 @@ export default function App() {
     useEffect(() => {
         socket.on("user_joined", (data) => {
             console.log("User joined:", data);
-            setParticipants((prev) => { // update list of participants when someone joins
-                if (!prev.includes(data.name)) {
-                    return [...prev, data.name];
-                }
-                return prev;
-            });
+            setParticipants(data.name)
         });
     
         socket.on("user_left", (data) => {
