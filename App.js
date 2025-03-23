@@ -272,6 +272,7 @@ export default function App() {
             const data = await response.json();
     
             if (response.ok) {
+                setHostName(data.host_name)
                 setSessionCode(sessionCode);
                 setName(name);
                 setParticipants((prev) => [...prev, name]);
