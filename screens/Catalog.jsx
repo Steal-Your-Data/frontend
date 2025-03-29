@@ -21,6 +21,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import "../global.css";
+import GradientBackground from '../components/GradientBackground';
 
 export default function Catalog(props) {
   const [movies, setMovies] = useState([]);
@@ -30,6 +31,7 @@ export default function Catalog(props) {
   const [isLimitModalVisible, setLimitModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { width } = Dimensions.get("window");
+
 
   useEffect(() => {
     fetchMovies();
@@ -71,134 +73,130 @@ export default function Catalog(props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={["#0a0f24", "#010409"]}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      />
-      <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar style="light" />
+      <GradientBackground>
+        <SafeAreaView style={{ flex: 1 }}>
+          <StatusBar style="light" />
 
-        <View className="px-4">
-          <Text className="text-white text-3xl font-black text-center mb-4">
-            Movie Catalog
-          </Text>
-
-          <TextInput
-            className="bg-white text-black px-4 py-2 rounded-lg mb-4"
-            placeholder="Search movies..."
-            placeholderTextColor="#888"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        {loading ? (
-          <ActivityIndicator size="large" color="orange" className="mt-4" />
-        ) : (
-          <FlatList
-            data={filteredMovies}
-            keyExtractor={(item) => item.id.toString()}
-            numColumns={numColumns}
-            key={numColumns}
-            contentContainerStyle={{
-              paddingBottom: 140,
-              paddingHorizontal: 12,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            renderItem={({ item }) => (
-              <FlipCard
-                movie={item}
-                isSelected={selectedMovies[item.id]}
-                toggleSelectMovie={toggleSelectMovie}
-              />
-            )}
-          />
-        )}
-
-        <TouchableOpacity
-          style={styles.cartButton}
-          onPress={() => setCartVisible(true)}
-        >
-          <Text className="text-white font-bold text-sm">
-            🛒 Cart ({selectedCount} / {maxNumber})
-          </Text>
-        </TouchableOpacity>
-
-        {/* Cart Modal */}
-        <Modal
-          isVisible={isCartVisible}
-          onBackdropPress={() => setCartVisible(false)}
-          swipeDirection="down"
-          className="m-0 justify-end"
-        >
-          <View className="bg-white rounded-t-2xl p-6 max-h-[80%]">
-            <TouchableOpacity
-              className="absolute top-4 right-4 z-10"
-              onPress={() => setCartVisible(false)}
-            >
-              <Text className="text-2xl font-bold text-gray-700">✖</Text>
-            </TouchableOpacity>
-
-            <Text className="text-xl font-bold text-center mb-4">
-              Your Cart ({selectedCount})
+          <View className="px-4">
+            <Text className="text-white text-3xl font-black text-center mb-4">
+              Movie Catalog
             </Text>
 
+            <TextInput
+              className="bg-white text-black px-4 py-2 rounded-lg mb-4"
+              placeholder="Search movies..."
+              placeholderTextColor="#888"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="large" color="orange" className="mt-4" />
+          ) : (
             <FlatList
-              data={movies.filter((movie) => selectedMovies[movie.id])}
+              data={filteredMovies}
               keyExtractor={(item) => item.id.toString()}
+              numColumns={numColumns}
+              key={numColumns}
+              contentContainerStyle={{
+                paddingBottom: 140,
+                paddingHorizontal: 12,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
               renderItem={({ item }) => (
-                <View className="flex-row items-center mb-4 bg-gray-100 p-3 rounded-xl">
-                  <Image
-                    source={{
-                      uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-                    }}
-                    className="w-12 h-20 rounded mr-3"
-                  />
-                  <Text className="flex-1 font-semibold text-base">
-                    {item.title}
-                  </Text>
-                  <TouchableOpacity onPress={() => removeFromCart(item.id)}>
-                    <Text className="text-red-600 text-lg font-bold">❌</Text>
-                  </TouchableOpacity>
-                </View>
+                <FlipCard
+                  movie={item}
+                  isSelected={selectedMovies[item.id]}
+                  toggleSelectMovie={toggleSelectMovie}
+                />
               )}
             />
+          )}
 
-            <TouchableOpacity
-              className="bg-green-600 mt-4 py-3 rounded-xl"
-              onPress={() => props.handleSendMovies(selectedMovies)}
-            >
-              <Text className="text-white font-bold text-center text-lg">
-                Ready
+          <TouchableOpacity
+            style={styles.cartButton}
+            onPress={() => setCartVisible(true)}
+          >
+            <Text className="text-white font-bold text-sm">
+              🛒 Cart ({selectedCount} / {maxNumber})
+            </Text>
+          </TouchableOpacity>
+
+          {/* Cart Modal */}
+          <Modal
+            isVisible={isCartVisible}
+            onBackdropPress={() => setCartVisible(false)}
+            swipeDirection="down"
+            className="m-0 justify-end"
+          >
+            <View className="bg-white rounded-t-2xl p-6 max-h-[80%]">
+              <TouchableOpacity
+                className="absolute top-4 right-4 z-10"
+                onPress={() => setCartVisible(false)}
+              >
+                <Text className="text-2xl font-bold text-gray-700">✖</Text>
+              </TouchableOpacity>
+
+              <Text className="text-xl font-bold text-center mb-4">
+                Your Cart ({selectedCount})
               </Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
 
-        {/* Limit Modal */}
-        <Modal
-          isVisible={isLimitModalVisible}
-          onBackdropPress={() => setLimitModalVisible(false)}
-        >
-          <View className="bg-white p-6 rounded-xl items-center">
-            <Text className="text-lg font-bold text-red-600 mb-2">
-              🚨 Selection Limit Reached
-            </Text>
-            <Text className="text-base text-center mb-4">
-              You can only select up to 3 movies.
-            </Text>
-            <TouchableOpacity
-              className="bg-red-500 px-4 py-2 rounded"
-              onPress={() => setLimitModalVisible(false)}
-            >
-              <Text className="text-white font-bold">Okay</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </SafeAreaView>
+              <FlatList
+                data={movies.filter((movie) => selectedMovies[movie.id])}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <View className="flex-row items-center mb-4 bg-gray-100 p-3 rounded-xl">
+                    <Image
+                      source={{
+                        uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                      }}
+                      className="w-12 h-20 rounded mr-3"
+                    />
+                    <Text className="flex-1 font-semibold text-base">
+                      {item.title}
+                    </Text>
+                    <TouchableOpacity onPress={() => removeFromCart(item.id)}>
+                      <Text className="text-red-600 text-lg font-bold">❌</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+
+              <TouchableOpacity
+                className="bg-green-600 mt-4 py-3 rounded-xl"
+                onPress={() => props.handleSendMovies(selectedMovies)}
+              >
+                <Text className="text-white font-bold text-center text-lg">
+                  Ready
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+
+          {/* Limit Modal */}
+          <Modal
+            isVisible={isLimitModalVisible}
+            onBackdropPress={() => setLimitModalVisible(false)}
+          >
+            <View className="bg-white p-6 rounded-xl items-center">
+              <Text className="text-lg font-bold text-red-600 mb-2">
+                🚨 Selection Limit Reached
+              </Text>
+              <Text className="text-base text-center mb-4">
+                You can only select up to 3 movies.
+              </Text>
+              <TouchableOpacity
+                className="bg-red-500 px-4 py-2 rounded"
+                onPress={() => setLimitModalVisible(false)}
+              >
+                <Text className="text-white font-bold">Okay</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        </SafeAreaView>
+      </GradientBackground>
     </View>
   );
 }

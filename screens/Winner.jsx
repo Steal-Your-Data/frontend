@@ -8,8 +8,8 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import GradientBackground from '../components/GradientBackground'; // ✅ Use your custom component
 import "../global.css";
 
 function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
@@ -48,26 +48,18 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
 
   if (loading) {
     return (
-      <LinearGradient
-        colors={["#0a0f24", "#010409"]}
-        style={styles.gradient}
-      >
+      <GradientBackground>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#FFA500" />
           <Text className="text-white mt-4 text-base">Calculating Winner...</Text>
         </View>
-      </LinearGradient>
+      </GradientBackground>
     );
   }
 
   return (
-    <LinearGradient
-      colors={["#0a0f24", "#010409"]}
-      style={styles.gradient}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-      >
+    <GradientBackground>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text className="text-3xl font-black text-white text-center mb-2">🏆 Winner 🏆</Text>
 
         {winningMovies.length > 1 && (
@@ -98,10 +90,10 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
         ))}
 
         <TouchableOpacity
-        className="bg-orange-500 px-6 py-3 rounded-xl mt-6"
-        onPress={handleReturnHome}
+          className="bg-orange-500 px-6 py-3 rounded-xl mt-6"
+          onPress={handleReturnHome}
         >
-        <Text className="text-white font-bold text-lg text-center">Return to Home</Text>
+          <Text className="text-white font-bold text-lg text-center">Return to Home</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -112,14 +104,11 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
         autoStart={false}
         ref={confettiRef}
       />
-    </LinearGradient>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
   centered: {
     flex: 1,
     justifyContent: 'center',
@@ -129,8 +118,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 80,      // pushes content down
-    paddingBottom: 40,   // gives breathing room under button
+    paddingTop: 80,
+    paddingBottom: 40,
   },
 });
 

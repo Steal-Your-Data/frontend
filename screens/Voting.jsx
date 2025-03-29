@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import GradientBackground from '../components/GradientBackground'; // ✅ custom background
 import "../global.css";
 
 function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFinalVote, fetchMovies }) {
@@ -53,28 +53,22 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
 
   if (loading) {
     return (
-      <LinearGradient
-        colors={["#0a0f24", "#010409"]}
-        style={styles.gradient}
-      >
+      <GradientBackground>
         <View className="flex-1 justify-center items-center px-6">
           <ActivityIndicator size="large" color="#FFA500" />
           <Text className="text-white mt-4 text-base">Loading movies...</Text>
         </View>
-      </LinearGradient>
+      </GradientBackground>
     );
   }
 
   if (movies.length === 0) {
     return (
-      <LinearGradient
-        colors={["#0a0f24", "#010409"]}
-        style={styles.gradient}
-      >
+      <GradientBackground>
         <View className="flex-1 justify-center items-center px-6">
           <Text className="text-red-500 text-lg font-semibold">No movies available.</Text>
         </View>
-      </LinearGradient>
+      </GradientBackground>
     );
   }
 
@@ -82,12 +76,8 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   const progress = ((currentIndex + 1) / movies.length) * 100;
 
   return (
-    <LinearGradient
-      colors={["#0a0f24", "#010409"]}
-      style={styles.gradient}
-    >
+    <GradientBackground>
       <View className="flex-1 justify-center items-center px-6 py-4">
-
         {/* Progress Indicator */}
         <View className="w-full max-w-md mb-6">
           <Text className="text-white text-sm text-center mb-1">
@@ -117,9 +107,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
 
         <View className="flex-row justify-around w-full max-w-md">
           <TouchableOpacity
-            className={`px-6 py-3 rounded-xl ${
-              voted ? 'bg-green-400 opacity-50' : 'bg-green-500'
-            }`}
+            className={`px-6 py-3 rounded-xl ${voted ? 'bg-green-400 opacity-50' : 'bg-green-500'}`}
             onPress={() => handleVote(movie.id, "yes")}
             disabled={voted}
           >
@@ -127,9 +115,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`px-6 py-3 rounded-xl ${
-              voted ? 'bg-red-400 opacity-50' : 'bg-red-500'
-            }`}
+            className={`px-6 py-3 rounded-xl ${voted ? 'bg-red-400 opacity-50' : 'bg-red-500'}`}
             onPress={() => handleVote(movie.id, "no")}
             disabled={voted}
           >
@@ -143,14 +129,8 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
           </Text>
         )}
       </View>
-    </LinearGradient>
+    </GradientBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
-});
 
 export default Voting;

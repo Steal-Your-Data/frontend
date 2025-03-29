@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, TextInput, Pressable, TouchableOpacity, StyleSheet } from "react-native";
+import GradientBackground from "../components/GradientBackground";
 import "../global.css";
 
 function Host(props) {
@@ -8,14 +8,7 @@ function Host(props) {
   const isDisabled = hostName.trim() === "";
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={["#0a0f24", "#010409"]}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      />
-
+    <GradientBackground>
       <View className="flex-1 justify-center items-center px-4">
         <View className="bg-white rounded-2xl shadow-md w-full max-w-sm p-6 items-center">
           <Text className="text-[#0a0f24] text-3xl font-black text-center mb-2">
@@ -50,15 +43,11 @@ function Host(props) {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
   button: {
     width: "100%",
     paddingVertical: 12,
