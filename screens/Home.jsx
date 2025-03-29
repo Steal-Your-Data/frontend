@@ -1,29 +1,68 @@
+import React, { useState } from "react";
 import {
-    View,
-    Text,
-    Pressable,
-  } from "react-native";
-  import GradientBackground from "../components/GradientBackground";
-  import Animated, { FadeInUp } from "react-native-reanimated";
-  import "../global.css";
-  
-  function Home(props) {
+  View,
+  Text,
+  Pressable,
+} from "react-native";
+import GradientBackground from "../components/GradientBackground";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  FadeInUp,
+  withDelay,
+} from "react-native-reanimated";
+import "../global.css";
+
+function Home(props) {
+  const letters = ["M", "o", "o", "d"];
+  const bounces = letters.map(() => useSharedValue(0));
+  const [trigger, setTrigger] = useState(false);
+
+  const handleBounce = () => {
+    bounces.forEach((bounce, index) => {
+      bounce.value = withDelay(index * 100, withSpring(-20, {
+        damping: 2,
+        stiffness: 100,
+        mass: 0.5,
+      }));
+      // Return to original position
+      setTimeout(() => {
+        bounce.value = withSpring(0);
+      }, 300 + index * 100);
+    });
+    setTrigger(!trigger); // to allow retrigger
+  };
     return (
       <GradientBackground>
         <View className="flex-1 justify-center items-center px-4">
   
-          {/* Glowing Mood Title */}
-        <Text
-        className="text-white text-8xl font-extrabold tracking-tight mb-6"
-        style={{
-            paddingBottom: 10, // adds separation from the modal
-            textShadowColor: 'rgba(255,165,0,0.6)',
-            textShadowOffset: { width: 0, height: 0 },
-            textShadowRadius: 14,
-        }}
-        >
-        Mood
-        </Text>
+        {/* Glowing Mood Title with Bouncing Easter Egg */}
+        <Pressable onPress={handleBounce} className="mb-6">
+          <View className="flex-row">
+            {letters.map((char, index) => {
+              const animatedStyle = useAnimatedStyle(() => ({
+                transform: [{ translateY: bounces[index].value }],
+              }));
+              return (
+                <Animated.Text
+                  key={index}
+                  style={[
+                    {
+                      textShadowColor: 'rgba(255,165,0,0.6)',
+                      textShadowOffset: { width: 0, height: 0 },
+                      textShadowRadius: 14,
+                    },
+                    animatedStyle,
+                  ]}
+                  className="text-white text-8xl font-extrabold tracking-tight"
+                >
+                  {char}
+                </Animated.Text>
+              );
+            })}
+          </View>
+        </Pressable>
   
           {/* Animated Card */}
           <Animated.View
