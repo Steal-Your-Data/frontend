@@ -1,42 +1,66 @@
-import { View, Text, Button, Image, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import "../global.css";
 
-function Home(props) { //remember to delete catalog button
-    return (
-        <View style={styles.container}>
-            <Image source={require('../assets/app-logo.png')} style={styles.image}/>
-            <Text style={styles.title}>What are you in the mood for?</Text>
-            <Text style={styles.text}>Find something to watch by joining a matching session or hosting your own!</Text>
-            <Button title="Join" onPress={() => props.setIsJoining(true)}/>
-            <Button title="Host" onPress={() => props.setIsHosting(true)}/>
-            <Button title="Catalog" onPress={() => props.setGoCatalog(true)}/>
-            <Button title="Waiting" onPress={() => props.setGoWaiting(true)} />
+function Home(props) {
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#0a0f24', '#010409']}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+      
+      <View className="flex-1 justify-center items-center px-4">
+        <View className="bg-white rounded-2xl shadow-md w-full max-w-sm p-5 items-center">
+          <Text className="text-[#0a0f24] text-4xl font-black text-center mb-1 tracking-tight">
+            Mood
+          </Text>
+
+          <Text className="text-gray-700 text-lg font-semibold text-center mb-2">
+            What are you in the mood for?
+          </Text>
+
+          <Text className="text-gray-500 text-sm text-center mb-6 leading-relaxed">
+            Find something to watch by joining a matching session or hosting your own!
+          </Text>
+
+          <Pressable
+            className="bg-orange-500 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
+            onPress={() => props.setIsJoining(true)}
+          >
+            <Text className="text-center text-white font-semibold text-base">Join</Text>
+          </Pressable>
+
+          <Pressable
+            className="bg-orange-600 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
+            onPress={() => props.setIsHosting(true)}
+          >
+            <Text className="text-center text-white font-semibold text-base">Host</Text>
+          </Pressable>
+
+          <Pressable
+            className="bg-orange-700 px-6 py-3 rounded-lg w-full active:scale-[.98]"
+            onPress={() => props.setGoWaiting(true)}
+          >
+            <Text className="text-center text-white font-semibold text-base">Waiting</Text>
+          </Pressable>
         </View>
+
+        <Text className="text-white text-sm text-center mt-10 opacity-60 italic">
+          Mood • Match. Watch. Vibe.
+        </Text>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        margin: 10
-    },
-    image: {
-        height: 175,
-        width: 175,
-        marginBottom: 20
-    },
-    title: {
-        fontSize: 25,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginBottom: 20
-    },
-    text: {
-        fontSize: 15,
-        textAlign: "center",
-        marginBottom: 20
-    }
-})
+  container: {
+    flex: 1,
+    position: "relative",
+  },
+});
 
 export default Home;

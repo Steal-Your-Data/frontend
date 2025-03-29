@@ -1,51 +1,77 @@
 import { useState } from "react";
-import { View, Text, Button, TextInput, StyleSheet } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import "../global.css";
 
 function Host(props) {
-    const [hostName, setHostName] = useState('');
+  const [hostName, setHostName] = useState("");
+  const isDisabled = hostName.trim() === "";
 
-    return (
-        <View style={styles.container}>
-            <Button title="Back to Home" onPress={() => props.setIsHosting(false)}/>
-            <Text style={styles.title}>Host a Session</Text>
-            <Text>Enter Your Name</Text>
-            <TextInput
-                value={hostName}
-                onChangeText={setHostName}
-                style={styles.input}
-            />
-            <Button
-                title="HOST"
-                onPress={() => props.handleHostSession(hostName)}
-                disabled={hostName.trim() === ''}
-            />
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={["#0a0f24", "#010409"]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+
+      <View className="flex-1 justify-center items-center px-4">
+        <View className="bg-white rounded-2xl shadow-md w-full max-w-sm p-6 items-center">
+          <Text className="text-[#0a0f24] text-3xl font-black text-center mb-2">
+            Host a Session
+          </Text>
+
+          <Text className="text-gray-600 text-sm text-center mb-4">
+            Enter your name to begin hosting.
+          </Text>
+
+          <TextInput
+            value={hostName}
+            onChangeText={setHostName}
+            placeholder="Your name"
+            placeholderTextColor="#999"
+            className="border border-gray-300 rounded-md px-4 py-3 text-base w-full mb-4"
+          />
+
+          <Pressable
+            style={[
+              styles.button,
+              isDisabled ? styles.buttonDisabled : styles.buttonEnabled,
+            ]}
+            onPress={() => props.handleHostSession(hostName)}
+            disabled={isDisabled}
+          >
+            <Text className="text-center text-white font-semibold text-base">HOST</Text>
+          </Pressable>
+
+          <TouchableOpacity onPress={() => props.setIsHosting(false)} style={{ marginTop: 8 }}>
+            <Text className="text-sm text-gray-500 underline">← Back to Home</Text>
+          </TouchableOpacity>
         </View>
-    );
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        margin: 10
-    },
-    title: {
-        fontSize: 25,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginBottom: 20
-    },
-    code: {
-        fontSize: 18
-    },
-    input: {
-        height: 50,
-        margin: 12,
-        borderWidth: 1,
-        width: '70%',
-        padding: 12
-    }
-})
+  container: {
+    flex: 1,
+    position: "relative",
+  },
+  button: {
+    width: "100%",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  buttonEnabled: {
+    backgroundColor: "#ea580c", // orange-600
+  },
+  buttonDisabled: {
+    backgroundColor: "#d1d5db", // gray-300
+  },
+});
 
 export default Host;
