@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; 
 import {
   View,
   Text,
@@ -15,54 +15,72 @@ import Animated, {
 import "../global.css";
 
 function Home(props) {
-  const letters = ["M", "o", "o", "d"];
-  const bounces = letters.map(() => useSharedValue(0));
-  const [trigger, setTrigger] = useState(false);
-
-  const handleBounce = () => {
-    bounces.forEach((bounce, index) => {
-      bounce.value = withDelay(index * 100, withSpring(-20, {
-        damping: 2,
-        stiffness: 100,
-        mass: 0.5,
-      }));
-      // Return to original position
-      setTimeout(() => {
-        bounce.value = withSpring(0);
-      }, 300 + index * 100);
-    });
-    setTrigger(!trigger); // to allow retrigger
-  };
+    const letters = ["M", "o", "o", "d"];
+    const animations = letters.map(() => ({
+      x: useSharedValue(0),
+      y: useSharedValue(0),
+      r: useSharedValue(0),
+    }));
+    const [trigger, setTrigger] = useState(false);
+  
+    const handleBounce = () => {
+      animations.forEach((anim, index) => {
+        const randomX = (Math.random() - 0.5) * 60; // -30 to 30
+        const randomY = (Math.random() - 1) * 60;   // -60 to 0
+        const randomR = (Math.random() - 0.5) * 40; // -20 to 20 degrees
+  
+        anim.x.value = withDelay(index * 80, withSpring(randomX, { damping: 4 }));
+        anim.y.value = withDelay(index * 80, withSpring(randomY, { damping: 4 }));
+        anim.r.value = withDelay(index * 80, withSpring(randomR, { damping: 6 }));
+  
+        setTimeout(() => {
+          anim.x.value = withSpring(0);
+          anim.y.value = withSpring(0);
+          anim.r.value = withSpring(0);
+        }, 500 + index * 100);
+      });
+  
+      setTrigger(!trigger);
+    };
+  
+    useEffect(() => {
+      handleBounce();
+    }, []);
+  
     return (
       <GradientBackground>
         <View className="flex-1 justify-center items-center px-4">
+          {/* Glowing Mood Title with Bouncing Easter Egg */}
+          <Pressable onPress={handleBounce} className="mb-6">
+            <View className="flex-row">
+              {letters.map((char, index) => {
+                const animatedStyle = useAnimatedStyle(() => ({
+                  transform: [
+                    { translateX: animations[index].x.value },
+                    { translateY: animations[index].y.value },
+                    { rotate: `${animations[index].r.value}deg` },
+                  ],
+                }));
   
-        {/* Glowing Mood Title with Bouncing Easter Egg */}
-        <Pressable onPress={handleBounce} className="mb-6">
-          <View className="flex-row">
-            {letters.map((char, index) => {
-              const animatedStyle = useAnimatedStyle(() => ({
-                transform: [{ translateY: bounces[index].value }],
-              }));
-              return (
-                <Animated.Text
-                  key={index}
-                  style={[
-                    {
-                      textShadowColor: 'rgba(255,165,0,0.6)',
-                      textShadowOffset: { width: 0, height: 0 },
-                      textShadowRadius: 14,
-                    },
-                    animatedStyle,
-                  ]}
-                  className="text-white text-8xl font-extrabold tracking-tight"
-                >
-                  {char}
-                </Animated.Text>
-              );
-            })}
-          </View>
-        </Pressable>
+                return (
+                  <Animated.Text
+                    key={index}
+                    style={[
+                      {
+                        textShadowColor: 'rgba(255,165,0,0.6)',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 14,
+                      },
+                      animatedStyle,
+                    ]}
+                    className="text-white text-8xl font-extrabold tracking-tight"
+                  >
+                    {char}
+                  </Animated.Text>
+                );
+              })}
+            </View>
+          </Pressable>
   
           {/* Animated Card */}
           <Animated.View
