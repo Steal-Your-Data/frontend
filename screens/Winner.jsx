@@ -6,17 +6,21 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner}) { // Accept 
     const [movie, setMovie] = useState([]);
     const [winningMovies, setWinningMovies] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [votes, setVotes] = useState(0);
+    const [wonMovieId, setWonMovieId] = useState(null);
+    const [spinnerVisible, setSpinnerVisible] = useState(true);
 
+    const handleCloseSpinner = () => {
+        setSpinnerVisible(false);
+    };
 
      // Use useEffect to fetch movies once when component mounts
     useEffect(() => {
         const loadWinner = async () => {
             setLoading(true); // Set loading state before fetching
             const fetchedWinner = await fetchWinner(); // Call the async function
-            setMovie(fetchedWinner.movieInfo);
-            setVotes(fetchedWinner.votes); // Set the movies state
-            setLoading(false); // Mark loading as false after fetching
+            setMovie(fetchedWinner.movies_list);
+            setWonMovieId(fetchedWinner.winner_id);
+            setLoading(false);
         };
      
             loadWinner();
@@ -46,11 +50,11 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner}) { // Accept 
             {winningMovies.length > 1 && <Text style={styles.subHeader}>It's a tie! Multiple winners.</Text>}
 
             {winningMovies.map((movie) => (
-                <View key={movie.id} style={styles.movieContainer}>
-                    <Image source={{ uri:`https://image.tmdb.org/t/p/w500${movie.poster_path}` }} style={styles.movieImage} />
-                    <Text style={styles.movieTitle}>{movie.title}</Text>
-                    <Text style={styles.description}>{movie.overview}</Text>
-                    <Text style={styles.voteCount}>Votes: { votes || 0}</Text>
+                <View key={movie.movie.id} style={styles.movieContainer}>
+                    <Image source={{ uri:`https://image.tmdb.org/t/p/w500${movie.movie.poster_path}` }} style={styles.movieImage} />
+                    <Text style={styles.movieTitle}>{movie.movie.title}</Text>
+                    <Text style={styles.description}>{movie.movie.overview}</Text>
+                    <Text style={styles.voteCount}>Votes: { movie.votes || 0}</Text>
                 </View>
             ))}
 
