@@ -160,28 +160,7 @@ export default function App() {
             console.log(movieWinnerData)
     
     
-            // Step 2: Extract movie ID
-            const movieId = movieWinnerData.movie_id;
-
-            console.log(movieId)
-    
-            // Step 3: Fetch full movie details
-            const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_id', {
-                method: "POST",  // Use POST to send JSON body
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ id: movieId }),
-            });
-    
-            const movieInfoData = await movieInfoResponse.json();
-            console.log(movieInfoData);
-    
-            return {
-                movieInfo: movieInfoData,
-                votes: movieWinnerData.votes
-            };
+            return movieWinnerData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
         }
@@ -386,7 +365,7 @@ export default function App() {
     async function handleSendMovies(movieIDs) {
         const ids = Object.keys(movieIDs);
         //console.log(participantID);
-        for (i = 0; i < ids.length; i++) {
+        //for (i = 0; i < ids.length; i++) {
             try {
                 const response = await fetch("https://backend-production-e0e1.up.railway.app/session/add_movie", {
                     method: "POST",
@@ -396,7 +375,7 @@ export default function App() {
                     },
                     body: JSON.stringify({ session_id: sessionCode,
                                            participant_ID: participantID,
-                                           movie_id: ids[i]})
+                                           movie_ids: ids})
                 });
         
                 const data = await response.json();
@@ -415,7 +394,7 @@ export default function App() {
             } catch (error) {
                 console.error("Error:", error);
             }
-        }
+        //}
         
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_selection", {

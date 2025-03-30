@@ -21,13 +21,11 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
 
   useEffect(() => {
     const loadWinner = async () => {
-      setLoading(true);
-      const fetchedWinner = await fetchWinner();
-      setMovie(fetchedWinner.movieInfo);
-      setVotes(fetchedWinner.votes);
+      setLoading(true); // Set loading state before fetching
+      const fetchedWinner = await fetchWinner(); // Call the async function
+      setMovie(fetchedWinner.movies_list);
       setLoading(false);
     };
-
     loadWinner();
   }, []);
 
@@ -70,21 +68,21 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
 
         {winningMovies.map((movie) => (
           <View
-            key={movie.id}
+            key={movie?.movie?.id}
             className="items-center bg-white rounded-2xl shadow-lg p-4 mb-6 w-full max-w-md"
           >
             <Image
-              source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
+              source={{ uri: `https://image.tmdb.org/t/p/w500${movie?.movie?.poster_path}` }}
               className="w-64 h-96 rounded-xl mb-4"
             />
             <Text className="text-[#0a0f24] text-xl font-bold text-center mb-2">
-              {movie.title}
+              {movie?.movie?.title}
             </Text>
             <Text className="text-gray-700 text-sm text-center mb-3 px-2">
-              {movie.overview}
+              {movie?.movie?.overview}
             </Text>
             <Text className="text-blue-600 font-semibold text-base">
-              Votes: {votes || 0}
+              Votes: {movie?.votes || 0}
             </Text>
           </View>
         ))}
