@@ -1,5 +1,4 @@
-import { useCallback, useState } from "react";
-import { View, Text } from "react-native";
+import { useCallback, useState, useEffect } from "react";
 import Home from './screens/Home';
 import Host from './screens/Host';
 import Join from './screens/Join';
@@ -9,7 +8,6 @@ import Waiting from './screens/Waiting';
 import Voting from './screens/Voting'; // Import Voting Screen
 import Winner from './screens/Winner';
 import io from 'socket.io-client';  // Used for interacting with backend
-import { useEffect } from "react";
  
 const socket = io('https://backend-production-e0e1.up.railway.app', {
 
@@ -25,24 +23,24 @@ export default function App() {
     const [hostName, setHostName] = useState('');
     const [name, setName] = useState('');
     const [participantID, setParticipantID] = useState(0);
-    const [participants, setParticipants] = useState('');
-    const [goCatalog, setGoCatalog] = useState(false); // temporary catalog access
+    const [participants, setParticipants] = useState([]);
+    const [goCatalog, setGoCatalog] = useState(false);
     const [goWaiting, setGoWaiting] = useState(false);
     const [goVoting, setGoVoting] = useState(false);
     const [goWinner, setGoWinner] = useState(false);
     const [goHome, setGoHome] = useState(false);
-    const [doneSelecting, setDoneSelecting] = useState(false);
-    const [doneVoting, setDoneVoting] = useState(false);
     const [finalVotes, setFinalVotes] = useState({});
     const [movies, setMovies] = useState([]);
+    const [finishedUsers, setFinishedUsers] = useState(0);
 
     // Listen for user_joined and user_left events
     useEffect(() => {
         socket.on("user_joined", (data) => {
             console.log("User joined:", data);
-            setParticipants(data.name)
+            setParticipants(data.name);
         });
     
+        // TODO: fix this because right now, the list isn't updating when someone leaves
         socket.on("user_left", (data) => {
             console.log("User left:", data);
             setParticipants((prev) => // update list of participants when someone leaves
@@ -57,6 +55,11 @@ export default function App() {
     }, []);
 
     useEffect(() => {
+        socket.on('selection_progress', (data) => {
+            console.log('Selection progress:', data);
+            setFinishedUsers(data.done_participants); // update the number of participants who have finished
+        });      
+
         socket.on('selection_complete', (data) => {
             console.log('Selection Completed:', data);
             setGoVoting(true); // Move all clients to the Voting page
@@ -64,18 +67,25 @@ export default function App() {
         });
      
         return () => {
+            socket.off('selection_progress');
             socket.off('selection_complete'); // Cleanup listener
         };
     }, []);
     
     useEffect(() => {
+        socket.on('voting_progress', (data) => {
+            console.log('Voting progress:', data);
+            setFinishedUsers(data.done_participants); // update the number of participants who have finished
+        });  
+
         socket.on('voting_complete', (data) => {
             console.log('Voting Completed:', data);
-            setGoWinner(true); // Move all clients to the Voting page
+            setGoWinner(true); // Move all clients to the Winner page
             setGoWaiting(false);
         });
      
         return () => {
+            socket.off('voting_progress')
             socket.off('voting_complete'); // Cleanup listener
         };
     }, []);
@@ -205,9 +215,9 @@ export default function App() {
             if (response.ok) {
                 setSessionCode(data.session_id);
                 setHostName(hostName);
+                setName(hostName);
                 setParticipants([hostName]);
                 setParticipantID(data.participant_id);
-                console.log(data.participant_id)
                 startSession(data.session_id, hostName); // socket function must be called in here
                 setIsHosting(false);
                 setInSession(true);
@@ -433,6 +443,8 @@ export default function App() {
 
     }   
 
+    // check state, go to the respective screen
+    // rewrite this code to use React's navigation
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
     } else if (isJoining) {
@@ -445,10 +457,10 @@ export default function App() {
             participants={participants}
             handleStartSession={handleStartSession}
         />;
-    } else if (goCatalog) { // temporary catalog access
+    } else if (goCatalog) {
         return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies}/>;
     } else if (goWaiting) {
-        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
+        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} participants={participants} finishedUsers={finishedUsers}/>; // Pass setGoVoting
     } else if (goVoting) {
       return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} handleYes={handleYes} handleFinalVote={handleFinalVote} fetchMovies={fetchMovies}/>;
     } else if (goWinner) {
@@ -459,7 +471,5 @@ export default function App() {
     return <Home
         setIsHosting={setIsHosting}
         setIsJoining={setIsJoining}
-        setGoCatalog={setGoCatalog} 
-        setGoWaiting={setGoWaiting}
-    />; //remember to remove setGoCatalog
+    />;
 }
