@@ -124,6 +124,24 @@ export default function Catalog(props) {
             </Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={{
+            position: "absolute",
+            bottom: 20,
+            alignSelf: "left",
+            backgroundColor: "#f97316",
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 999}}
+            onPress={() => {
+              
+            }}
+          >
+            <Text className="text-white font-bold text-sm">
+              Test Button
+            </Text>
+          </TouchableOpacity>
+
           {/* Cart Modal */}
           <Modal
             isVisible={isCartVisible}
