@@ -15,7 +15,7 @@ import Animated, {
 import "../global.css";
 
 function Home(props) {
-    const letters = ["M", "o", "o", "d"];
+    const letters = ["C", "i", "n", "e", "M", "a", "t", "c", "h"];
     const animations = letters.map(() => ({
       x: useSharedValue(0),
       y: useSharedValue(0),
@@ -73,7 +73,7 @@ function Home(props) {
                       },
                       animatedStyle,
                     ]}
-                    className="text-white text-8xl font-extrabold tracking-tight"
+                    className="text-orange-50 text-7xl font-extrabold tracking-tight"
                   >
                     {char}
                   </Animated.Text>
@@ -85,7 +85,7 @@ function Home(props) {
           {/* Animated Card */}
           <Animated.View
             entering={FadeInUp.duration(600)}
-            className="bg-white/90 rounded-2xl shadow-2xl w-full max-w-sm p-6 items-center border border-white/30"
+            className="bg-orange-50 rounded-2xl shadow-2xl w-full max-w-sm p-6 items-center border border-white/30"
           >
             <Text className="text-gray-700 text-lg font-semibold text-center mb-2">
               What are you in the mood for?
