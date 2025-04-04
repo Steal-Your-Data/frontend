@@ -295,7 +295,7 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
 
         <Animated.View
           style={[backAnimatedStyle]}
-          className="absolute w-full h-full bg-gray-100 justify-center items-center p-4 rounded-xl"
+          className="absolute w-full h-full bg-gray-200 justify-center items-center p-4 rounded-xl"
         >
           <Text
             className="text-sm text-gray-700 text-center"
