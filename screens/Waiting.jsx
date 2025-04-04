@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import io from 'socket.io-client';
 import "../global.css";
 
-const socket = io('https://backend-production-e0e1.up.railway.app', {
+const socket = io('http://localhost:5000', {
   transports: ['websocket'],
 });
 
