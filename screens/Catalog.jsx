@@ -32,6 +32,15 @@ export default function Catalog(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const { width } = Dimensions.get("window");
 
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [onlyInTheater, setOnlyInTheater] = useState("");
+
+  const genresList = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"]; // Replace with actual list
+  const languageList = ["en", "la"]; // Replace with actual list
+  const releaseYears = Array.from({ length: 30 }, (_, i) => 2024 - i); // past 30 years
+
 
   useEffect(() => {
     fetchMovies();
@@ -40,7 +49,7 @@ export default function Catalog(props) {
   const fetchMovies = async () => {
     try {
       const response = await fetch(
-        `https://backend-production-e0e1.up.railway.app/movies/get_all_movies`
+        `http://localhost:5000/movies/get_all_movies`
       );
       const data = await response.json();
       setMovies(data);
@@ -48,6 +57,23 @@ export default function Catalog(props) {
       console.error("Failed to fetch movies:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFilterClick = async () => {
+    const params = new URLSearchParams();
+
+    selectedGenres.forEach((genre) => params.append("genres", genre));
+    if (selectedLanguage) params.append("language", selectedLanguage);
+    if (selectedYear) params.append("release_year", selectedYear);
+    if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
+
+    try {
+      const response = await fetch(`http://localhost:5000/movies/filter_movies_V2?${params.toString()}`);
+      const filtered = await response.json();
+      setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
+    } catch (error) {
+      console.error("Failed to fetch filtered movies:", error);
     }
   };
 
@@ -121,6 +147,71 @@ export default function Catalog(props) {
           >
             <Text className="text-white font-bold text-sm">
               🛒 Cart ({selectedCount} / {maxNumber})
+            </Text>
+          </TouchableOpacity>
+
+          <div>
+      {/* Filter Menu */}
+      <div style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
+        <h3>Filter Movies</h3>
+
+        {/* Genres (multiselect) */}
+        <label>Genres:</label>
+        <select multiple value={selectedGenres} onChange={(e) => {
+          const selected = Array.from(e.target.selectedOptions, option => option.value);
+          setSelectedGenres(selected);
+        }}>
+          {genresList.map((genre) => (
+            <option key={genre} value={genre}>{genre}</option>
+          ))}
+        </select>
+
+        {/* Language */}
+        <label>Language:</label>
+        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
+          <option value="">-- Select --</option>
+          {languageList.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
+
+        {/* Release Year */}
+        <label>Release Year:</label>
+        <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+          <option value="">-- Select --</option>
+          {releaseYears.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+
+        {/* In Theaters */}
+        <label>In Theaters:</label>
+        <select value={onlyInTheater} onChange={(e) => setOnlyInTheater(e.target.value)}>
+          <option value="">-- Select --</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+
+        {/* Filter Button */}
+        <button onClick={handleFilterClick}>Filter</button>
+      </div>
+    </div>
+
+    <TouchableOpacity
+            style={{
+            position: "absolute",
+            bottom: 20,
+            alignSelf: "left",
+            backgroundColor: "#f97316",
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 999}}
+            onPress={() => {
+              handleFilterClick();
+            }}
+          >
+            <Text className="text-white font-bold text-sm">
+              Filter
             </Text>
           </TouchableOpacity>
 
