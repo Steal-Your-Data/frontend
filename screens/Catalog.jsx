@@ -36,7 +36,11 @@ export default function Catalog(props) {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [onlyInTheater, setOnlyInTheater] = useState("");
+  const [selectedSort, setSelectedSort] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState("");
 
+  const sortList = ["popularity", "title", "release_date"];
+  const sortOrderList = ["asc", "desc"];
   const genresList = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"]; // Replace with actual list
   const languageList = ["en", "la"]; // Replace with actual list
   const releaseYears = Array.from({ length: 30 }, (_, i) => 2024 - i); // past 30 years
@@ -67,9 +71,11 @@ export default function Catalog(props) {
     if (selectedLanguage) params.append("language", selectedLanguage);
     if (selectedYear) params.append("release_year", selectedYear);
     if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
+    if (sortList) params.append("sort_by", sortList);
+    if (sortOrderList) params.append("order", sortOrderList);
 
     try {
-      const response = await fetch(`http://localhost:5000/movies/filter_movies_V2?${params.toString()}`);
+      const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
       const filtered = await response.json();
       setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
     } catch (error) {
@@ -153,10 +159,16 @@ export default function Catalog(props) {
           <div>
       {/* Filter Menu */}
       <div style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
-        <h3>Filter Movies</h3>
+        <h3
+        className="text-white"
+        >
+          Filter Movies</h3>
 
         {/* Genres (multiselect) */}
-        <label>Genres:</label>
+        <label
+        className="text-white"
+        >
+          Genres:</label>
         <select multiple value={selectedGenres} onChange={(e) => {
           const selected = Array.from(e.target.selectedOptions, option => option.value);
           setSelectedGenres(selected);
@@ -167,7 +179,10 @@ export default function Catalog(props) {
         </select>
 
         {/* Language */}
-        <label>Language:</label>
+        <label
+        className="text-white"
+        >
+          Language:</label>
         <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
           <option value="">-- Select --</option>
           {languageList.map((lang) => (
@@ -176,7 +191,10 @@ export default function Catalog(props) {
         </select>
 
         {/* Release Year */}
-        <label>Release Year:</label>
+        <label
+        className="text-white"
+        >
+          Release Year:</label>
         <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
           <option value="">-- Select --</option>
           {releaseYears.map((year) => (
@@ -185,15 +203,46 @@ export default function Catalog(props) {
         </select>
 
         {/* In Theaters */}
-        <label>In Theaters:</label>
+        <label
+        className="text-white"
+        >
+          In Theaters:</label>
         <select value={onlyInTheater} onChange={(e) => setOnlyInTheater(e.target.value)}>
           <option value="">-- Select --</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
         </select>
+      </div>
 
-        {/* Filter Button */}
-        <button onClick={handleFilterClick}>Filter</button>
+      {/* Sort Menu */}
+      <div style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
+        <h3
+        className="text-white"
+        >
+          Sort Movies</h3>
+
+        {/* Sort */}
+        <label
+        className="text-white"
+        >
+          Sort:</label>
+        <select value={selectedSort} onChange={(e) => setSelectedSort(e.target.value)}>
+          <option value="">-- Select --</option>
+          {sortList.map((sort) => (
+            <option key={sort} value={sort}>{sort}</option>
+          ))}
+        </select>
+
+        {/* Order */}
+        <label
+        className="text-white"
+        >
+          Sort Order:</label>
+          <select value={selectedOrder} onChange={(e) => setSelectedOrder(e.target.value)}>
+          <option value="">-- Select --</option>
+          <option value="asc">asc</option>
+          <option value="desc">desc</option>
+        </select>
       </div>
     </div>
 
