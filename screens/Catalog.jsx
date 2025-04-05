@@ -31,27 +31,35 @@ export default function Catalog(props) {
   const [isLimitModalVisible, setLimitModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { width } = Dimensions.get("window");
-  const [timer, setTimer] = useState(180); // three minutes (in seconds)
+  const [timer, setTimer] = useState(180); // three minutes (in seconds)const [selectedGenres, setSelectedGenres] = useState([]);
+    const [selectedLanguage, setSelectedLanguage] = useState("");
+    const [selectedYear, setSelectedYear] = useState("");
+    const [onlyInTheater, setOnlyInTheater] = useState("");
+    const [selectedSort, setSelectedSort] = useState("");
+    const [selectedOrder, setSelectedOrder] = useState("");
 
-  // catalog timer, TODO: implement redirection to next screen once timer ends
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (timer > 0) {
-        setTimer((prevTimer) => prevTimer - 1);
-      } else {
-        clearInterval(interval);
-      }
-    }, 1000);
+    const sortList = ["popularity", "title", "release_date"];
+    const sortOrderList = ["asc", "desc"];
+    const genresList = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"]; // Replace with actual list
+    const languageList = ["en", "la"]; // Replace with actual list
+    const releaseYears = Array.from({ length: 30 }, (_, i) => 2024 - i); // past 30 years
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (timer > 0) {
+                setTimer((prevTimer) => prevTimer - 1);
+            } else {
+                clearInterval(interval);
+            }
+        }, 1000);
 
-    return () => clearInterval(interval);
-  }, [timer]);
+        return () => clearInterval(interval);
+    }, [timer]);
 
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-  };
-
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+    };
   useEffect(() => {
     fetchMovies();
   }, []);
@@ -67,6 +75,25 @@ export default function Catalog(props) {
       console.error("Failed to fetch movies:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFilterClick = async () => {
+    const params = new URLSearchParams();
+
+    selectedGenres.forEach((genre) => params.append("genres", genre));
+    if (selectedLanguage) params.append("language", selectedLanguage);
+    if (selectedYear) params.append("release_year", selectedYear);
+    if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
+    if (sortList) params.append("sort_by", selectedSort);
+    if (sortOrderList) params.append("order", selectedOrder);
+
+    try {
+      const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
+      const filtered = await response.json();
+      setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
+    } catch (error) {
+      console.error("Failed to fetch filtered movies:", error);
     }
   };
 
@@ -147,6 +174,114 @@ export default function Catalog(props) {
           >
             <Text className="text-white font-bold text-sm">
               🛒 Cart ({selectedCount} / {maxNumber})
+            </Text>
+          </TouchableOpacity>
+
+          <div>
+      {/* Filter Menu */}
+      <div style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
+        <h3
+        className="text-white"
+        >
+          Filter Movies</h3>
+
+        {/* Genres (multiselect) */}
+        <label
+        className="text-white"
+        >
+          Genres:</label>
+        <select multiple value={selectedGenres} onChange={(e) => {
+          const selected = Array.from(e.target.selectedOptions, option => option.value);
+          setSelectedGenres(selected);
+        }}>
+          {genresList.map((genre) => (
+            <option key={genre} value={genre}>{genre}</option>
+          ))}
+        </select>
+
+        {/* Language */}
+        <label
+        className="text-white"
+        >
+          Language:</label>
+        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
+          <option value="">-- Select --</option>
+          {languageList.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
+
+        {/* Release Year */}
+        <label
+        className="text-white"
+        >
+          Release Year:</label>
+        <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+          <option value="">-- Select --</option>
+          {releaseYears.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+
+        {/* In Theaters */}
+        <label
+        className="text-white"
+        >
+          In Theaters:</label>
+        <select value={onlyInTheater} onChange={(e) => setOnlyInTheater(e.target.value)}>
+          <option value="">-- Select --</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      {/* Sort Menu */}
+      <div style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
+        <h3
+        className="text-white"
+        >
+          Sort Movies</h3>
+
+        {/* Sort */}
+        <label
+        className="text-white"
+        >
+          Sort:</label>
+        <select value={selectedSort} onChange={(e) => setSelectedSort(e.target.value)}>
+          <option value="">-- Select --</option>
+          {sortList.map((sort) => (
+            <option key={sort} value={sort}>{sort}</option>
+          ))}
+        </select>
+
+        {/* Order */}
+        <label
+        className="text-white"
+        >
+          Sort Order:</label>
+          <select value={selectedOrder} onChange={(e) => setSelectedOrder(e.target.value)}>
+          <option value="">-- Select --</option>
+          <option value="asc">asc</option>
+          <option value="desc">desc</option>
+        </select>
+      </div>
+    </div>
+
+    <TouchableOpacity
+            style={{
+            position: "absolute",
+            bottom: 20,
+            alignSelf: "left",
+            backgroundColor: "#f97316",
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 999}}
+            onPress={() => {
+              handleFilterClick();
+            }}
+          >
+            <Text className="text-white font-bold text-sm">
+              Filter
             </Text>
           </TouchableOpacity>
 
@@ -317,7 +452,7 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
 
         <Animated.View
           style={[backAnimatedStyle]}
-          className="absolute w-full h-full bg-gray-100 justify-center items-center p-4 rounded-xl"
+          className="absolute w-full h-full bg-gray-200 justify-center items-center p-4 rounded-xl"
         >
           <Text
             className="text-sm text-gray-700 text-center"
