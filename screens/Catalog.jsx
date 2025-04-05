@@ -71,8 +71,8 @@ export default function Catalog(props) {
     if (selectedLanguage) params.append("language", selectedLanguage);
     if (selectedYear) params.append("release_year", selectedYear);
     if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
-    if (sortList) params.append("sort_by", sortList);
-    if (sortOrderList) params.append("order", sortOrderList);
+    if (sortList) params.append("sort_by", selectedSort);
+    if (sortOrderList) params.append("order", selectedOrder);
 
     try {
       const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
