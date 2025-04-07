@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
+import { Alert } from "react-native";
 import Home from './screens/Home';
 import Host from './screens/Host';
 import Join from './screens/Join';
@@ -169,7 +170,6 @@ export default function App() {
 
             console.log(movieWinnerData)
     
-    
             return movieWinnerData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
@@ -230,7 +230,7 @@ export default function App() {
                 console.log('User joined:', data);
               
             });
-    
+
             
             if (response.ok) {
                 setSessionCode(data.session_id);
@@ -249,6 +249,7 @@ export default function App() {
         }
     }
 
+    // TODO: currently doesn't handle when user tries to join session that already started, need to fix
     async function handleJoinSession(sessionCode, name) {
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/join", {
@@ -290,7 +291,8 @@ export default function App() {
                 setIsJoining(false);
                 setInSession(true);
             } else {
-                console.error("Error joining session:", data.message);
+                console.error("Error joining session:", data.message || data.error);
+                Alert.alert("Error joining session", data.message || data.error);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -479,7 +481,7 @@ export default function App() {
             handleStartSession={handleStartSession}
         />;
     } else if (goCatalog) {
-        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies}/>;
+        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} participants={participants}/>;
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} participants={participants} finishedUsers={finishedUsers}/>; // Pass setGoVoting
     } else if (goVoting) {

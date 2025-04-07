@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, Pressable, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import GradientBackground from "../components/GradientBackground";
 import "../global.css";
 
@@ -13,6 +13,15 @@ function Join(props) {
   };
 
   const isDisabled = code.trim() === "" || name.trim() === "";
+
+  const onJoining = () => {
+    if (code.length !== 6) {
+      Alert.alert("Invalid Code", "Session code must be six digits.");
+      return;
+    } else {
+      props.handleJoinSession(code, name);
+    }
+  }
 
   return (
     <GradientBackground>
@@ -49,7 +58,7 @@ function Join(props) {
               styles.button,
               isDisabled ? styles.buttonDisabled : styles.buttonEnabled,
             ]}
-            onPress={() => props.handleJoinSession(code, name)}
+            onPress={onJoining}
             disabled={isDisabled}
           >
             <Text className="text-center text-white font-semibold text-base">

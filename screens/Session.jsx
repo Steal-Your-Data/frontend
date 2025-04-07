@@ -43,7 +43,7 @@ function Session(props) {
                   : 'bg-gray-300'
               }`}
               onPress={props.handleStartSession}
-              //disabled={!enoughParticipants}
+              disabled={!enoughParticipants}
             >
               <Text
                 className={`text-center font-semibold text-base ${

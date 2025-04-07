@@ -33,7 +33,7 @@ export default function GradientBackground({ children }) {
       {/* Background image fades in on large screens */}
       <Animated.View style={[styles.imageWrapper, { opacity: fadeAnim }]}>
         <ImageBackground
-          source={require("../assets/night-city.png")}
+          source={require("../assets/cinema-background.png")}
           resizeMode="cover"
           style={styles.imageBackground}
         />

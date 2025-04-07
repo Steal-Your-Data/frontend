@@ -31,7 +31,8 @@ export default function Catalog(props) {
     const [isLimitModalVisible, setLimitModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const {width} = Dimensions.get("window");
-    const [timer, setTimer] = useState(180); // three minutes (in seconds)const [selectedGenres, setSelectedGenres] = useState([]);
+    const [timer, setTimer] = useState(180); // three minutes (in seconds)
+    //const [selectedGenres, setSelectedGenres] = useState([]);
 
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -45,6 +46,8 @@ export default function Catalog(props) {
     const genresList = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"]; // Replace with actual list
     const languageList = ["en", "la"]; // Replace with actual list
     const releaseYears = Array.from({length: 30}, (_, i) => 2024 - i); // past 30 years
+    
+    // timer
     useEffect(() => {
         const interval = setInterval(() => {
             if (timer > 0) {
@@ -99,7 +102,15 @@ export default function Catalog(props) {
         }
     };
 
-    const maxNumber = 3;
+    let maxNumber;
+    if (props.participants.length < 4) {
+        maxNumber = 3;
+    } else if (props.participants.length > 3 && props.participants.length < 6) {
+        maxNumber = 2;
+    } else {
+        maxNumber = 1;
+    }
+
     const selectedCount = Object.values(selectedMovies).filter(Boolean).length;
 
     const toggleSelectMovie = (id) => {
@@ -175,7 +186,7 @@ export default function Catalog(props) {
                         onPress={() => setCartVisible(true)}
                     >
                         <Text className="text-white font-bold text-sm">
-                            🛒 Cart ({selectedCount} / {maxNumber})
+                            🎥 Selection ({selectedCount} / {maxNumber})
                         </Text>
                     </TouchableOpacity>
 
@@ -304,7 +315,7 @@ export default function Catalog(props) {
                             </TouchableOpacity>
 
                             <Text className="text-xl font-bold text-center mb-4">
-                                Your Cart ({selectedCount})
+                                Your Movies ({selectedCount})
                             </Text>
 
                             <FlatList
@@ -349,7 +360,8 @@ export default function Catalog(props) {
                                 🚨 Selection Limit Reached
                             </Text>
                             <Text className="text-base text-center mb-4">
-                                You can only select up to 3 movies.
+                                You can only select up to {maxNumber} movie
+                                {maxNumber !== 1 && 's'}
                             </Text>
                             <TouchableOpacity
                                 className="bg-red-500 px-4 py-2 rounded"
