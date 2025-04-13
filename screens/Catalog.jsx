@@ -67,8 +67,8 @@ export default function Catalog(props) {
       try {
         setLoading(true);
         const endpoint = query
-          ? `https://backend-production-e0e1.up.railway.app/search_API?query=${encodeURIComponent(query)}`
-          : `https://backend-production-e0e1.up.railway.app/get_all_movies`;
+          ? `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(query)}`
+          : `https://backend-production-e0e1.up.railway.app/movies/get_all_movies`;
   
         const response = await fetch(endpoint);
         const data = await response.json();
