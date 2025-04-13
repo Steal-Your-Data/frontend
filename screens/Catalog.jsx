@@ -62,23 +62,36 @@ export default function Catalog(props) {
         const remainingSeconds = seconds % 60;
         return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
     };
-    useEffect(() => {
-        fetchMovies();
-    }, []);
 
-    const fetchMovies = async () => {
-        try {
-            const response = await fetch(
-                `https://backend-production-e0e1.up.railway.app/movies/get_all_movies`
-            );
-            const data = await response.json();
-            setMovies(data);
-        } catch (error) {
-            console.error("Failed to fetch movies:", error);
-        } finally {
-            setLoading(false);
-        }
+    const fetchMovies = async (query = "") => {
+      try {
+        setLoading(true);
+        const endpoint = query
+          ? `https://backend-production-e0e1.up.railway.app/search_API?query=${encodeURIComponent(query)}`
+          : `https://backend-production-e0e1.up.railway.app/get_all_movies`;
+  
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        setMovies(data);
+      } catch (error) {
+        console.error("Failed to fetch movies:", error);
+      } finally {
+        setLoading(false);
+      }
     };
+  
+    useEffect(() => {
+      fetchMovies();
+    }, []);
+  
+    // Trigger a search when the user types in the search bar
+    useEffect(() => {
+      const delayDebounce = setTimeout(() => {
+        fetchMovies(searchQuery);
+      }, 300); // debounce for 300ms
+  
+      return () => clearTimeout(delayDebounce);
+    }, [searchQuery]);
 
     const handleFilterClick = async () => {
         const params = new URLSearchParams();
@@ -115,9 +128,6 @@ export default function Catalog(props) {
     };
 
     const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
-    const filteredMovies = movies.filter((movie) =>
-        movie.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
 
     return (
         <View style={{flex: 1}}>
@@ -150,7 +160,7 @@ export default function Catalog(props) {
                         <ActivityIndicator size="large" color="orange" className="mt-4"/>
                     ) : (
                         <FlatList
-                            data={filteredMovies}
+                            data={movies}
                             keyExtractor={(item) => item.id.toString()}
                             numColumns={numColumns}
                             key={numColumns}
