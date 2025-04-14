@@ -31,7 +31,7 @@ export default function Catalog(props) {
     const [isLimitModalVisible, setLimitModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const {width} = Dimensions.get("window");``
-    const [timer, setTimer] = useState(2); // three minutes (in seconds)const [selectedGenres, setSelectedGenres] = useState([]);
+    const [timer, setTimer] = useState(180); // three minutes (in seconds)const [selectedGenres, setSelectedGenres] = useState([]);
 
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState("");
