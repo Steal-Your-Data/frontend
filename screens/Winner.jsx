@@ -17,6 +17,8 @@ import "../global.css";
 export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}) {
     const [movie, setMovie] = useState([]);
     const [winningMovies, setWinningMovies] = useState([]);
+    const [finalistMovies, setFinalistMovies] = useState([]);
+
     const [loading, setLoading] = useState(true);
 
     const [selectedMovie, setSelectedMovie] = useState(null);
@@ -39,6 +41,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
             setLoading(true);
             const fetchedWinner = await fetchWinner();
             setMovie(fetchedWinner.movies_list);
+            setFinalistMovies(fetchedWinner.movies_list);
             setWinnerId(fetchedWinner.movie_id);
             setLoading(false);
         };
@@ -88,17 +91,9 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
 
         const finalIndex = actualIndex + 4 * singleSetLength;
 
-        const itemSpacing = (itemWidth + 16);
+        const itemSpacing = itemWidth + 16;
         const initialOffset = (containerWidth - itemWidth) / 2;
         const finalOffset = initialOffset - itemSpacing * finalIndex;
-
-        console.log("Container Width:", containerWidth);
-        console.log("Item Width:", itemWidth);
-        console.log("Initial Offset:", initialOffset);
-        console.log("Final Index:", finalIndex);
-        console.log("Final Offset:", finalOffset);
-        console.log("Actual Index:", actualIndex);
-
 
         Animated.timing(spinAnim, {
             toValue: finalOffset,
@@ -108,7 +103,6 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
         }).start(() => {
             setSpinCompleted(true);
             setSelectedMovie(winningMovies[actualIndex]);
-
             Animated.timing(scaleAnim, {
                 toValue: 1,
                 duration: 500,
@@ -117,16 +111,6 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                 confettiRef.current?.start();
             });
         });
-    };
-
-    const handleReplaySpin = () => {
-
-        spinAnim.setValue(0);
-        scaleAnim.setValue(0);
-        setSpinCompleted(false);
-        setSelectedMovie(null);
-
-        runTiebreakerSpin();
     };
 
     const handleReturnHome = () => {
@@ -169,7 +153,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                                         transform: [{translateX: spinAnim}],
                                     }}
                                 >
-                                    {[...winningMovies, ...winningMovies, ...winningMovies, ...winningMovies, ...winningMovies, ...winningMovies, ...winningMovies, ...winningMovies].map((m, idx) => (
+                                    {[...Array(8)].flatMap(() => winningMovies).map((m, idx) => (
                                         <View
                                             key={idx}
                                             style={styles.itemWrapper}
@@ -216,17 +200,31 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                         </Animated.View>
                     )}
 
-                    {/* debug stuff
-                    {winningMovies.length > 1 && spinCompleted && (
-                        <TouchableOpacity style={styles.replayButton} onPress={handleReplaySpin}>
-                            <Text style={styles.replayButtonText}>Replay Spin</Text>
-                        </TouchableOpacity>
-                    )}
-*/}
-
                     <TouchableOpacity style={styles.returnButton} onPress={handleReturnHome}>
                         <Text style={styles.returnButtonText}>Return to Home</Text>
                     </TouchableOpacity>
+
+                    { (winningMovies.length === 1 || spinCompleted) && finalistMovies && (
+                        <View style={styles.finalistsContainer}>
+                            <Text style={styles.finalistsHeader}>All Finalists</Text>
+                            {finalistMovies.map((film) => (
+                                <View style={styles.finalistItem} key={film.movie.id}>
+                                    <Image
+                                        source={{
+                                            uri: `https://image.tmdb.org/t/p/w500${film.movie?.poster_path}`,
+                                        }}
+                                        style={styles.finalistImage}
+                                    />
+                                    <View style={styles.finalistInfo}>
+                                        <Text style={styles.finalistTitle}>{film.movie.title}</Text>
+                                        <Text style={styles.finalistVotes}>
+                                            {film.votes} {film.votes === 1 ? 'vote' : 'votes'}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    )}
                 </ScrollView>
 
                 <ConfettiCannon
@@ -288,7 +286,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 20,
         shadowColor: "#000",
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
@@ -320,18 +318,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
-    replayButton: {
-        backgroundColor: '#FF6347',
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 15,
-        marginBottom: 10,
-    },
-    replayButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
     returnButton: {
         backgroundColor: 'orange',
         paddingHorizontal: 24,
@@ -343,5 +329,50 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    finalistsContainer: {
+        width: '100%',
+        marginTop: 30,
+        paddingHorizontal: 10,
+    },
+    finalistsHeader: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: 'white',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    finalistItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        marginBottom: 12,
+        padding: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 3,
+        elevation: 4,
+    },
+    finalistImage: {
+        width: 60,
+        height: 90,
+        borderRadius: 6,
+        marginRight: 12,
+    },
+    finalistInfo: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    finalistTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#0a0f24',
+        marginBottom: 4,
+    },
+    finalistVotes: {
+        fontSize: 14,
+        color: 'gray',
     },
 });
