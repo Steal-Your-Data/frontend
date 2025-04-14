@@ -30,8 +30,8 @@ export default function Catalog(props) {
     const [isCartVisible, setCartVisible] = useState(false);
     const [isLimitModalVisible, setLimitModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const {width} = Dimensions.get("window");
-    const [timer, setTimer] = useState(180); // three minutes (in seconds)const [selectedGenres, setSelectedGenres] = useState([]);
+    const {width} = Dimensions.get("window");``
+    const [timer, setTimer] = useState(2); // three minutes (in seconds)const [selectedGenres, setSelectedGenres] = useState([]);
 
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -60,6 +60,20 @@ export default function Catalog(props) {
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
+
+        // Send users to voting page when timer hits zero
+        if(seconds == 0) {
+            if (Object.keys(selectedMovies).length === 0) {
+                console.log("User did not select a movie");
+                console.log("Use this movie id: ", movies[0].id);
+                setSelectedMovies((prev) => ({...prev, [movies[0].id]: !prev[movies[0].id]}));
+                props.handleSendMovies(selectedMovies);
+            } else {
+                props.handleSendMovies(selectedMovies);
+            }
+        }
+       
+
         return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
     };
     useEffect(() => {

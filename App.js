@@ -176,27 +176,6 @@ export default function App() {
         }
     }, [sessionCode]); 
 
-    /**
-     * This handler is for grabbing movies based on filtered traits
-     * @param
-     * @return List of filterd movies
-     */
-    const handleFetchFilteredMovies = useCallback(async () => {
-        try {
-            console.log("Fetching filtered movies in database");
-            const movieListResponse = await fetch('https://backend-production-e0e1.up.railway.app/session/movies_in_pocket', {
-                method: "POST",  // Use POST to send JSON body
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID }),
-            });
-        } catch (error) {
-            console.error("Error fetching filterd movies from database:", error);
-        }
-    }, []);
-
     async function handleHostSession(hostName) {
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/start", {
