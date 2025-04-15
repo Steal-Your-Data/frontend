@@ -8,8 +8,13 @@ import Catalog from './screens/Catalog';
 import Waiting from './screens/Waiting';
 import Voting from './screens/Voting'; // Import Voting Screen
 import Winner from './screens/Winner';
+import Step1GenreScreen from './screens/Step1GenreScreen';
+import Step2TypeScreen from './screens/Step2TypeScreen';
+import Step3TimePeriodScreen from './screens/Step3TimePeriodScreen';
 import io from 'socket.io-client';  // Used for interacting with backend
 import { useEffect } from "react";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
  
 const socket = io('https://backend-production-e0e1.up.railway.app', {
 
@@ -35,6 +40,7 @@ export default function App() {
     const [doneVoting, setDoneVoting] = useState(false);
     const [finalVotes, setFinalVotes] = useState({});
     const [movies, setMovies] = useState([]);
+    const [stepScreen, setStepScreen] = useState(null); // "Step1", "Step2", or "Step3"
 
     // Listen for user_joined and user_left events
     useEffect(() => {
@@ -433,33 +439,67 @@ export default function App() {
 
     }   
 
+    const Stack = createNativeStackNavigator();
+
     if (isHosting) {
-        return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
-    } else if (isJoining) {
-        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining}/>;
-    } else if (inSession) {
-        return <Session
+        return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting} />;
+      } else if (isJoining) {
+        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} />;
+      } else if (inSession) {
+        return (
+          <Session
             sessionCode={sessionCode}
-            hostName={hostName} 
+            hostName={hostName}
             name={name}
             participants={participants}
             handleStartSession={handleStartSession}
-        />;
-    } else if (goCatalog) { // temporary catalog access
-        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies}/>;
-    } else if (goWaiting) {
-        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting}/>; // Pass setGoVoting
-    } else if (goVoting) {
-      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} handleYes={handleYes} handleFinalVote={handleFinalVote} fetchMovies={fetchMovies}/>;
-    } else if (goWinner) {
-      return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} fetchWinner={fetchWinner}/>;
-    } else if (goHome) {
-        return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting} />;
-    }
-    return <Home
-        setIsHosting={setIsHosting}
-        setIsJoining={setIsJoining}
-        setGoCatalog={setGoCatalog} 
-        setGoWaiting={setGoWaiting}
-    />; //remember to remove setGoCatalog
+          />
+        );
+      } else if (goCatalog) {
+        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} />;
+      } else if (goWaiting) {
+        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} />;
+      } else if (goVoting) {
+        return (
+          <Voting
+            setGoVoting={setGoVoting}
+            setGoWinner={setGoWinner}
+            setFinalVotes={setFinalVotes}
+            handleYes={handleYes}
+            handleFinalVote={handleFinalVote}
+            fetchMovies={fetchMovies}
+          />
+        );
+      } else if (goWinner) {
+        return (
+          <Winner
+            finalVotes={finalVotes}
+            setGoWinner={setGoWinner}
+            setGoHome={setGoHome}
+            fetchWinner={fetchWinner}
+          />
+        );
+      }
+    
+      // Wrap Home + Step screens in NavigationContainer
+      return (
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home">
+              {(props) => (
+                <Home
+                  {...props}
+                  setIsHosting={setIsHosting}
+                  setIsJoining={setIsJoining}
+                  setGoCatalog={setGoCatalog}
+                  setGoWaiting={setGoWaiting}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Step1" component={Step1GenreScreen} />
+            <Stack.Screen name="Step2" component={Step2TypeScreen} />
+            <Stack.Screen name="Step3" component={Step3TimePeriodScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      );
 }
