@@ -32,6 +32,8 @@ export default function App() {
     const [finalVotes, setFinalVotes] = useState({});
     const [movies, setMovies] = useState([]);
     const [finishedUsers, setFinishedUsers] = useState(0);
+    const [joinError, setJoinError] = useState('');
+
 
     // Listen for user_joined and user_left events
     useEffect(() => {
@@ -169,13 +171,32 @@ export default function App() {
 
             console.log(movieWinnerData)
     
-    
             return movieWinnerData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
         }
     }, [sessionCode]); 
 
+    /**
+     * This handler is for grabbing movies based on filtered traits
+     * @param
+     * @return List of filterd movies
+     */
+    const handleFetchFilteredMovies = useCallback(async () => {
+        try {
+            console.log("Fetching filtered movies in database");
+            const movieListResponse = await fetch('https://backend-production-e0e1.up.railway.app/session/movies_in_pocket', {
+                method: "POST",  // Use POST to send JSON body
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID }),
+            });
+        } catch (error) {
+            console.error("Error fetching filterd movies from database:", error);
+        }
+    }, []);
 
     async function handleHostSession(hostName) {
         try {
@@ -210,7 +231,7 @@ export default function App() {
                 console.log('User joined:', data);
               
             });
-    
+
             
             if (response.ok) {
                 setSessionCode(data.session_id);
@@ -229,6 +250,7 @@ export default function App() {
         }
     }
 
+    // TODO: currently doesn't handle when user tries to join session that already started, need to fix
     async function handleJoinSession(sessionCode, name) {
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/join", {
@@ -269,8 +291,11 @@ export default function App() {
                 joinSession(sessionCode, name);
                 setIsJoining(false);
                 setInSession(true);
+                setJoinError("");
             } else {
-                console.error("Error joining session:", data.message);
+                // FIX: not receiving error messages for sessions already started
+                console.error("Error joining session:", data.message || data.error);
+                setJoinError(data.message || data.error || "Failed to join session.");
             }
         } catch (error) {
             console.error("Error:", error);
@@ -303,6 +328,7 @@ export default function App() {
     }
 
     async function handleFinalVote() {
+
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_voting", {
                 method: "POST",
@@ -340,37 +366,37 @@ export default function App() {
         }
     }
 
-        // Handler is for when we have a yes vote
-        async function handleYes(movieID) {
-            try {
-                const response = await fetch("https://backend-production-e0e1.up.railway.app/session/vote", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    body: JSON.stringify({ session_id: sessionCode, participant_id: participantID, movie_id: movieID })
-                });
-        
-                const data = await response.json();
+    // Handler is for when we have a yes vote
+    async function handleYes(movieID) {
+        try {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/vote", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID, movie_id: movieID })
+            });
+    
+            const data = await response.json();
 
-                console.log(data);
+            console.log(data);
 
-                socket.on('vote_update', (data) => {
+            socket.on('vote_update', (data) => {
 
-                    console.log('Vote status:', data);
-                  
-                });
-        
-                if (response.ok) {
-                     // Change to next movie handled in Voting.jsx
-                } else {
-                    console.error("Error starting session:", data.message);
-                }
-            } catch (error) {
-                console.error("Error:", error);
+                console.log('Vote status:', data);
+                
+            });
+    
+            if (response.ok) {
+                    // Change to next movie handled in Voting.jsx
+            } else {
+                console.error("Error starting session:", data.message);
             }
+        } catch (error) {
+            console.error("Error:", error);
         }
+    }
 
     async function handleSendMovies(movieIDs) {
         const ids = Object.keys(movieIDs);
@@ -448,7 +474,7 @@ export default function App() {
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
     } else if (isJoining) {
-        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining}/>;
+        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} joinError={joinError}/>;
     } else if (inSession) {
         return <Session
             sessionCode={sessionCode}
@@ -458,7 +484,7 @@ export default function App() {
             handleStartSession={handleStartSession}
         />;
     } else if (goCatalog) {
-        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies}/>;
+        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} participants={participants}/>;
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} participants={participants} finishedUsers={finishedUsers}/>; // Pass setGoVoting
     } else if (goVoting) {

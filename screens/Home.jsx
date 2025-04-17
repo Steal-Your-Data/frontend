@@ -118,8 +118,21 @@ function Home(props) {
                 shadowRadius: 6,
                 elevation: 10,
               }}
-            >
+            >    
               <Text className="text-center text-white font-semibold text-base">Host</Text>
+            </Pressable>
+            <Pressable
+              className="bg-orange-600 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
+              onPress={() => props.setGoCatalog(true)}
+              style={{
+                shadowColor: '#FFA500',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 10,
+              }}
+            >    
+              <Text className="text-center text-white font-semibold text-base">CATALOG</Text>
             </Pressable>
           </Animated.View>
 
