@@ -213,6 +213,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                             <Text style={styles.finalistsHeader}>All Finalists</Text>
                             {finalistMovies
                                 .filter((film) => film.movie.id !== winnerId)
+                                .sort((a, b) => b.votes - a.votes)
                                 .slice(0, 2)
                                 .map((film) => (
                                 <View style={styles.finalistItem} key={film.movie.id}>
