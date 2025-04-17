@@ -32,6 +32,8 @@ export default function App() {
     const [finalVotes, setFinalVotes] = useState({});
     const [movies, setMovies] = useState([]);
     const [finishedUsers, setFinishedUsers] = useState(0);
+    const [joinError, setJoinError] = useState('');
+
 
     // Listen for user_joined and user_left events
     useEffect(() => {
@@ -169,7 +171,6 @@ export default function App() {
 
             console.log(movieWinnerData)
     
-    
             return movieWinnerData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
@@ -209,7 +210,7 @@ export default function App() {
                 console.log('User joined:', data);
               
             });
-    
+
             
             if (response.ok) {
                 setSessionCode(data.session_id);
@@ -228,6 +229,7 @@ export default function App() {
         }
     }
 
+    // TODO: currently doesn't handle when user tries to join session that already started, need to fix
     async function handleJoinSession(sessionCode, name) {
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/join", {
@@ -268,8 +270,11 @@ export default function App() {
                 joinSession(sessionCode, name);
                 setIsJoining(false);
                 setInSession(true);
+                setJoinError("");
             } else {
-                console.error("Error joining session:", data.message);
+                // FIX: not receiving error messages for sessions already started
+                console.error("Error joining session:", data.message || data.error);
+                setJoinError(data.message || data.error || "Failed to join session.");
             }
         } catch (error) {
             console.error("Error:", error);
@@ -448,7 +453,7 @@ export default function App() {
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
     } else if (isJoining) {
-        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining}/>;
+        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} joinError={joinError}/>;
     } else if (inSession) {
         return <Session
             sessionCode={sessionCode}
@@ -458,7 +463,7 @@ export default function App() {
             handleStartSession={handleStartSession}
         />;
     } else if (goCatalog) {
-        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies}/>;
+        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} participants={participants}/>;
     } else if (goWaiting) {
         return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} participants={participants} finishedUsers={finishedUsers}/>; // Pass setGoVoting
     } else if (goVoting) {
