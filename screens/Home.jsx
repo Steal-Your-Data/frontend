@@ -142,7 +142,8 @@ function Home(props) {
               }}
             >    
               <Text className="text-center text-white font-semibold text-base">CATALOG</Text>
-            </Pressable> */}
+              */}
+            </Pressable>
           </Animated.View>
 
           {/* Instructions */}
