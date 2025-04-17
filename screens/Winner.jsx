@@ -49,7 +49,11 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
     }, [fetchWinner]);
 
     useEffect(() => {
-        setWinningMovies(Array.isArray(movie) ? movie : [movie]);
+        var movies = Array.isArray(movie) ? movie : [movie];
+
+        const topFinalists = movies.filter((m) => m.votes === Math.max(...movies.map((m) => m.votes)));
+
+        setWinningMovies(topFinalists);
     }, [movie]);
 
     useEffect(() => {
@@ -207,7 +211,10 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                     { (winningMovies.length === 1 || spinCompleted) && finalistMovies && (
                         <View style={styles.finalistsContainer}>
                             <Text style={styles.finalistsHeader}>All Finalists</Text>
-                            {finalistMovies.map((film) => (
+                            {finalistMovies
+                                .filter((film) => film.movie.id !== winnerId)
+                                .slice(0, 2)
+                                .map((film) => (
                                 <View style={styles.finalistItem} key={film.movie.id}>
                                     <Image
                                         source={{

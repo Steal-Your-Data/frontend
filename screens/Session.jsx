@@ -56,6 +56,22 @@ function Session(props) {
           ) : (
             <Text className="text-gray-500 italic">Waiting for host to start...</Text>
           )}
+
+          <Pressable
+              className={`px-6 py-3 rounded-lg w-full ${
+                  'bg-red-600 active:scale-[.98]'
+              }`}
+              onPress={props.handleLeaveSession}
+              //disabled={!enoughParticipants}
+          >
+            <Text
+                className={`text-center font-semibold text-base ${
+                    'text-white-500'
+                }`}
+            >
+              LEAVE
+            </Text>
+          </Pressable>
         </View>
       </View>
     </GradientBackground>
