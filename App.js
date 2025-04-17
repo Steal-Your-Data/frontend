@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import {useCallback, useState, useEffect} from "react";
 import Home from './screens/Home';
 import Host from './screens/Host';
 import Join from './screens/Join';
@@ -8,10 +8,10 @@ import Waiting from './screens/Waiting';
 import Voting from './screens/Voting'; // Import Voting Screen
 import Winner from './screens/Winner';
 import io from 'socket.io-client';  // Used for interacting with backend
- 
+
 const socket = io('https://backend-production-e0e1.up.railway.app', {
 
-  transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
+    transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
 
 });
 
@@ -37,55 +37,72 @@ export default function App() {
 
     // Listen for user_joined and user_left events
     useEffect(() => {
-        socket.on("user_joined", (data) => {
+        const handleUserJoined = (data) => {
             console.log("User joined:", data);
             setParticipants(data.name);
-        });
-    
-        // TODO: fix this because right now, the list isn't updating when someone leaves
-        socket.on("user_left", (data) => {
+        }
+
+        socket.on("user_joined", handleUserJoined);
+
+        const participantLeft = (data) => {
             console.log("User left:", data);
             setParticipants((prev) => // update list of participants when someone leaves
-                prev.filter((participant) => participant !== data.name)
+                prev.filter((participant) => participant !== data.participant_name)
             );
-        });
-    
+        }
+
+        socket.on("participant_left", participantLeft);
+
+        const sessionDisbanded = (data) => {
+            console.log("data is", data)
+            if (data.session_id == sessionCode) {
+                console.log("Session disbanded:", data);
+                setInSession(false);
+                setGoHome(true);
+            }
+        }
+
+        socket.on("session_disbanded", sessionDisbanded);
+
+
         return () => {
-            socket.off("user_joined");
-            socket.off("user_left");
+            socket.off("user_joined", handleUserJoined);
+            socket.off("participant_left", participantLeft);
+            socket.off("session_disbanded", sessionDisbanded);
+
         };
-    }, []);
+    }, [sessionCode]);
 
     useEffect(() => {
         socket.on('selection_progress', (data) => {
             console.log('Selection progress:', data);
             setFinishedUsers(data.done_participants); // update the number of participants who have finished
-        });      
+        });
 
         socket.on('selection_complete', (data) => {
             console.log('Selection Completed:', data);
             setGoVoting(true); // Move all clients to the Voting page
             setGoWaiting(false);
         });
-     
+
         return () => {
             socket.off('selection_progress');
             socket.off('selection_complete'); // Cleanup listener
         };
     }, []);
-    
+
     useEffect(() => {
         socket.on('voting_progress', (data) => {
             console.log('Voting progress:', data);
             setFinishedUsers(data.done_participants); // update the number of participants who have finished
-        });  
+        });
 
         socket.on('voting_complete', (data) => {
             console.log('Voting Completed:', data);
             setGoWinner(true); // Move all clients to the Winner page
             setGoWaiting(false);
         });
-     
+
         return () => {
             socket.off('voting_progress')
             socket.off('voting_complete'); // Cleanup listener
@@ -100,7 +117,7 @@ export default function App() {
             setGoCatalog(true); // Move all clients to the Catalog page
             setInSession(false);
         });
-     
+
         return () => {
             socket.off('session_begin'); // Clean up event listener
         };
@@ -116,23 +133,23 @@ export default function App() {
                     'Access-Control-Allow-Origin': '*',
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID }),
+                body: JSON.stringify({session_id: sessionCode, participant_id: participantID}),
             });
-            
+
             const movieListData = await movieListResponse.json();
 
             console.log(movieListData)
-    
+
             if (!movieListData.movies || movieListData.movies.length === 0) {
                 setMovies([]);  // No movies in pocket
                 return;
             }
-    
+
             // Step 2: Extract movie IDs
             const movieIds = movieListData.movies.map(movie => movie.movie_id);
 
             console.log(movieIds)
-    
+
             // Step 3: Fetch full movie details
             const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_ids', {
                 method: "POST",  // Use POST to send JSON body
@@ -140,19 +157,19 @@ export default function App() {
                     'Access-Control-Allow-Origin': '*',
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ids: movieIds }),
+                body: JSON.stringify({ids: movieIds}),
             });
-    
+
             const movieInfoData = await movieInfoResponse.json();
             console.log(movieInfoData);
-    
+
             // Step 4: Update state with full movie details
             //setMovies(movieInfoData);
             return movieInfoData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
         }
-    }, [sessionCode, participantID]); 
+    }, [sessionCode, participantID]);
 
     const fetchWinner = useCallback(async () => {
         try {
@@ -164,18 +181,18 @@ export default function App() {
                     'Access-Control-Allow-Origin': '*',
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ session_id: sessionCode }),
+                body: JSON.stringify({session_id: sessionCode}),
             });
-            
+
             const movieWinnerData = await movieWinner.json();
 
             console.log(movieWinnerData)
-    
+
             return movieWinnerData;
         } catch (error) {
             console.error("Error fetching movies in pocket:", error);
         }
-    }, [sessionCode]); 
+    }, [sessionCode]);
 
     async function handleHostSession(hostName) {
         try {
@@ -185,9 +202,9 @@ export default function App() {
                     'Access-Control-Allow-Origin': '*', // USE THIS FOR EVERY FETCH!!!!
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ host_name: hostName })
+                body: JSON.stringify({host_name: hostName})
             });
-    
+
             const data = await response.json();
 
 
@@ -195,23 +212,23 @@ export default function App() {
             const startSession = (session_id, hostName) => {
 
                 socket.emit('join_session_room', {
-              
-                  session_id: session_id,
-              
-                  name: hostName,
-              
+
+                    session_id: session_id,
+
+                    name: hostName,
+
                 });
-              
+
             };
 
             // Displays if user joined
             socket.on('user_joined', (data) => {
 
                 console.log('User joined:', data);
-              
+
             });
 
-            
+
             if (response.ok) {
                 setSessionCode(data.session_id);
                 setHostName(hostName);
@@ -238,29 +255,31 @@ export default function App() {
                     "Content-Type": "application/json",
                     'Access-Control-Allow-Origin': '*' // USE THIS FOR EVERY FETCH!!!!
                 },
-                body: JSON.stringify({ session_id: sessionCode, name: name})
+                body: JSON.stringify({session_id: sessionCode, name: name})
             });
-    
+
+
+
             const joinSession = (sessionCode, name) => {
 
                 socket.emit('join_session_room', {
-              
-                  session_id: sessionCode,
-              
-                  name: name,
-              
+
+                    session_id: sessionCode,
+
+                    name: name,
+
                 });
-              
+
             };
 
             socket.on('user_joined', (data) => {
 
                 console.log('User joined:', data);
-              
+
             });
 
             const data = await response.json();
-    
+
             if (response.ok) {
                 setHostName(data.host_name)
                 setSessionCode(sessionCode);
@@ -290,16 +309,39 @@ export default function App() {
                     "Content-Type": "application/json",
                     'Access-Control-Allow-Origin': '*'
                 },
-                body: JSON.stringify({ session_id: sessionCode })
+                body: JSON.stringify({session_id: sessionCode})
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 setGoCatalog(true);
                 setInSession(false);
             } else {
                 console.error("Error starting session:", data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    async function handleLeaveSession() {
+        try {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/leave", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify({session_id: sessionCode, participant_id: participantID})
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+
+            } else {
+                console.error("Error stopping session:", data.message);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -315,9 +357,9 @@ export default function App() {
                     "Content-Type": "application/json",
                     'Access-Control-Allow-Origin': '*'
                 },
-                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID })
+                body: JSON.stringify({session_id: sessionCode, participant_id: participantID})
             });
-    
+
             const data = await response.json();
 
             console.log(data);
@@ -325,15 +367,15 @@ export default function App() {
             socket.on('voting_progress', (data) => {
 
                 console.log('Voting status:', data);
-              
+
             });
-    
+
             if (data.total_participants !== data.done_participants) {
-                console.log(data.message);  
+                console.log(data.message);
                 setGoWaiting(true);
                 setGoVoting(false);
             } else if (data.total_participants === data.done_participants) {
-                console.log(data.message);  
+                console.log(data.message);
                 setGoWinner(true);
                 setGoVoting(false);
                 //fetchMovies(); May need to change this to get the winner
@@ -354,9 +396,9 @@ export default function App() {
                     "Content-Type": "application/json",
                     'Access-Control-Allow-Origin': '*'
                 },
-                body: JSON.stringify({ session_id: sessionCode, participant_id: participantID, movie_id: movieID })
+                body: JSON.stringify({session_id: sessionCode, participant_id: participantID, movie_id: movieID})
             });
-    
+
             const data = await response.json();
 
             console.log(data);
@@ -364,11 +406,11 @@ export default function App() {
             socket.on('vote_update', (data) => {
 
                 console.log('Vote status:', data);
-                
+
             });
-    
+
             if (response.ok) {
-                    // Change to next movie handled in Voting.jsx
+                // Change to next movie handled in Voting.jsx
             } else {
                 console.error("Error starting session:", data.message);
             }
@@ -381,36 +423,38 @@ export default function App() {
         const ids = Object.keys(movieIDs);
         //console.log(participantID);
         //for (i = 0; i < ids.length; i++) {
-            try {
-                const response = await fetch("https://backend-production-e0e1.up.railway.app/session/add_movie", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    body: JSON.stringify({ session_id: sessionCode,
-                                           participant_ID: participantID,
-                                           movie_ids: ids})
-                });
-        
-                const data = await response.json();
+        try {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/add_movie", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify({
+                    session_id: sessionCode,
+                    participant_ID: participantID,
+                    movie_ids: ids
+                })
+            });
 
-                socket.on('movie_added', (data) => {
+            const data = await response.json();
 
-                    console.log('Movie Info:', data);
-                  
-                });
-        
-                if (response.ok) {
+            socket.on('movie_added', (data) => {
 
-                } else {
-                    console.error("Error starting session:", data.message);
-                }
-            } catch (error) {
-                console.error("Error:", error);
+                console.log('Movie Info:', data);
+
+            });
+
+            if (response.ok) {
+
+            } else {
+                console.error("Error starting session:", data.message);
             }
+        } catch (error) {
+            console.error("Error:", error);
+        }
         //}
-        
+
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_selection", {
                 method: "POST",
@@ -418,24 +462,26 @@ export default function App() {
                     "Content-Type": "application/json",
                     'Access-Control-Allow-Origin': '*'
                 },
-                body: JSON.stringify({ session_id: sessionCode,
-                                       participant_id: participantID})
+                body: JSON.stringify({
+                    session_id: sessionCode,
+                    participant_id: participantID
+                })
             });
-    
+
             const data = await response.json();
 
             socket.on('selection_progress', (data) => {
 
                 console.log('Selection Progress:', data);
-              
+
             });
 
             if (data.total_participants !== data.done_participants) {
-                console.log(data.message);  
+                console.log(data.message);
                 setGoWaiting(true);
                 setGoCatalog(false);
             } else if (data.total_participants === data.done_participants) {
-                console.log(data.message);  
+                console.log(data.message);
                 setGoVoting(true);
                 setGoCatalog(false);
                 //fetchMovies();
@@ -446,7 +492,7 @@ export default function App() {
             console.error("Error:", error);
         }
 
-    }   
+    }
 
     // check state, go to the respective screen
     // rewrite this code to use React's navigation
@@ -457,21 +503,26 @@ export default function App() {
     } else if (inSession) {
         return <Session
             sessionCode={sessionCode}
-            hostName={hostName} 
+            hostName={hostName}
             name={name}
             participants={participants}
             handleStartSession={handleStartSession}
+            handleLeaveSession={handleLeaveSession}
         />;
     } else if (goCatalog) {
         return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} participants={participants}/>;
     } else if (goWaiting) {
-        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} participants={participants} finishedUsers={finishedUsers}/>; // Pass setGoVoting
+        return <Waiting setGoWaiting={setGoWaiting} setGoVoting={setGoVoting} participants={participants}
+                        finishedUsers={finishedUsers}/>; // Pass setGoVoting
     } else if (goVoting) {
-      return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes} handleYes={handleYes} handleFinalVote={handleFinalVote} fetchMovies={fetchMovies}/>;
+        return <Voting setGoVoting={setGoVoting} setGoWinner={setGoWinner} setFinalVotes={setFinalVotes}
+                       handleYes={handleYes} handleFinalVote={handleFinalVote} fetchMovies={fetchMovies}/>;
     } else if (goWinner) {
-      return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome} fetchWinner={fetchWinner}/>;
+        return <Winner finalVotes={finalVotes} setGoWinner={setGoWinner} setGoHome={setGoHome}
+                       fetchWinner={fetchWinner}/>;
     } else if (goHome) {
-        return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog} setGoWaiting={setGoWaiting} />;
+        return <Home setIsHosting={setIsHosting} setIsJoining={setIsJoining} setGoCatalog={setGoCatalog}
+                     setGoWaiting={setGoWaiting}/>;
     }
     return <Home
         setIsHosting={setIsHosting}
