@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";  
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -40,8 +40,9 @@ function Home(props) {
         anim.r.value = withSpring(0);
       }, 500 + index * 100);
     });
-
-    setTrigger(prev => !prev);
+    
+    setTrigger(!trigger);
+    
   };
 
   useEffect(() => {
@@ -121,6 +122,14 @@ function Home(props) {
             >    
               <Text className="text-center text-white font-semibold text-base">Host</Text>
             </Pressable>
+
+             {/* Step Preview Buttons */}
+            <Pressable
+              className="bg-gray-700 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
+              onPress={() => props.navigation.navigate("Step1")}
+            >
+            <Text className="text-center text-white font-semibold text-base">Preview Step 1</Text>
+
             {/* <Pressable
               className="bg-orange-600 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
               onPress={() => props.setGoCatalog(true)}
