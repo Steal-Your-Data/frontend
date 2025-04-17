@@ -31,7 +31,26 @@ export default function Catalog(props) {
   const [isLimitModalVisible, setLimitModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { width } = Dimensions.get("window");
+  const [timer, setTimer] = useState(180); // three minutes (in seconds)
 
+  // catalog timer, TODO: implement redirection to next screen once timer ends
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (timer > 0) {
+        setTimer((prevTimer) => prevTimer - 1);
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     fetchMovies();
@@ -89,6 +108,13 @@ export default function Catalog(props) {
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
+          </View>
+
+          {/* Timer */}
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>
+              {formatTime(timer)}
+            </Text>
           </View>
 
           {loading ? (
@@ -209,8 +235,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#f97316",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 999,
+    borderRadius: 999
   },
+  timerContainer: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    backgroundColor: "#f97316",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 999
+  },
+  timerText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold"
+  }
 });
 
 const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
