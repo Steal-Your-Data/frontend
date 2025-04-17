@@ -129,6 +129,7 @@ function Home(props) {
               onPress={() => props.navigation.navigate("Step1")}
             >
             <Text className="text-center text-white font-semibold text-base">Preview Step 1</Text>
+            </Pressable> 
 
             {/* <Pressable
               className="bg-orange-600 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
