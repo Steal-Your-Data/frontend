@@ -504,10 +504,10 @@ export default function App() {
     // check state, go to the respective screen
     // rewrite this code to use React's navigation
     if (isHosting) {
-        return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting} />;
-      } else if (isJoining) {
+        return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
+    } else if (isJoining) {
         return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} joinError={joinError}/>;
-      } else if (inSession) {
+    } else if (inSession) {
         return (
           <Session
             sessionCode={sessionCode}
@@ -518,9 +518,9 @@ export default function App() {
             handleLeaveSession={handleLeaveSession}
           />
         );
-      } else if (goCatalog) {
+    } else if (goCatalog) {
         return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} participants={participants}/>;
-      } else if (goWaiting) {
+    } else if (goWaiting) {
         return (
           <Waiting
             setGoWaiting={setGoWaiting}
@@ -529,7 +529,7 @@ export default function App() {
             finishedUsers={finishedUsers}
           />
         );
-      } else if (goVoting) {
+    } else if (goVoting) {
         return (
           <Voting
             setGoVoting={setGoVoting}
@@ -540,7 +540,7 @@ export default function App() {
             fetchMovies={fetchMovies}
           />
         );
-      } else if (goWinner) {
+    } else if (goWinner) {
         return (
           <Winner
             finalVotes={finalVotes}
@@ -549,10 +549,10 @@ export default function App() {
             fetchWinner={fetchWinner}
           />
         );
-      }
+    }
     
-      // Wrap Home + Step screens in NavigationContainer
-      return (
+    // Wrap Home + Step screens in NavigationContainer
+    return (
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home">
@@ -571,5 +571,5 @@ export default function App() {
             <Stack.Screen name="Step3" component={Step3TimePeriodScreen} />
           </Stack.Navigator>
         </NavigationContainer>
-      );
+    );
 }

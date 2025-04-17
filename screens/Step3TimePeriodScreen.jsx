@@ -5,6 +5,16 @@ export default function Step3TimePeriodScreen({ navigation }) {
   const [fromYear, setFromYear] = useState("2000");
   const [toYear, setToYear] = useState("2020");
 
+  const handleFromYear = (text) => {
+    const numericText = text.replace(/[^0-9]/g, "");
+    setFromYear(numericText);
+  };
+
+  const handleToYear = (text) => {
+    const numericText = text.replace(/[^0-9]/g, "");
+    setToYear(numericText);
+  };
+
   return (
     <View className="flex-1 justify-center items-center bg-black px-6">
       <Text className="text-gray-400 text-lg mb-2">Step 3 of 3</Text>
@@ -19,7 +29,8 @@ export default function Step3TimePeriodScreen({ navigation }) {
             keyboardType="numeric" 
             className="text-white text-xl text-center w-full"
             value={fromYear}
-            onChangeText={setFromYear}
+            onChangeText={handleFromYear}
+            maxLength={4}
           />
         </View>
         <View className="bg-gray-800 p-4 rounded-lg w-32 items-center">
@@ -28,7 +39,8 @@ export default function Step3TimePeriodScreen({ navigation }) {
             keyboardType="numeric" 
             className="text-white text-xl text-center w-full"
             value={toYear}
-            onChangeText={setToYear}
+            onChangeText={handleToYear}
+            maxLength={4}
           />
         </View>
       </View>
