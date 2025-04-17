@@ -339,7 +339,8 @@ export default function App() {
             const data = await response.json();
 
             if (response.ok) {
-
+                setInSession(false);
+                setGoHome(true);
             } else {
                 console.error("Error stopping session:", data.message);
             }
