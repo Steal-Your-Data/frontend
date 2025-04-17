@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from "react";
-import { Alert } from "react-native";
 import Home from './screens/Home';
 import Host from './screens/Host';
 import Join from './screens/Join';
@@ -33,6 +32,8 @@ export default function App() {
     const [finalVotes, setFinalVotes] = useState({});
     const [movies, setMovies] = useState([]);
     const [finishedUsers, setFinishedUsers] = useState(0);
+    const [joinError, setJoinError] = useState('');
+
 
     // Listen for user_joined and user_left events
     useEffect(() => {
@@ -290,9 +291,11 @@ export default function App() {
                 joinSession(sessionCode, name);
                 setIsJoining(false);
                 setInSession(true);
+                setJoinError("");
             } else {
+                // FIX: not receiving error messages for sessions already started
                 console.error("Error joining session:", data.message || data.error);
-                Alert.alert("Error joining session", data.message || data.error);
+                setJoinError(data.message || data.error || "Failed to join session.");
             }
         } catch (error) {
             console.error("Error:", error);
@@ -471,7 +474,7 @@ export default function App() {
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
     } else if (isJoining) {
-        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining}/>;
+        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} joinError={joinError}/>;
     } else if (inSession) {
         return <Session
             sessionCode={sessionCode}

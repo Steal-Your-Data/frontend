@@ -16,6 +16,25 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   const [voted, setVoted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [movies, setMovies] = useState([]);
+  const [timer, setTimer] = useState(15); // 15 seconds
+
+  // timer
+  useEffect(() => {
+    if (timer === 0 && !voted) {
+      handleVote(movies[currentIndex].id, "no");
+    }
+  
+    const interval = setInterval(() => {
+      if (timer > 0) {
+        setTimer((prevTimer) => prevTimer - 1);
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  }, [timer, voted, currentIndex, movies]);
+  
 
   useEffect(() => {
     const loadMovies = async () => {
@@ -47,6 +66,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
       } else {
         setCurrentIndex(currentIndex + 1);
         setVoted(false);
+        setTimer(15);
       }
     }, 1000);
   };
@@ -75,6 +95,23 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   const movie = movies[currentIndex];
   const progress = ((currentIndex + 1) / movies.length) * 100;
 
+  const styles = StyleSheet.create({
+    timerContainer: {
+        position: "absolute",
+        top: 20,
+        left: 20,
+        backgroundColor: "#f97316",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 999
+    },
+    timerText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold"
+    }
+  });
+
   return (
     <GradientBackground>
       <View className="flex-1 justify-center items-center px-6 py-4">
@@ -86,6 +123,13 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
           <View className="h-2 w-full bg-gray-700 rounded-full overflow-hidden">
             <View style={{ width: `${progress}%` }} className="h-full bg-orange-500" />
           </View>
+        </View>
+
+        {/* Timer */}
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>
+            ⏳ {timer}
+          </Text>
         </View>
 
         <Text className="text-white text-2xl font-bold text-center mb-4">

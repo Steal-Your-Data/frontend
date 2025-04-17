@@ -19,7 +19,6 @@ import Animated, {
     withTiming,
     interpolate,
 } from "react-native-reanimated";
-import {LinearGradient} from "expo-linear-gradient";
 import "../global.css";
 import GradientBackground from '../components/GradientBackground';
 
