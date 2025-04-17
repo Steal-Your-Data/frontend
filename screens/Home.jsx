@@ -174,7 +174,7 @@ function Home(props) {
             CineMatch • Match. Watch. Vibe.
           </Text>
 
-          <Text className="text-white text-xs text-center mt-2 opacity-40">
+          <Text className="text-white text-xs text-center mt-2 opacity-60">
             Your watch party awaits 🍿
           </Text>
         </View>

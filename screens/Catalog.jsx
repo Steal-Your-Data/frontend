@@ -33,7 +33,7 @@ export default function Catalog(props) {
     const [timer, setTimer] = useState(180); // three minutes (in seconds)
     //const [selectedGenres, setSelectedGenres] = useState([]);
 
-    const [selectedGenres, setSelectedGenres] = useState([]);
+    const [selectedGenres, setSelectedGenres] = useState("");
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [selectedYear, setSelectedYear] = useState("");
     const [onlyInTheater, setOnlyInTheater] = useState("");
@@ -112,7 +112,12 @@ export default function Catalog(props) {
     const handleFilterClick = async () => {
         const params = new URLSearchParams();
 
-        selectedGenres.forEach((genre) => params.append("genres", genre));
+
+        if (selectedGenres == "Sci-Fi") {
+            params.append("genres", "Science Fiction"); 
+        } else {
+            selectedGenres.forEach((genre) => params.append("genres", genre));
+        }
         if (selectedLanguage) params.append("language", selectedLanguage);
         if (selectedYear) params.append("release_year", selectedYear);
         if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
