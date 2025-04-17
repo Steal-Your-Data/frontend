@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
     View,
     Text,
@@ -8,25 +8,40 @@ import {
     ScrollView,
     StyleSheet,
     Animated,
+    Easing,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
-import GradientBackground from '../components/GradientBackground'; // ✅ Use your custom component
+import GradientBackground from '../components/GradientBackground';
 import "../global.css";
 
-function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
+export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}) {
     const [movie, setMovie] = useState([]);
     const [winningMovies, setWinningMovies] = useState([]);
+    const [finalistMovies, setFinalistMovies] = useState([]);
+
     const [loading, setLoading] = useState(true);
+
     const [selectedMovie, setSelectedMovie] = useState(null);
-    const scaleAnim = useRef(new Animated.Value(0)).current; // for card entrance animation
-    const confettiRef = useRef(null);
     const [winnerId, setWinnerId] = useState(null);
+
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+
+    const spinAnim = useRef(new Animated.Value(0)).current; // horizontal translate for the spinner
+    const [spinCompleted, setSpinCompleted] = useState(false);
+
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [itemWidth, setItemWidth] = useState(0);
+
+    const confettiRef = useRef(null);
+
+    const [shouldSpin, setShouldSpin] = useState(false);
 
     useEffect(() => {
         const loadWinner = async () => {
-            setLoading(true); // Set loading state before fetching
-            const fetchedWinner = await fetchWinner(); // Call the async function
+            setLoading(true);
+            const fetchedWinner = await fetchWinner();
             setMovie(fetchedWinner.movies_list);
+            setFinalistMovies(fetchedWinner.movies_list);
             setWinnerId(fetchedWinner.movie_id);
             setLoading(false);
         };
@@ -39,37 +54,64 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
 
     useEffect(() => {
         if (!loading && winningMovies.length > 0) {
-            // If there is only one winner, use it
             if (winningMovies.length === 1) {
                 setSelectedMovie(winningMovies[0]);
                 Animated.timing(scaleAnim, {
                     toValue: 1,
                     duration: 500,
                     useNativeDriver: true,
-                }).start();
-            }
-            else if (winningMovies.length > 1) {
+                }).start(() => {
+                    confettiRef.current?.start();
+                });
+            } else {
                 const timer = setTimeout(() => {
-                    setSelectedMovie(winningMovies.find((movie) => movie.movie.id === winnerId));
-
-
-                    Animated.timing(scaleAnim, {
-                        toValue: 1,
-                        duration: 500,
-                        useNativeDriver: true,
-                    }).start();
-                }, 3000);
+                    setShouldSpin(true);
+                }, 1000);
                 return () => clearTimeout(timer);
             }
         }
-    }, [loading, winningMovies, scaleAnim, winnerId]);
+    }, [loading, winningMovies]);
 
-    // Start confetti after selection is made
     useEffect(() => {
-        if (!loading && selectedMovie && confettiRef.current) {
-            confettiRef.current.start();
+        if (shouldSpin && containerWidth > 0 && itemWidth > 0) {
+            runTiebreakerSpin();
         }
-    }, [loading, selectedMovie]);
+    }, [shouldSpin, containerWidth, itemWidth]);
+
+    useEffect(() => {
+        if (containerWidth && itemWidth) {
+            const initialOffset = (containerWidth - itemWidth) / 2;
+            spinAnim.setValue(initialOffset);
+        }
+    }, [containerWidth, itemWidth, spinAnim]);
+
+    const runTiebreakerSpin = () => {
+        const singleSetLength = winningMovies.length;
+        const actualIndex = winningMovies.findIndex(m => m.movie.id === winnerId); // e.g. 0, 1, or 2
+
+        const finalIndex = actualIndex + 4 * singleSetLength;
+
+        const itemSpacing = itemWidth + 16;
+        const initialOffset = (containerWidth - itemWidth) / 2;
+        const finalOffset = initialOffset - itemSpacing * finalIndex;
+
+        Animated.timing(spinAnim, {
+            toValue: finalOffset,
+            duration: 7000,
+            easing: Easing.out(Easing.exp),
+            useNativeDriver: false,
+        }).start(() => {
+            setSpinCompleted(true);
+            setSelectedMovie(winningMovies[actualIndex]);
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).start(() => {
+                confettiRef.current?.start();
+            });
+        });
+    };
 
     const handleReturnHome = () => {
         setGoWinner(false);
@@ -78,73 +120,127 @@ function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
 
     if (loading) {
         return (
-            <GradientBackground>
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color="#FFA500" />
-                    <Text className="text-white mt-4 text-base">Calculating Winner...</Text>
-                </View>
-            </GradientBackground>
+            <View style={[styles.flexCenter, {flex: 1, backgroundColor: '#000'}]}>
+                <ActivityIndicator size="large" color="#FFA500"/>
+                <Text style={{color: 'white', marginTop: 16, fontSize: 16}}>
+                    Calculating Winner...
+                </Text>
+            </View>
         );
     }
 
     return (
         <GradientBackground>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text className="text-3xl font-black text-white text-center mb-2">🏆 Winner 🏆</Text>
+            <View style={{flex: 1}}>
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <Text style={styles.header}>🏆 Winner 🏆</Text>
+                    {winningMovies.length > 1 && !spinCompleted && !selectedMovie && (
+                        <>
+                            <Text style={styles.tieText}>
+                                It's a tie! Spinning the wheel...
+                            </Text>
 
-                {/* Show tie message until a random movie is picked */}
-                {winningMovies.length > 1 && !selectedMovie && (
-                    <Text className="text-orange-300 text-base text-center mb-4">
-                        It's a tie! Randomly selecting a winner...
-                    </Text>
-                )}
+                            <View
+                                style={styles.spinnerContainer}
+                                onLayout={(e) => {
+                                    const w = e.nativeEvent.layout.width;
+                                    if (w !== containerWidth) setContainerWidth(w);
+                                }}
+                            >
+                                <Animated.View
+                                    style={{
+                                        flexDirection: 'row',
+                                        transform: [{translateX: spinAnim}],
+                                    }}
+                                >
+                                    {[...Array(8)].flatMap(() => winningMovies).map((m, idx) => (
+                                        <View
+                                            key={idx}
+                                            style={styles.itemWrapper}
+                                            onLayout={(ev) => {
+                                                if (!itemWidth) {
+                                                    setItemWidth(ev.nativeEvent.layout.width);
+                                                }
+                                            }}
+                                        >
+                                            <Image
+                                                source={{uri: `https://image.tmdb.org/t/p/w500${m.movie?.poster_path}`}}
+                                                style={styles.itemPoster}
+                                                resizeMode="cover"
+                                            />
+                                        </View>
+                                    ))}
+                                </Animated.View>
+                            </View>
+                        </>
+                    )}
 
-                {/* Once a movie is selected, display it with an animated entrance */}
-                {selectedMovie && (
-                    <Animated.View
-                        style={[
-                            styles.movieCard,
-                            { transform: [{ scale: scaleAnim }] },
-                        ]}
-                    >
-                        <Image
-                            source={{ uri: `https://image.tmdb.org/t/p/w500${selectedMovie?.movie?.poster_path}` }}
-                            style={styles.poster}
-                        />
-                        <Text style={styles.title}>
-                            {selectedMovie?.movie?.title}
-                        </Text>
-                        <Text style={styles.overview}>
-                            {selectedMovie?.movie?.overview}
-                        </Text>
-                        <Text style={styles.votes}>
-                            Votes: {selectedMovie?.votes || 0}
-                        </Text>
-                    </Animated.View>
-                )}
+                    {selectedMovie && (
+                        <Animated.View
+                            style={[
+                                styles.movieCard,
+                                {transform: [{scale: scaleAnim}]},
+                            ]}
+                        >
+                            <Image
+                                source={{
+                                    uri: `https://image.tmdb.org/t/p/w500${selectedMovie?.movie?.poster_path}`,
+                                }}
+                                style={styles.poster}
+                            />
+                            <Text style={styles.title}>
+                                {selectedMovie?.movie?.title}
+                            </Text>
+                            <Text style={styles.overview}>
+                                {selectedMovie?.movie?.overview}
+                            </Text>
+                            <Text style={styles.votes}>
+                                Votes: {selectedMovie?.votes || 0}
+                            </Text>
+                        </Animated.View>
+                    )}
 
-                <TouchableOpacity
-                    className="bg-orange-500 px-6 py-3 rounded-xl mt-6"
-                    onPress={handleReturnHome}
-                >
-                    <Text className="text-white font-bold text-lg text-center">Return to Home</Text>
-                </TouchableOpacity>
-            </ScrollView>
+                    <TouchableOpacity style={styles.returnButton} onPress={handleReturnHome}>
+                        <Text style={styles.returnButtonText}>Return to Home</Text>
+                    </TouchableOpacity>
 
-            <ConfettiCannon
-                count={100}
-                origin={{ x: 200, y: -20 }}
-                fadeOut
-                autoStart={false}
-                ref={confettiRef}
-            />
+                    { (winningMovies.length === 1 || spinCompleted) && finalistMovies && (
+                        <View style={styles.finalistsContainer}>
+                            <Text style={styles.finalistsHeader}>All Finalists</Text>
+                            {finalistMovies.map((film) => (
+                                <View style={styles.finalistItem} key={film.movie.id}>
+                                    <Image
+                                        source={{
+                                            uri: `https://image.tmdb.org/t/p/w500${film.movie?.poster_path}`,
+                                        }}
+                                        style={styles.finalistImage}
+                                    />
+                                    <View style={styles.finalistInfo}>
+                                        <Text style={styles.finalistTitle}>{film.movie.title}</Text>
+                                        <Text style={styles.finalistVotes}>
+                                            {film.votes} {film.votes === 1 ? 'vote' : 'votes'}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+                </ScrollView>
+
+                <ConfettiCannon
+                    count={100}
+                    origin={{x: 200, y: -20}}
+                    fadeOut
+                    autoStart={false}
+                    ref={confettiRef}
+                />
+            </View>
         </GradientBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    centered: {
-        flex: 1,
+    flexCenter: {
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -154,6 +250,34 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 80,
         paddingBottom: 40,
+    },
+    header: {
+        fontSize: 26,
+        fontWeight: '900',
+        color: 'white',
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    tieText: {
+        color: 'orange',
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    spinnerContainer: {
+        width: '100%',
+        height: 200,
+        overflow: 'hidden',
+        backgroundColor: 'transparent',
+        marginBottom: 20,
+    },
+    itemWrapper: {
+        marginHorizontal: 8,
+    },
+    itemPoster: {
+        width: 120,
+        height: 180,
+        borderRadius: 8,
     },
     movieCard: {
         alignItems: 'center',
@@ -194,6 +318,61 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+    returnButton: {
+        backgroundColor: 'orange',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 15,
+        marginTop: 4,
+    },
+    returnButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    finalistsContainer: {
+        width: '100%',
+        marginTop: 30,
+        paddingHorizontal: 10,
+    },
+    finalistsHeader: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: 'white',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    finalistItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        marginBottom: 12,
+        padding: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 3,
+        elevation: 4,
+    },
+    finalistImage: {
+        width: 60,
+        height: 90,
+        borderRadius: 6,
+        marginRight: 12,
+    },
+    finalistInfo: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    finalistTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#0a0f24',
+        marginBottom: 4,
+    },
+    finalistVotes: {
+        fontSize: 14,
+        color: 'gray',
+    },
 });
-
-export default Winner;

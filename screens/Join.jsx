@@ -6,6 +6,7 @@ import "../global.css";
 function Join(props) {
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
   const handleInputCode = (text) => {
     const numericText = text.replace(/[^0-9]/g, "");
@@ -13,6 +14,20 @@ function Join(props) {
   };
 
   const isDisabled = code.trim() === "" || name.trim() === "";
+
+  // sets error messages
+  const onJoining = () => {
+    if (code.length !== 6) {
+      setError("Session code must be six digits");
+      return;
+    } else if (props.joinError !== "") {
+      setError(props.joinError);
+      return;
+    } else {
+      setError("");
+      props.handleJoinSession(code, name);
+    }
+  }
 
   return (
     <GradientBackground>
@@ -44,12 +59,18 @@ function Join(props) {
             className="border border-gray-300 rounded-md px-4 py-3 text-base w-full mb-4"
           />
 
+          {error !== "" && (
+            <Text className="text-red-500 text-sm mb-4">
+              {error}
+            </Text>
+          )}
+
           <Pressable
             style={[
               styles.button,
               isDisabled ? styles.buttonDisabled : styles.buttonEnabled,
             ]}
-            onPress={() => props.handleJoinSession(code, name)}
+            onPress={onJoining}
             disabled={isDisabled}
           >
             <Text className="text-center text-white font-semibold text-base">

@@ -2,8 +2,8 @@ import { View, Text, Pressable, FlatList } from 'react-native';
 import GradientBackground from "../components/GradientBackground";
 import "../global.css"; // NativeWind CSS import
 
-function Session(props) {
-  const isHost = props.participants[0] === props.hostName;
+function Session(props) { 
+  const isHost = props.name == props.hostName;
   const enoughParticipants = props.participants.length >= 2;
 
   return (
