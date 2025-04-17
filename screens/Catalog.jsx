@@ -164,6 +164,10 @@ export default function Catalog(props) {
                             Movie Catalog
                         </Text>
 
+                        <Text className="text-white text-lg font-semibold text-center mb-2">
+                            Select movies you want to watch
+                        </Text>
+
                         <TextInput
                             className="bg-white text-black px-4 py-2 rounded-lg mb-4"
                             placeholder="Search movies..."
