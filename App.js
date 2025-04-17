@@ -280,7 +280,7 @@ export default function App() {
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && !data.error) {
                 setHostName(data.host_name)
                 setSessionCode(sessionCode);
                 setName(name);
