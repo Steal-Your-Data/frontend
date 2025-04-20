@@ -39,6 +39,11 @@ export default function App() {
     const [stepScreen, setStepScreen] = useState(null); // "Step1", "Step2", or "Step3"
     const [finishedUsers, setFinishedUsers] = useState(0);
     const [joinError, setJoinError] = useState('');
+    const [genreFilters, setGenreFilters] = useState([]);
+    const [sortOption, setSortOption] = useState("");
+    const [sortOrder, setSortOrder] = useState("");
+    const [yearRange, setYearRange] = useState({ from: "", to: "" });
+
 
     // Listen for user_joined and user_left events
     useEffect(() => {
@@ -119,7 +124,7 @@ export default function App() {
         // Wait for a session_begin signal by backend
         socket.on('session_begin', (data) => {
             console.log("Session begin:", data);
-            setGoCatalog(true); // Move all clients to the Catalog page
+            setStepScreen("Step1"); // Move all clients to the Step 1 page
             setInSession(false);
         });
 
@@ -518,8 +523,52 @@ export default function App() {
             handleLeaveSession={handleLeaveSession}
           />
         );
+    } else if (stepScreen === "Step1") {
+        return (
+            <Step1GenreScreen
+                onNext={(genres) => {
+                    setGenreFilters(genres);
+                    setStepScreen("Step2");
+                }}
+                sessionCode={sessionCode}
+                participantID={participantID}
+            />
+        );
+    } else if (stepScreen === "Step2") {
+        return (
+            <Step2TypeScreen
+                onNext={({ sortBy, order }) => {
+                    setSortOption(sortBy);
+                    setSortOrder(order);
+                    setStepScreen("Step3");
+                }}
+                sessionCode={sessionCode}
+                participantID={participantID}
+            />
+
+        );
+    } else if (stepScreen === "Step3") {
+        return (
+            <Step3TimePeriodScreen
+                onNext={(range) => {
+                    setYearRange(range);
+                    setStepScreen(null);
+                    setGoCatalog(true); // Navigate to Catalog
+                }}
+                sessionCode={sessionCode}
+                participantID={participantID}
+            />
+        );
     } else if (goCatalog) {
-        return <Catalog setGoCatalog={setGoCatalog} handleSendMovies={handleSendMovies} participants={participants}/>;
+        return <Catalog
+            setGoCatalog={setGoCatalog}
+            handleSendMovies={handleSendMovies}
+            participants={participants}
+            selectedGenres={genreFilters}
+            selectedSort={sortOption}
+            selectedOrder={sortOrder}
+            yearRange={yearRange}
+        />
     } else if (goWaiting) {
         return (
           <Waiting

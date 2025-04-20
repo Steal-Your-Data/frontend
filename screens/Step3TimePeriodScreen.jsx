@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput } from 'react-native';
 
-export default function Step3TimePeriodScreen({ navigation }) {
+export default function Step3TimePeriodScreen({ onNext, sessionCode, participantID }) {
+
+  const handleNext = () => {
+    onNext({ from: fromYear, to: toYear }); // Pass year range
+  };
+  
+
   const [fromYear, setFromYear] = useState("2000");
   const [toYear, setToYear] = useState("2020");
 
@@ -46,10 +52,7 @@ export default function Step3TimePeriodScreen({ navigation }) {
       </View>
 
       <Pressable 
-        onPress={() => {
-          // You could navigate to Home or Summary screen
-          console.log(`Chosen range: ${fromYear} - ${toYear}`);
-        }}
+        onPress={handleNext}
         className="bg-orange-500 px-12 py-3 rounded-full"
       >
         <Text className="text-white font-bold text-lg">Finish</Text>

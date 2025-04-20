@@ -83,8 +83,8 @@ export default function Catalog(props) {
       try {
         setLoading(true);
         const endpoint = query
-          ? `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(query)}`
-          : `https://backend-production-e0e1.up.railway.app/movies/get_all_movies`;
+          ? `http://localhost:5000/movies/search_API?query=${encodeURIComponent(query)}`
+          : `http://localhost:5000/movies/get_all_movies`;
   
         const response = await fetch(endpoint);
         const data = await response.json();
@@ -97,17 +97,19 @@ export default function Catalog(props) {
     };
   
     useEffect(() => {
-      fetchMovies();
-    }, []);
+        fetchFilteredMoviesFromSteps(); // load based on Step1–3 filters
+      }, []);
+      
   
     // Trigger a search when the user types in the search bar
     useEffect(() => {
-      const delayDebounce = setTimeout(() => {
-        fetchMovies(searchQuery);
-      }, 300); // debounce for 300ms
-  
-      return () => clearTimeout(delayDebounce);
-    }, [searchQuery]);
+        if (searchQuery.trim() === "") return; // 🔒 prevent initial fetch
+        const delayDebounce = setTimeout(() => {
+          fetchMovies(searchQuery);
+        }, 300);
+      
+        return () => clearTimeout(delayDebounce);
+      }, [searchQuery]);
 
     const handleFilterClick = async () => {
         const params = new URLSearchParams();
@@ -125,7 +127,7 @@ export default function Catalog(props) {
         if (sortOrderList) params.append("order", selectedOrder);
 
         try {
-            const response = await fetch(`https://backend-production-e0e1.up.railway.app/movies/filter_and_sort?${params.toString()}`);
+            const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
             const filtered = await response.json();
             setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
         } catch (error) {
@@ -157,6 +159,43 @@ export default function Catalog(props) {
     };
 
     const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
+
+    const fetchFilteredMoviesFromSteps = async () => {
+        const params = new URLSearchParams();
+      
+        // Genres
+        if (props.selectedGenres) {
+          props.selectedGenres.forEach((genre) => {
+            if (genre === "Sci-Fi") {
+              params.append("genres", "Science Fiction");
+            } else {
+              params.append("genres", genre);
+            }
+          });
+        }
+      
+        // Year Range
+        if (props.yearRange?.from) params.append("from_year", props.yearRange.from);
+        if (props.yearRange?.to) params.append("to_year", props.yearRange.to);
+      
+        // Sorting
+        if (props.selectedSort) params.append("sort_by", props.selectedSort);
+        if (props.selectedOrder) params.append("order", props.selectedOrder);
+
+        console.log("Genres from props:", props.selectedGenres);
+      
+        try {
+          setLoading(true);
+          const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
+          const data = await response.json();
+          setMovies(data);
+        } catch (error) {
+          console.error("Failed to fetch filtered movies:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
 
     return (
         <View style={{flex: 1}}>
