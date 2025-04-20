@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {
     View,
     Text,
@@ -23,6 +23,8 @@ import "../global.css";
 import GradientBackground from '../components/GradientBackground';
 
 export default function Catalog(props) {
+    const [page, setPage] = useState(1); // current page (backend starts at 1)
+    const [hasMore, setHasMore] = useState(true); // flag to disable further calls
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedMovies, setSelectedMovies] = useState({});
@@ -33,7 +35,6 @@ export default function Catalog(props) {
     const [timer, setTimer] = useState(180); // three minutes (in seconds)
     //const [selectedGenres, setSelectedGenres] = useState([]);
 
-    const [selectedGenres, setSelectedGenres] = useState("");
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [onlyInTheater, setOnlyInTheater] = useState("");
     const [selectedSort, setSelectedSort] = useState("");
@@ -41,7 +42,11 @@ export default function Catalog(props) {
 
     const sortList = ["popularity", "title", "release_date"];
     const sortOrderList = ["asc", "desc"];
-    const genresList = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"]; // Replace with actual list
+    const genresList = [
+        "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
+        "Drama", "Family", "Fantasy", "History", "Horror", "Music",
+        "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
+    ]; // Replace with actual list
     const languageList = ["en", "la"]; // Replace with actual list
     const releaseYears = Array.from({length: 30}, (_, i) => 2024 - i); // past 30 years
 
@@ -78,6 +83,73 @@ export default function Catalog(props) {
         return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
     };
 
+    const controllerRef = useRef();
+    const buildEndpoint = useCallback(
+        (pageNumber) => {
+            if (searchQuery.trim()) {
+                return `http://localhost:5000/movies/search_API?query=${encodeURIComponent(
+                    searchQuery.trim()
+                )}&page=${pageNumber}`;
+            }
+
+            const params = new URLSearchParams();
+
+            var joinedGenres = props.selectedGenres?.join("|");
+
+            if (joinedGenres) params.append("genres", joinedGenres);
+
+            if (props.yearRange?.from)
+                params.append("release_year_min", props.yearRange.from);
+            if (props.yearRange?.to)
+                params.append("release_year_max", props.yearRange.to);
+
+            if (props.selectedSort) params.append("sort_by", props.selectedSort);
+            if (props.selectedOrder) params.append("order", props.selectedOrder);
+
+            params.append("page", pageNumber);
+            return `http://localhost:5000/movies/filter_and_sort_V2?${params.toString()}`;
+        },
+        [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder]
+    );
+
+    const getMovies = useCallback(
+        async (pageNumber = 1, reset = false) => {
+            controllerRef.current?.abort?.();
+            controllerRef.current = new AbortController();
+            const signal = controllerRef.current.signal;
+
+            try {
+                if (reset) setLoading(true);
+                const endpoint = buildEndpoint(pageNumber);
+                const res = await fetch(endpoint, { signal });
+                const data = await res.json();
+
+                setHasMore(data.length > 0);
+                setMovies((prev) => (pageNumber === 1 || reset ? data : [...prev, ...data]));
+            } catch (err) {
+                if (err.name !== "AbortError") console.error("Movie fetch failed", err);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [buildEndpoint]
+    );
+
+    useEffect(() => {
+        setPage(1);
+        setHasMore(true);
+        getMovies(1, true);
+        setSelectedMovies({});
+    }, [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder, getMovies]);
+
+    const loadNextPage = () => {
+        if (loading || !hasMore) return;
+        const next = page + 1;
+        setPage(next);
+        getMovies(next);
+    };
+
+
     const fetchMovies = async (query = "") => {
         try {
             setLoading(true);
@@ -95,11 +167,6 @@ export default function Catalog(props) {
         }
     };
 
-    useEffect(() => {
-        fetchFilteredMoviesFromSteps(); // load based on Step1–3 filters
-    }, []);
-
-
     // Trigger a search when the user types in the search bar
     useEffect(() => {
         if (searchQuery.trim() === "") return; // 🔒 prevent initial fetch
@@ -113,12 +180,14 @@ export default function Catalog(props) {
     const handleFilterClick = async () => {
         const params = new URLSearchParams();
 
+        //selectedGenres.forEach((genre) => params.append("genres", genre));
 
-        if (selectedGenres == "Sci-Fi") {
-            params.append("genres", "Science Fiction");
-        } else {
-            selectedGenres.forEach((genre) => params.append("genres", genre));
-        }
+        var joinedGenres = props?.selectedGenres.join("|");
+
+        if (joinedGenres) params.append("genres", joinedGenres);
+
+
+
         if (selectedLanguage) params.append("language", selectedLanguage);
         if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
         if (sortList) params.append("sort_by", selectedSort);
@@ -161,43 +230,6 @@ export default function Catalog(props) {
 
     const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
 
-    const fetchFilteredMoviesFromSteps = async () => {
-        const params = new URLSearchParams();
-
-        // Genres
-        if (props.selectedGenres) {
-            props.selectedGenres.forEach((genre) => {
-                if (genre === "Sci-Fi") {
-                    params.append("genres", "Science Fiction");
-                } else {
-                    params.append("genres", genre);
-                }
-            });
-        }
-
-        // Year Range
-        if (props.yearRange?.from) params.append("release_year_min", props.yearRange.from);
-        if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
-
-        // Sorting
-        if (props.selectedSort) params.append("sort_by", props.selectedSort);
-        if (props.selectedOrder) params.append("order", props.selectedOrder);
-
-        console.log("Genres from props:", props.selectedGenres);
-
-        try {
-            setLoading(true);
-            const response = await fetch(`http://localhost:5000/movies/filter_and_sort_V2?${params.toString()}`);
-            const data = await response.json();
-            setMovies(data);
-        } catch (error) {
-            console.error("Failed to fetch filtered movies:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-
     return (
         <View style={{flex: 1}}>
             <GradientBackground>
@@ -237,19 +269,17 @@ export default function Catalog(props) {
                             keyExtractor={(item) => item.id.toString()}
                             numColumns={numColumns}
                             key={numColumns}
-                            contentContainerStyle={{
-                                paddingBottom: 140,
-                                paddingHorizontal: 12,
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                            renderItem={({item}) => (
+                            contentContainerStyle={{ paddingBottom: 140, paddingHorizontal: 12, justifyContent: "center", alignItems: "center" }}
+                            renderItem={({ item }) => (
                                 <FlipCard
                                     movie={item}
                                     isSelected={selectedMovies[item.id]}
                                     toggleSelectMovie={toggleSelectMovie}
                                 />
                             )}
+                            ListFooterComponent={() => (loading ? <ActivityIndicator style={{ margin: 20 }} /> : null)}
+                            onEndReached={loadNextPage}
+                            onEndReachedThreshold={0.4}
                         />
                     )}
 
@@ -275,9 +305,9 @@ export default function Catalog(props) {
                                 className="text-white"
                             >
                                 Genres:</label>
-                            <select multiple value={selectedGenres} onChange={(e) => {
+                            <select multiple value={props?.selectedGenres} onChange={(e) => {
                                 const selected = Array.from(e.target.selectedOptions, option => option.value);
-                                setSelectedGenres(selected);
+                               props?.setSelectedGenres(selected);
                             }}>
                                 {genresList.map((genre) => (
                                     <option key={genre} value={genre}>{genre}</option>
