@@ -568,6 +568,7 @@ export default function App() {
             selectedSort={sortOption}
             selectedOrder={sortOrder}
             yearRange={yearRange}
+            setYearRange={setYearRange}
         />
     } else if (goWaiting) {
         return (

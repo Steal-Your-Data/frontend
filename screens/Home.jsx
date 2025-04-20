@@ -130,7 +130,7 @@ function Home(props) {
               >
                   <Text className="text-center text-white font-semibold text-base">Preview Step 1</Text>
               </Pressable>
-              {/* <Pressable
+             <Pressable
               className="bg-orange-600 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
               onPress={() => props.setGoCatalog(true)}
               style={{
@@ -144,7 +144,7 @@ function Home(props) {
               <Text className="text-center text-white font-semibold text-base">CATALOG</Text>
 
             </Pressable>
-            */}
+
           </Animated.View>
 
           {/* Instructions */}

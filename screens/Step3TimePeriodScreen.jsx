@@ -9,7 +9,7 @@ export default function Step3TimePeriodScreen({ onNext, sessionCode, participant
   
 
   const [fromYear, setFromYear] = useState("2000");
-  const [toYear, setToYear] = useState("2020");
+  const [toYear, setToYear] = useState(new Date().getFullYear().toString());
 
   const handleFromYear = (text) => {
     const numericText = text.replace(/[^0-9]/g, "");

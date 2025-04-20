@@ -35,7 +35,6 @@ export default function Catalog(props) {
 
     const [selectedGenres, setSelectedGenres] = useState("");
     const [selectedLanguage, setSelectedLanguage] = useState("");
-    const [selectedYear, setSelectedYear] = useState("");
     const [onlyInTheater, setOnlyInTheater] = useState("");
     const [selectedSort, setSelectedSort] = useState("");
     const [selectedOrder, setSelectedOrder] = useState("");
@@ -45,7 +44,7 @@ export default function Catalog(props) {
     const genresList = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"]; // Replace with actual list
     const languageList = ["en", "la"]; // Replace with actual list
     const releaseYears = Array.from({length: 30}, (_, i) => 2024 - i); // past 30 years
-    
+
     // timer
     useEffect(() => {
         const interval = setInterval(() => {
@@ -64,7 +63,7 @@ export default function Catalog(props) {
         const remainingSeconds = seconds % 60;
 
         // Send users to voting page when timer hits zero
-        if(seconds == 0) {
+        if (seconds == 0) {
             if (Object.keys(selectedMovies).length === 0) {
                 console.log("User did not select a movie");
                 console.log("Use this movie id: ", movies[0].id);
@@ -74,60 +73,62 @@ export default function Catalog(props) {
                 props.handleSendMovies(selectedMovies);
             }
         }
-       
+
 
         return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
     };
 
     const fetchMovies = async (query = "") => {
-      try {
-        setLoading(true);
-        const endpoint = query
-          ? `http://localhost:5000/movies/search_API?query=${encodeURIComponent(query)}`
-          : `http://localhost:5000/movies/get_all_movies`;
-  
-        const response = await fetch(endpoint);
-        const data = await response.json();
-        setMovies(data);
-      } catch (error) {
-        console.error("Failed to fetch movies:", error);
-      } finally {
-        setLoading(false);
-      }
+        try {
+            setLoading(true);
+            const endpoint = query
+                ? `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(query)}`
+                : `https://backend-production-e0e1.up.railway.app/movies/get_all_movies`;
+
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            setMovies(data);
+        } catch (error) {
+            console.error("Failed to fetch movies:", error);
+        } finally {
+            setLoading(false);
+        }
     };
-  
+
     useEffect(() => {
         fetchFilteredMoviesFromSteps(); // load based on Step1–3 filters
-      }, []);
-      
-  
+    }, []);
+
+
     // Trigger a search when the user types in the search bar
     useEffect(() => {
         if (searchQuery.trim() === "") return; // 🔒 prevent initial fetch
         const delayDebounce = setTimeout(() => {
-          fetchMovies(searchQuery);
+            fetchMovies(searchQuery);
         }, 300);
-      
+
         return () => clearTimeout(delayDebounce);
-      }, [searchQuery]);
+    }, [searchQuery]);
 
     const handleFilterClick = async () => {
         const params = new URLSearchParams();
 
 
         if (selectedGenres == "Sci-Fi") {
-            params.append("genres", "Science Fiction"); 
+            params.append("genres", "Science Fiction");
         } else {
             selectedGenres.forEach((genre) => params.append("genres", genre));
         }
         if (selectedLanguage) params.append("language", selectedLanguage);
-        if (selectedYear) params.append("release_year", selectedYear);
         if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
         if (sortList) params.append("sort_by", selectedSort);
         if (sortOrderList) params.append("order", selectedOrder);
 
+        if (props.yearRange?.from) params.append("release_year_min", props.yearRange.from);
+        if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
+
         try {
-            const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
+            const response = await fetch(`http://localhost:5000/movies/filter_and_sort_V2?${params.toString()}`);
             const filtered = await response.json();
             setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
         } catch (error) {
@@ -162,40 +163,40 @@ export default function Catalog(props) {
 
     const fetchFilteredMoviesFromSteps = async () => {
         const params = new URLSearchParams();
-      
+
         // Genres
         if (props.selectedGenres) {
-          props.selectedGenres.forEach((genre) => {
-            if (genre === "Sci-Fi") {
-              params.append("genres", "Science Fiction");
-            } else {
-              params.append("genres", genre);
-            }
-          });
+            props.selectedGenres.forEach((genre) => {
+                if (genre === "Sci-Fi") {
+                    params.append("genres", "Science Fiction");
+                } else {
+                    params.append("genres", genre);
+                }
+            });
         }
-      
+
         // Year Range
-        if (props.yearRange?.from) params.append("from_year", props.yearRange.from);
-        if (props.yearRange?.to) params.append("to_year", props.yearRange.to);
-      
+        if (props.yearRange?.from) params.append("release_year_min", props.yearRange.from);
+        if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
+
         // Sorting
         if (props.selectedSort) params.append("sort_by", props.selectedSort);
         if (props.selectedOrder) params.append("order", props.selectedOrder);
 
         console.log("Genres from props:", props.selectedGenres);
-      
+
         try {
-          setLoading(true);
-          const response = await fetch(`http://localhost:5000/movies/filter_and_sort?${params.toString()}`);
-          const data = await response.json();
-          setMovies(data);
+            setLoading(true);
+            const response = await fetch(`http://localhost:5000/movies/filter_and_sort_V2?${params.toString()}`);
+            const data = await response.json();
+            setMovies(data);
         } catch (error) {
-          console.error("Failed to fetch filtered movies:", error);
+            console.error("Failed to fetch filtered movies:", error);
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
-      
+    };
+
 
     return (
         <View style={{flex: 1}}>
@@ -300,7 +301,18 @@ export default function Catalog(props) {
                                 className="text-white"
                             >
                                 Release Year:</label>
-                            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+                            <select value={props.yearRange?.from === props.yearRange?.to ? props.yearRange?.from : ""}
+
+
+                                    onChange={(e) => {
+                                        const year = e.target.value;
+
+                                        props.setYearRange({
+                                            from: year,
+                                            to: year
+                                        });
+
+                                    }}>
                                 <option value="">-- Select --</option>
                                 {releaseYears.map((year) => (
                                     <option key={year} value={year}>{year}</option>
