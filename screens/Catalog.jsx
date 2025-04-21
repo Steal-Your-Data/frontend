@@ -87,7 +87,7 @@ export default function Catalog(props) {
     const buildEndpoint = useCallback(
         (pageNumber) => {
             if (searchQuery.trim()) {
-                return `http://localhost:5000/movies/search_API?query=${encodeURIComponent(
+                return `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(
                     searchQuery.trim()
                 )}&page=${pageNumber}`;
             }
@@ -107,7 +107,7 @@ export default function Catalog(props) {
             if (props.selectedOrder) params.append("order", props.selectedOrder);
 
             params.append("page", pageNumber);
-            return `http://localhost:5000/movies/filter_and_sort_V2?${params.toString()}`;
+            return `https://backend-production-e0e1.up.railway.app/movies/filter_and_sort_V2?${params.toString()}`;
         },
         [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder]
     );
@@ -197,7 +197,7 @@ export default function Catalog(props) {
         if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
 
         try {
-            const response = await fetch(`http://localhost:5000/movies/filter_and_sort_V2?${params.toString()}`);
+            const response = await fetch(`https://backend-production-e0e1.up.railway.app/movies/filter_and_sort_V2?${params.toString()}`);
             const filtered = await response.json();
             setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
         } catch (error) {
