@@ -139,7 +139,7 @@ export default function Catalog(props) {
         setPage(1);
         setHasMore(true);
         getMovies(1, true);
-        setSelectedMovies({});
+        setSelectedMovies([]);
     }, [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder, getMovies]);
 
     const loadNextPage = () => {
