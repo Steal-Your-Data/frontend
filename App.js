@@ -148,7 +148,7 @@ export default function App() {
 
             const movieListData = await movieListResponse.json();
 
-            console.log(movieListData)
+            console.log("movieListData", movieListData)
 
             if (!movieListData.movies || movieListData.movies.length === 0) {
                 setMovies([]);  // No movies in pocket
@@ -158,10 +158,12 @@ export default function App() {
             // Step 2: Extract movie IDs
             const movieIds = movieListData.movies.map(movie => movie.movie_id);
 
-            console.log(movieIds)
+            console.log("moviedIds: ", movieIds)
+            console.log({ids: movieIds});
 
             // Step 3: Fetch full movie details
-            const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_ids', {
+            const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_ids_API', {
+
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -430,9 +432,10 @@ export default function App() {
         }
     }
 
-    async function handleSendMovies(movieIDs) {
-        const ids = Object.keys(movieIDs);
-        //console.log(participantID);
+    async function handleSendMovies(movies) {
+        const ids = movies.map(item => item.id);
+        console.log(movies);
+        console.log(ids);
         //for (i = 0; i < ids.length; i++) {
         try {
             const response = await fetch("https://backend-production-e0e1.up.railway.app/session/add_movie", {

@@ -40,6 +40,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
         const loadWinner = async () => {
             setLoading(true);
             const fetchedWinner = await fetchWinner();
+            console.log(fetchedWinner);
             setMovie(fetchedWinner.movies_list);
             setFinalistMovies(fetchedWinner.movies_list);
             setWinnerId(fetchedWinner.movie_id);
