@@ -14,7 +14,7 @@ import io from 'socket.io-client';  // Used for interacting with backend
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
  
-const socket = io('http://localhost:5000', {
+const socket = io('https://backend-production-e0e1.up.railway.app', {
 
     transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
 
@@ -137,7 +137,7 @@ export default function App() {
         try {
             // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
             console.log("Fetching movies in pocket");
-            const movieListResponse = await fetch('http://localhost:5000/session/movies_in_pocket', {
+            const movieListResponse = await fetch('https://backend-production-e0e1.up.railway.app/session/movies_in_pocket', {
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -162,7 +162,8 @@ export default function App() {
             console.log({ids: movieIds});
 
             // Step 3: Fetch full movie details
-            const movieInfoResponse = await fetch('http://localhost:5000/movies/get_movie_info_by_ids_API', {
+            const movieInfoResponse = await fetch('https://backend-production-e0e1.up.railway.app/movies/get_movie_info_by_ids_API', {
+
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -186,7 +187,7 @@ export default function App() {
         try {
             // Step 1: Fetch movie IDs from the pocket with session_id and participant_id
             console.log("Fetching winner");
-            const movieWinner = await fetch('http://localhost:5000/session/final_movie', {
+            const movieWinner = await fetch('https://backend-production-e0e1.up.railway.app/session/final_movie', {
                 method: "POST",  // Use POST to send JSON body
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -207,7 +208,7 @@ export default function App() {
 
     async function handleHostSession(hostName) {
         try {
-            const response = await fetch("http://localhost:5000/session/start", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/start", {
                 method: "POST",
                 headers: {
                     'Access-Control-Allow-Origin': '*', // USE THIS FOR EVERY FETCH!!!!
@@ -260,7 +261,7 @@ export default function App() {
     // TODO: currently doesn't handle when user tries to join session that already started, need to fix
     async function handleJoinSession(sessionCode, name) {
         try {
-            const response = await fetch("http://localhost:5000/session/join", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/join", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -314,7 +315,7 @@ export default function App() {
     // Handler is for when Host clicks "Start" button
     async function handleStartSession() {
         try {
-            const response = await fetch("http://localhost:5000/session/begin", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/begin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -338,7 +339,7 @@ export default function App() {
 
     async function handleLeaveSession() {
         try {
-            const response = await fetch("http://localhost:5000/session/leave", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/leave", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -363,7 +364,7 @@ export default function App() {
     async function handleFinalVote() {
 
         try {
-            const response = await fetch("http://localhost:5000/session/finish_voting", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_voting", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -402,7 +403,7 @@ export default function App() {
     // Handler is for when we have a yes vote
     async function handleYes(movieID) {
         try {
-            const response = await fetch("http://localhost:5000/session/vote", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/vote", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -437,7 +438,7 @@ export default function App() {
         console.log(ids);
         //for (i = 0; i < ids.length; i++) {
         try {
-            const response = await fetch("http://localhost:5000/session/add_movie", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/add_movie", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -469,7 +470,7 @@ export default function App() {
         //}
 
         try {
-            const response = await fetch("http://localhost:5000/session/finish_selection", {
+            const response = await fetch("https://backend-production-e0e1.up.railway.app/session/finish_selection", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -511,10 +512,10 @@ export default function App() {
     // check state, go to the respective screen
     // rewrite this code to use React's navigation
     if (isHosting) {
-        return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting} />;
-      } else if (isJoining) {
+        return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
+    } else if (isJoining) {
         return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} joinError={joinError}/>;
-      } else if (inSession) {
+    } else if (inSession) {
         return (
           <Session
             sessionCode={sessionCode}
@@ -525,53 +526,54 @@ export default function App() {
             handleLeaveSession={handleLeaveSession}
           />
         );
-      } else if (stepScreen === "Step1") {
+    } else if (stepScreen === "Step1") {
         return (
-        <Step1GenreScreen
-            onNext={(genres) => {
-              setGenreFilters(genres);
-              setStepScreen("Step2");
-            }}
-            sessionCode={sessionCode}
-            participantID={participantID}
-          />
+            <Step1GenreScreen
+                onNext={(genres) => {
+                    setGenreFilters(genres);
+                    setStepScreen("Step2");
+                }}
+                sessionCode={sessionCode}
+                participantID={participantID}
+            />
         );
-      } else if (stepScreen === "Step2") {
+    } else if (stepScreen === "Step2") {
         return (
-        <Step2TypeScreen
-            onNext={({ sortBy, order }) => {
-              setSortOption(sortBy);
-              setSortOrder(order);
-              setStepScreen("Step3");
-            }}
-            sessionCode={sessionCode}
-            participantID={participantID}
-          />
-          
+            <Step2TypeScreen
+                onNext={({ sortBy, order }) => {
+                    setSortOption(sortBy);
+                    setSortOrder(order);
+                    setStepScreen("Step3");
+                }}
+                sessionCode={sessionCode}
+                participantID={participantID}
+            />
+
         );
-      } else if (stepScreen === "Step3") {
+    } else if (stepScreen === "Step3") {
         return (
-        <Step3TimePeriodScreen
-            onNext={(range) => {
-              setYearRange(range);
-              setStepScreen(null);
-              setGoCatalog(true); // Navigate to Catalog
-            }}
-            sessionCode={sessionCode}
-            participantID={participantID}
-          />
+            <Step3TimePeriodScreen
+                onNext={(range) => {
+                    setYearRange(range);
+                    setStepScreen(null);
+                    setGoCatalog(true); // Navigate to Catalog
+                }}
+                sessionCode={sessionCode}
+                participantID={participantID}
+            />
         );
-      } else if (goCatalog) {
+    } else if (goCatalog) {
         return <Catalog
-        setGoCatalog={setGoCatalog}
-        handleSendMovies={handleSendMovies}
-        participants={participants}
-        selectedGenres={genreFilters}
-        selectedSort={sortOption}
-        selectedOrder={sortOrder}
-        yearRange={yearRange}
-      />
-      } else if (goWaiting) {
+            setGoCatalog={setGoCatalog}
+            handleSendMovies={handleSendMovies}
+            participants={participants}
+            selectedGenres={genreFilters}
+            selectedSort={sortOption}
+            selectedOrder={sortOrder}
+            yearRange={yearRange}
+            setYearRange={setYearRange}
+        />
+    } else if (goWaiting) {
         return (
           <Waiting
             setGoWaiting={setGoWaiting}
@@ -580,7 +582,7 @@ export default function App() {
             finishedUsers={finishedUsers}
           />
         );
-      } else if (goVoting) {
+    } else if (goVoting) {
         return (
           <Voting
             setGoVoting={setGoVoting}
@@ -591,7 +593,7 @@ export default function App() {
             fetchMovies={fetchMovies}
           />
         );
-      } else if (goWinner) {
+    } else if (goWinner) {
         return (
           <Winner
             finalVotes={finalVotes}
@@ -600,10 +602,10 @@ export default function App() {
             fetchWinner={fetchWinner}
           />
         );
-      }
+    }
     
-      // Wrap Home + Step screens in NavigationContainer
-      return (
+    // Wrap Home + Step screens in NavigationContainer
+    return (
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home">
@@ -622,5 +624,5 @@ export default function App() {
             <Stack.Screen name="Step3" component={Step3TimePeriodScreen} />
           </Stack.Navigator>
         </NavigationContainer>
-      );
+    );
 }
