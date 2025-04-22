@@ -63,7 +63,7 @@ function Session(props) {
           >
             <Text
                 className={`text-center font-semibold text-base ${
-                    'text-white-500'
+                    'text-white'
                 }`}
             >
               LEAVE
