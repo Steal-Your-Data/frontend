@@ -1,54 +1,84 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    View,
-    Text,
-    FlatList,
-    TouchableOpacity,
-    ActivityIndicator,
-    Image,
-    Dimensions,
-    TextInput,
-    SafeAreaView,
-    StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  Dimensions,
+  TextInput,
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
 } from "react-native";
 import Modal from "react-native-modal";
-import {StatusBar} from "expo-status-bar";
+import { StatusBar } from "expo-status-bar";
 import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    interpolate,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
 } from "react-native-reanimated";
 import "../global.css";
-import GradientBackground from '../components/GradientBackground';
+import GradientBackground from "../components/GradientBackground";
+import { Picker } from "@react-native-picker/picker";
 
 export default function Catalog(props) {
-    const [page, setPage] = useState(1); // current page (backend starts at 1)
-    const [hasMore, setHasMore] = useState(true); // flag to disable further calls
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedMovies, setSelectedMovies] = useState({});
     const [isCartVisible, setCartVisible] = useState(false);
     const [isLimitModalVisible, setLimitModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const {width} = Dimensions.get("window");
-    const [timer, setTimer] = useState(180); // three minutes (in seconds)
-    //const [selectedGenres, setSelectedGenres] = useState([]);
-
+    const { width } = Dimensions.get("window");
+    const [timer, setTimer] = useState(180);
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [onlyInTheater, setOnlyInTheater] = useState("");
     const [selectedSort, setSelectedSort] = useState("");
     const [selectedOrder, setSelectedOrder] = useState("");
-
+    const [isFilterVisible, setFilterVisible] = useState(false);
+  
     const sortList = ["popularity", "title", "release_date"];
     const sortOrderList = ["asc", "desc"];
     const genresList = [
-        "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
-        "Drama", "Family", "Fantasy", "History", "Horror", "Music",
-        "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
-    ]; // Replace with actual list
-    const languageList = ["en", "la"]; // Replace with actual list
-    const releaseYears = Array.from({length: 30}, (_, i) => 2024 - i); // past 30 years
+      "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
+      "Drama", "Family", "Fantasy", "History", "Horror", "Music",
+      "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
+    ];
+    const languageList = ["en", "la"];
+    const releaseYears = Array.from({ length: 30 }, (_, i) => 2024 - i);
+
+    const [selectedGenres, setSelectedGenres] = useState(props.selectedGenres || []);
+
+    const toggleGenre = (genre) => {
+        setSelectedGenres((prev) =>
+        prev.includes(genre)
+            ? prev.filter((g) => g !== genre)
+            : [...prev, genre]
+        );
+    };
+
+    const renderGenreChips = () => (
+        <View style={styles.chipContainer}>
+          {genresList.map((genre) => (
+            <TouchableOpacity
+              key={genre}
+              style={[
+                styles.chip,
+                selectedGenres.includes(genre) && styles.chipSelected,
+              ]}
+              onPress={() => toggleGenre(genre)}
+            >
+              <Text style={{ color: selectedGenres.includes(genre) ? "white" : "#f97316" }}>
+                {genre}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+    );
 
     // timer
     useEffect(() => {
@@ -86,31 +116,41 @@ export default function Catalog(props) {
     const controllerRef = useRef();
     const buildEndpoint = useCallback(
         (pageNumber) => {
-            if (searchQuery.trim()) {
-                return `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(
-                    searchQuery.trim()
-                )}&page=${pageNumber}`;
-            }
-
-            const params = new URLSearchParams();
-
-            var joinedGenres = props.selectedGenres?.join("|");
-
-            if (joinedGenres) params.append("genres", joinedGenres);
-
-            if (props.yearRange?.from)
-                params.append("release_year_min", props.yearRange.from);
-            if (props.yearRange?.to)
-                params.append("release_year_max", props.yearRange.to);
-
-            if (props.selectedSort) params.append("sort_by", props.selectedSort);
-            if (props.selectedOrder) params.append("order", props.selectedOrder);
-
-            params.append("page", pageNumber);
-            return `https://backend-production-e0e1.up.railway.app/movies/filter_and_sort_V2?${params.toString()}`;
+          if (searchQuery.trim()) {
+            return `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(
+              searchQuery.trim()
+            )}&page=${pageNumber}`;
+          }
+      
+          const params = new URLSearchParams();
+      
+          // Use local state instead of props
+          const joinedGenres = selectedGenres?.join("|");
+          if (joinedGenres) params.append("genres", joinedGenres);
+      
+          if (props.yearRange?.from)
+            params.append("release_year_min", props.yearRange.from);
+          if (props.yearRange?.to)
+            params.append("release_year_max", props.yearRange.to);
+      
+          if (selectedSort) params.append("sort_by", selectedSort);
+          if (selectedOrder) params.append("order", selectedOrder);
+          if (selectedLanguage) params.append("language", selectedLanguage);
+          if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
+      
+          params.append("page", pageNumber);
+          return `https://backend-production-e0e1.up.railway.app/movies/filter_and_sort_V2?${params.toString()}`;
         },
-        [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder]
-    );
+        [
+          searchQuery,
+          selectedGenres,
+          selectedSort,
+          selectedOrder,
+          selectedLanguage,
+          onlyInTheater,
+          props.yearRange,
+        ]
+      );
 
     const getMovies = useCallback(
         async (pageNumber = 1, reset = false) => {
@@ -231,290 +271,352 @@ export default function Catalog(props) {
     const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
 
     return (
-        <View style={{flex: 1}}>
-            <GradientBackground>
-                <SafeAreaView style={{flex: 1}}>
-                    <StatusBar style="light"/>
-
-                    <View className="px-4">
-                        <Text className="text-white text-3xl font-black text-center mb-4">
-                            Movie Catalog
-                        </Text>
-
-                        <Text className="text-white text-lg font-semibold text-center mb-2">
-                            Select movies you want to watch
-                        </Text>
-
-                        <TextInput
-                            className="bg-white text-black px-4 py-2 rounded-lg mb-4"
-                            placeholder="Search movies..."
-                            placeholderTextColor="#888"
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                    </View>
-
-                    {/* Timer */}
-                    <View style={styles.timerContainer}>
-                        <Text style={styles.timerText}>
-                            {formatTime(timer)}
-                        </Text>
-                    </View>
-
-                    {loading ? (
-                        <ActivityIndicator size="large" color="orange" className="mt-4"/>
-                    ) : (
-                        <FlatList
-                            data={movies}
-                            keyExtractor={(item) => item.id.toString()}
-                            numColumns={numColumns}
-                            key={numColumns}
-                            contentContainerStyle={{ paddingBottom: 140, paddingHorizontal: 12, justifyContent: "center", alignItems: "center" }}
-                            renderItem={({ item }) => (
-                                <FlipCard
-                                    movie={item}
-                                    isSelected={selectedMovies[item.id]}
-                                    toggleSelectMovie={toggleSelectMovie}
-                                />
-                            )}
-                            ListFooterComponent={() => (loading ? <ActivityIndicator style={{ margin: 20 }} /> : null)}
-                            onEndReached={loadNextPage}
-                            onEndReachedThreshold={0.4}
-                        />
-                    )}
-
-                    <TouchableOpacity
-                        style={styles.cartButton}
-                        onPress={() => setCartVisible(true)}
-                    >
-                        <Text className="text-white font-bold text-sm">
-                            🎥 Selection ({selectedCount} / {maxNumber})
-                        </Text>
-                    </TouchableOpacity>
-
-                    <div>
-                        {/* Filter Menu */}
-                        <div style={{padding: "1rem", borderBottom: "1px solid #ccc"}}>
-                            <h3
-                                className="text-white"
-                            >
-                                Filter Movies</h3>
-
-                            {/* Genres (multiselect) */}
-                            <label
-                                className="text-white"
-                            >
-                                Genres:</label>
-                            <select multiple value={props?.selectedGenres} onChange={(e) => {
-                                const selected = Array.from(e.target.selectedOptions, option => option.value);
-                               props?.setSelectedGenres(selected);
-                            }}>
-                                {genresList.map((genre) => (
-                                    <option key={genre} value={genre}>{genre}</option>
-                                ))}
-                            </select>
-
-                            {/* Language */}
-                            <label
-                                className="text-white"
-                            >
-                                Language:</label>
-                            <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
-                                <option value="">-- Select --</option>
-                                {languageList.map((lang) => (
-                                    <option key={lang} value={lang}>{lang}</option>
-                                ))}
-                            </select>
-
-                            {/* Release Year */}
-                            <label
-                                className="text-white"
-                            >
-                                Release Year:</label>
-                            <select value={props.yearRange?.from === props.yearRange?.to ? props.yearRange?.from : ""}
-
-
-                                    onChange={(e) => {
-                                        const year = e.target.value;
-
-                                        props.setYearRange({
-                                            from: year,
-                                            to: year
-                                        });
-
-                                    }}>
-                                <option value="">-- Select --</option>
-                                {releaseYears.map((year) => (
-                                    <option key={year} value={year}>{year}</option>
-                                ))}
-                            </select>
-
-                            {/* In Theaters */}
-                            <label
-                                className="text-white"
-                            >
-                                In Theaters:</label>
-                            <select value={onlyInTheater} onChange={(e) => setOnlyInTheater(e.target.value)}>
-                                <option value="">-- Select --</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </select>
-                        </div>
-
-                        {/* Sort Menu */}
-                        <div style={{padding: "1rem", borderBottom: "1px solid #ccc"}}>
-                            <h3
-                                className="text-white"
-                            >
-                                Sort Movies</h3>
-
-                            {/* Sort */}
-                            <label
-                                className="text-white"
-                            >
-                                Sort:</label>
-                            <select value={selectedSort} onChange={(e) => setSelectedSort(e.target.value)}>
-                                <option value="">-- Select --</option>
-                                {sortList.map((sort) => (
-                                    <option key={sort} value={sort}>{sort}</option>
-                                ))}
-                            </select>
-
-                            {/* Order */}
-                            <label
-                                className="text-white"
-                            >
-                                Sort Order:</label>
-                            <select value={selectedOrder} onChange={(e) => setSelectedOrder(e.target.value)}>
-                                <option value="">-- Select --</option>
-                                <option value="asc">asc</option>
-                                <option value="desc">desc</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <TouchableOpacity
-                        style={{
-                            position: "absolute",
-                            bottom: 20,
-                            alignSelf: "left",
-                            backgroundColor: "#f97316",
-                            paddingVertical: 10,
-                            paddingHorizontal: 20,
-                            borderRadius: 999
-                        }}
-                        onPress={() => {
-                            handleFilterClick();
-                        }}
-                    >
-                        <Text className="text-white font-bold text-sm">
-                            Filter
-                        </Text>
-                    </TouchableOpacity>
-
-                    {/* Cart Modal */}
-                    <Modal
-                        isVisible={isCartVisible}
-                        onBackdropPress={() => setCartVisible(false)}
-                        swipeDirection="down"
-                        className="m-0 justify-end"
-                    >
-                        <View className="bg-white rounded-t-2xl p-6 max-h-[80%]">
-                            <TouchableOpacity
-                                className="absolute top-4 right-4 z-10"
-                                onPress={() => setCartVisible(false)}
-                            >
-                                <Text className="text-2xl font-bold text-gray-700">✖</Text>
-                            </TouchableOpacity>
-
-                            <Text className="text-xl font-bold text-center mb-4">
-                                Your Movies ({selectedCount})
-                            </Text>
-
-                            <FlatList
-                                data={movies.filter((movie) => selectedMovies[movie.id])}
-                                keyExtractor={(item) => item.id.toString()}
-                                renderItem={({item}) => (
-                                    <View className="flex-row items-center mb-4 bg-gray-100 p-3 rounded-xl">
-                                        <Image
-                                            source={{
-                                                uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-                                            }}
-                                            className="w-12 h-20 rounded mr-3"
-                                        />
-                                        <Text className="flex-1 font-semibold text-base">
-                                            {item.title}
-                                        </Text>
-                                        <TouchableOpacity onPress={() => removeFromCart(item.id)}>
-                                            <Text className="text-red-600 text-lg font-bold">❌</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                            />
-
-                            <TouchableOpacity
-                                className="bg-green-600 mt-4 py-3 rounded-xl"
-                                onPress={() => props.handleSendMovies(selectedMovies)}
-                            >
-                                <Text className="text-white font-bold text-center text-lg">
-                                    Ready
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </Modal>
-
-                    {/* Limit Modal */}
-                    <Modal
-                        isVisible={isLimitModalVisible}
-                        onBackdropPress={() => setLimitModalVisible(false)}
-                    >
-                        <View className="bg-white p-6 rounded-xl items-center">
-                            <Text className="text-lg font-bold text-red-600 mb-2">
-                                🚨 Selection Limit Reached
-                            </Text>
-                            <Text className="text-base text-center mb-4">
-                                You can only select up to {maxNumber} movie
-                                {maxNumber !== 1 && 's'}
-                            </Text>
-                            <TouchableOpacity
-                                className="bg-red-500 px-4 py-2 rounded"
-                                onPress={() => setLimitModalVisible(false)}
-                            >
-                                <Text className="text-white font-bold">Okay</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </Modal>
-                </SafeAreaView>
-            </GradientBackground>
+        <View style={{ flex: 1 }}>
+          <GradientBackground>
+            <SafeAreaView style={{ flex: 1 }}>
+              <StatusBar style="light" />
+    
+              {/* Header */}
+              <View className="px-4">
+                <Text className="text-white text-3xl font-black text-center mb-2">
+                  Movie Catalog
+                </Text>
+                <Text className="text-white text-lg text-center mb-4">
+                  Select movies you want to watch
+                </Text>
+                <TextInput
+                  className="bg-white text-black px-4 py-2 rounded-lg mb-2"
+                  placeholder="Search movies..."
+                  placeholderTextColor="#888"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+    
+              {/* Timer */}
+              <View style={styles.timerContainer}>
+                <Text style={styles.timerText}>{formatTime(timer)}</Text>
+              </View>
+    
+              <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
+              <TouchableOpacity
+                style={styles.filterToggle}
+                onPress={() => setFilterVisible(true)}
+                >
+                <Text style={{ color: "white", fontWeight: "bold" }}>☰ Filters</Text>
+            </TouchableOpacity>
         </View>
-    );
+
+{/* Movie Grid */}
+{loading ? (
+            <ActivityIndicator size="large" color="orange" className="mt-4" />
+          ) : (
+            <FlatList
+              data={movies}
+              keyExtractor={(item) => item.id.toString()}
+              numColumns={numColumns}
+              key={numColumns}
+              contentContainerStyle={{
+                paddingBottom: 160,
+                paddingHorizontal: 12,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              renderItem={({ item }) => (
+                <FlipCard
+                  movie={item}
+                  isSelected={selectedMovies[item.id]}
+                  toggleSelectMovie={toggleSelectMovie}
+                />
+              )}
+              ListFooterComponent={() =>
+                loading ? <ActivityIndicator style={{ margin: 20 }} /> : null
+              }
+              onEndReached={loadNextPage}
+              onEndReachedThreshold={0.4}
+            />
+          )}
+
+          {/* Cart Button */}
+          <TouchableOpacity
+            style={styles.cartButton}
+            onPress={() => setCartVisible(true)}
+          >
+            <Text className="text-white font-bold text-sm">
+              🎥 Selection ({selectedCount} / {maxNumber})
+            </Text>
+          </TouchableOpacity>
+
+          {/* Cart Modal */}
+          <Modal
+            isVisible={isCartVisible}
+            onBackdropPress={() => setCartVisible(false)}
+            swipeDirection="down"
+            className="m-0 justify-end"
+          >
+            <View className="bg-white rounded-t-2xl p-6 max-h-[80%]">
+              <TouchableOpacity
+                className="absolute top-4 right-4 z-10"
+                onPress={() => setCartVisible(false)}
+              >
+                <Text className="text-2xl font-bold text-gray-700">✖</Text>
+              </TouchableOpacity>
+
+              <Text className="text-xl font-bold text-center mb-4">
+                Your Movies ({selectedCount})
+              </Text>
+
+              <FlatList
+                data={movies.filter((movie) => selectedMovies[movie.id])}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <View className="flex-row items-center mb-4 bg-gray-100 p-3 rounded-xl">
+                    <Image
+                      source={{
+                        uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                      }}
+                      className="w-12 h-20 rounded mr-3"
+                    />
+                    <Text className="flex-1 font-semibold text-base">
+                      {item.title}
+                    </Text>
+                    <TouchableOpacity onPress={() => removeFromCart(item.id)}>
+                      <Text className="text-red-600 text-lg font-bold">❌</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+
+              <TouchableOpacity
+                className="bg-green-600 mt-4 py-3 rounded-xl"
+                onPress={() => props.handleSendMovies(selectedMovies)}
+              >
+                <Text className="text-white font-bold text-center text-lg">
+                  Ready
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+
+          {/* Limit Modal */}
+          <Modal
+            isVisible={isLimitModalVisible}
+            onBackdropPress={() => setLimitModalVisible(false)}
+          >
+            <View className="bg-white p-6 rounded-xl items-center">
+              <Text className="text-lg font-bold text-red-600 mb-2">
+                🚨 Selection Limit Reached
+              </Text>
+              <Text className="text-base text-center mb-4">
+                You can only select up to {maxNumber} movie{maxNumber !== 1 && "s"}
+              </Text>
+              <TouchableOpacity
+                className="bg-red-500 px-4 py-2 rounded"
+                onPress={() => setLimitModalVisible(false)}
+              >
+                <Text className="text-white font-bold">Okay</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+          <Modal
+            isVisible={isFilterVisible}
+            animationIn="slideInRight"
+            animationOut="slideOutRight"
+            onBackdropPress={() => setFilterVisible(false)}
+            style={{ margin: 0, justifyContent: "flex-end", alignItems: "flex-end" }}
+            >
+            <View style={styles.filterDrawer}>
+                <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+                    <Text style={styles.filterTitle}>Filter Movies 🎛️</Text>
+
+                    {/* Genres */}
+                    <Text className="text-white font-bold mt-4 mb-2">Genres</Text>
+                    {renderGenreChips()}
+
+                    {/* Language */}
+                    <Text className="text-white mt-4">Language:</Text>
+                    <View style={styles.dropdown}>
+                    <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        style={styles.selectBox}
+                    >
+                        <option value="">-- Select --</option>
+                        {languageList.map((lang) => (
+                        <option key={lang} value={lang}>{lang}</option>
+                        ))}
+                    </select>
+                    </View>
+
+                    {/* Release Year */}
+                    <Text className="text-white mt-4">Release Year:</Text>
+                    <View style={styles.dropdown}>
+                    <select
+                        value={props.yearRange?.from === props.yearRange?.to ? props.yearRange.from : ""}
+                        onChange={(e) => props.setYearRange({ from: e.target.value, to: e.target.value })}
+                        style={styles.selectBox}
+                    >
+                        <option value="">-- Select --</option>
+                        {releaseYears.map((year) => (
+                        <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                    </View>
+
+                    {/* In Theaters */}
+                    <Text className="text-white mt-4">In Theaters:</Text>
+                    <View style={styles.dropdown}>
+                    <select
+                        value={onlyInTheater}
+                        onChange={(e) => setOnlyInTheater(e.target.value)}
+                        style={styles.selectBox}
+                    >
+                        <option value="">-- Select --</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                    </View>
+
+                    {/* Sort By */}
+                    <Text className="text-white mt-4">Sort:</Text>
+                    <View style={styles.dropdown}>
+                    <select
+                        value={selectedSort}
+                        onChange={(e) => setSelectedSort(e.target.value)}
+                        style={styles.selectBox}
+                    >
+                        <option value="">-- Select --</option>
+                        <option value="popularity">Popularity</option>
+                        <option value="title">Title</option>
+                        <option value="release_date">Release Date</option>
+                        <option value="vote_average">TMDB Rating</option>
+                        <option value="vote_count"># of Votes</option>
+                    </select>
+                    </View>
+
+                    {/* Sort Order */}
+                    <Text className="text-white mt-4">Sort Order:</Text>
+                    <View style={styles.dropdown}>
+                    <select
+                        value={selectedOrder}
+                        onChange={(e) => setSelectedOrder(e.target.value)}
+                        style={styles.selectBox}
+                    >
+                        <option value="">-- Select --</option>
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                    </View>
+
+                    {/* Apply Button */}
+                    <TouchableOpacity
+                    style={styles.applyButton}
+                    onPress={() => {
+                        props.setSelectedGenres(selectedGenres);
+                        setPage(1);
+                        getMovies(1, true);
+                        setFilterVisible(false);
+                    }}
+                    >
+                    <Text style={{ color: "white", fontWeight: "bold" }}>Apply Filters</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+                </View>
+            </Modal>
+        </SafeAreaView>
+      </GradientBackground>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
     cartButton: {
-        position: "absolute",
-        bottom: 20,
-        alignSelf: "center",
-        backgroundColor: "#f97316",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 999
+      position: "absolute",
+      bottom: 20,
+      alignSelf: "center",
+      backgroundColor: "#f97316",
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 999,
+      zIndex: 999,
     },
     timerContainer: {
-        position: "absolute",
-        top: 20,
-        left: 20,
-        backgroundColor: "#f97316",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 999
+      position: "absolute",
+      top: 20,
+      left: 20,
+      backgroundColor: "#f97316",
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 999,
     },
     timerText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    filterToggle: {
+      backgroundColor: "#f97316",
+      paddingVertical: 10,
+      borderRadius: 999,
+      alignItems: "center",
+      marginTop: 10,
+      marginBottom: 10,
+    },
+    applyButton: {
+      backgroundColor: "#f97316",
+      marginTop: 20,
+      paddingVertical: 12,
+      borderRadius: 999,
+      alignItems: "center",
+    },
+    chipContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 12,
+    },
+    chip: {
+      borderWidth: 1,
+      borderColor: "#f97316",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+      marginRight: 8,
+      marginBottom: 8,
+      backgroundColor: "#fff",
+    },
+    chipSelected: {
+      backgroundColor: "#f97316",
+    },
+    dropdown: {
+      backgroundColor: "white",
+      borderRadius: 8,
+      marginTop: 6,
+      marginBottom: 12,
+    },
+    selectBox: {
+      width: "100%",
+      padding: 10,
+      fontSize: 16,
+      borderRadius: 8,
+      borderColor: "#ccc",
+    },
+    filterDrawer: {
+        width: "80%",
+        backgroundColor: "#1e1e1e",
+        padding: 20,
+        height: "100%",
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 20,
+      },
+      filterTitle: {
         color: "white",
-        fontSize: 16,
-        fontWeight: "bold"
-    }
-});
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 16,
+      },
+  });
+  
 
 const FlipCard = ({movie, isSelected, toggleSelectMovie}) => {
     const isFlipped = useSharedValue(0);
