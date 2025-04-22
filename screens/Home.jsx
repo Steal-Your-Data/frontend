@@ -124,13 +124,13 @@ function Home(props) {
             </Pressable>
 
              {/* Step Preview Buttons */}
-              <Pressable
+              {/* <Pressable
                   className="bg-gray-700 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
                   onPress={() => props.navigation.navigate("Step1")}
               >
                   <Text className="text-center text-white font-semibold text-base">Preview Step 1</Text>
-              </Pressable>
-             <Pressable
+              </Pressable> */}
+             {/* <Pressable
               className="bg-orange-600 px-6 py-3 rounded-lg mb-3 w-full active:scale-[.98]"
               onPress={() => props.setGoCatalog(true)}
               style={{
@@ -143,7 +143,7 @@ function Home(props) {
             >    
               <Text className="text-center text-white font-semibold text-base">CATALOG</Text>
 
-            </Pressable>
+            </Pressable> */}
 
           </Animated.View>
 
@@ -152,31 +152,31 @@ function Home(props) {
             entering={FadeInUp.duration(600)}
             className="bg-white/90 rounded-2xl shadow-xl w-full max-w-md p-6 border border-orange-100 mb-6"
           >
-            <Text className="text-orange-600 text-xl font-extrabold mb-4">✨ Don't know what to stream tonight?</Text>
+            <Text className="text-orange-600 text-xl font-extrabold mb-4">✨ Don't know what to watch?</Text>
 
             <View className="mb-4">
-              <Text className="text-orange-700 font-bold mb-1">1️⃣ Select your Streaming Platforms</Text>
-              <Text className="text-gray-700 text-sm">Pick from Netflix, Prime, or Disney+. Only what's in your region shows up.</Text>
+              <Text className="text-orange-700 font-bold mb-1">👯 Invite Friends</Text>
+              <Text className="text-gray-700 text-sm">Create a session. Everyone joins, votes, and vibes together.</Text>
             </View>
 
             <View className="mb-4">
               <Text className="text-orange-700 font-bold mb-1">🎬 Choose your Genres</Text>
-              <Text className="text-gray-700 text-sm">24 genres. All your group's faves. We'll handle the match-up magic.</Text>
+              <Text className="text-gray-700 text-sm">18 genres. All your faves. We'll handle the match-up magic.</Text>
             </View>
 
             <View className="mb-4">
-              <Text className="text-orange-700 font-bold mb-1">👯 Invite Friends</Text>
-              <Text className="text-gray-700 text-sm">Link, QR, or ID — everyone joins, swipes, and vibes together.</Text>
+              <Text className="text-orange-700 font-bold mb-1">1️⃣ Pick your Favorites</Text>
+              <Text className="text-gray-700 text-sm">Browse from our catalog. Select what catches your eye.</Text>
             </View>
 
             <View className="mb-4">
-              <Text className="text-orange-700 font-bold mb-1">👉 Start Swiping</Text>
-              <Text className="text-gray-700 text-sm">Left = nah. Right = let’s go. When everyone hearts the same one, it’s movie time!</Text>
+              <Text className="text-orange-700 font-bold mb-1">👉 Start Voting</Text>
+              <Text className="text-gray-700 text-sm">The movie with the most votes wins. Then it's time to watch!</Text>
             </View>
 
             <View>
               <Text className="text-orange-700 font-bold mb-1">🎉 Bonus: No installs. No hassle.</Text>
-              <Text className="text-gray-700 text-sm">Just browser it. Or pin it. All fun, no fuss.</Text>
+              <Text className="text-gray-700 text-sm">Just open in your browser. All fun, no fuss.</Text>
             </View>
           </Animated.View>
 

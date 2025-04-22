@@ -29,7 +29,7 @@ export default function Catalog(props) {
     const [hasMore, setHasMore] = useState(true);
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedMovies, setSelectedMovies] = useState({});
+    const [selectedMovies, setSelectedMovies] = useState([]);
     const [isCartVisible, setCartVisible] = useState(false);
     const [isLimitModalVisible, setLimitModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -179,7 +179,7 @@ export default function Catalog(props) {
         setPage(1);
         setHasMore(true);
         getMovies(1, true);
-        setSelectedMovies({});
+        //setSelectedMovies([]);
     }, [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder, getMovies]);
 
     const loadNextPage = () => {
@@ -256,16 +256,30 @@ export default function Catalog(props) {
 
     const selectedCount = Object.values(selectedMovies).filter(Boolean).length;
 
-    const toggleSelectMovie = (id) => {
-        if (!selectedMovies[id] && selectedCount >= maxNumber) {
+    const toggleSelectMovie = (movie) => {
+        // Check if Movie Limit is reached
+        if (!(selectedMovies.find(item => item.id === movie.id)) && selectedCount >= maxNumber) {
             setLimitModalVisible(true);
             return;
         }
-        setSelectedMovies((prev) => ({...prev, [id]: !prev[id]}));
+
+        // Remove movies if present in selectedMovies
+        // Else add movie
+        if (selectedMovies.find(item => item.id === movie.id)) {
+            console.log("Remove")
+            setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));
+        } else {
+            console.log("Add")
+            setSelectedMovies((prev) => ([...prev, movie]));
+        }
+        
+        // setSelectedMoviesID((prev) => ({...prev, [movie.id]: !prev[movie.id]}));  
+        // console.log(selectedMoviesID);
     };
 
-    const removeFromCart = (id) => {
-        setSelectedMovies((prev) => ({...prev, [id]: false}));
+    const removeFromCart = (movie) => {
+        // setSelectedMoviesID((prev) => ({...prev, [movie.id]: false}));
+        setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));;
     };
 
     const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
@@ -470,6 +484,32 @@ export default function Catalog(props) {
                         value={onlyInTheater}
                         onChange={(e) => setOnlyInTheater(e.target.value)}
                         style={styles.selectBox}
+                    {loading ? (
+                        <ActivityIndicator size="large" color="orange" className="mt-4"/>
+                    ) : (
+                        <FlatList
+                            data={movies}
+                            keyExtractor={(item) => item.id.toString()}
+                            numColumns={numColumns}
+                            key={numColumns}
+                            contentContainerStyle={{ paddingBottom: 140, paddingHorizontal: 12, justifyContent: "center", alignItems: "center" }}
+                            renderItem={({ item }) => (
+                                <FlipCard
+                                    movie={item}
+                                    // isSelected={selectedMoviesID[item.id]} 
+                                    isSelected={selectedMovies.find(movie => item.id === movie.id)}
+                                    toggleSelectMovie={toggleSelectMovie}
+                                />
+                            )}
+                            ListFooterComponent={() => (loading ? <ActivityIndicator style={{ margin: 20 }} /> : null)}
+                            onEndReached={loadNextPage}
+                            onEndReachedThreshold={0.4}
+                        />
+                    )}
+
+                    <TouchableOpacity
+                        style={styles.cartButton}
+                        onPress={() => setCartVisible(true)}
                     >
                         <option value="">-- Select --</option>
                         <option value="yes">Yes</option>
@@ -507,6 +547,49 @@ export default function Catalog(props) {
                         <option value="desc">Descending</option>
                     </select>
                     </View>
+                        <View className="bg-white rounded-t-2xl p-6 max-h-[80%]">
+                            <TouchableOpacity
+                                className="absolute top-4 right-4 z-10"
+                                onPress={() => setCartVisible(false)}
+                            >
+                                <Text className="text-2xl font-bold text-gray-700">✖</Text>
+                            </TouchableOpacity>
+
+                            <Text className="text-xl font-bold text-center mb-4">
+                                Your Movies ({selectedCount})
+                            </Text>
+{/* movies.filter((movie) => selectedMovies[movie.id]) */}
+                            <FlatList
+                                data={selectedMovies}
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={({item}) => (
+                                    <View className="flex-row items-center mb-4 bg-gray-100 p-3 rounded-xl">
+                                        <Image
+                                            source={{
+                                                uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                                            }}
+                                            className="w-12 h-20 rounded mr-3"
+                                        />
+                                        <Text className="flex-1 font-semibold text-base">
+                                            {item.title}
+                                        </Text>
+                                        <TouchableOpacity onPress={() => removeFromCart(item)}>
+                                            <Text className="text-red-600 text-lg font-bold">❌</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            />
+
+                            <TouchableOpacity
+                                className="bg-green-600 mt-4 py-3 rounded-xl"
+                                onPress={() => props.handleSendMovies(selectedMovies)}
+                            >
+                                <Text className="text-white font-bold text-center text-lg">
+                                    Ready
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Modal>
 
                     {/* Apply Button */}
                     <TouchableOpacity
@@ -695,7 +778,7 @@ const FlipCard = ({movie, isSelected, toggleSelectMovie}) => {
 
             {/* + Button BELOW the card */}
             <TouchableOpacity
-                onPress={() => toggleSelectMovie(movie.id)}
+                onPress={() => toggleSelectMovie(movie)}
                 className={`mt-2 rounded-full px-4 py-2 self-center ${
                     isSelected ? "bg-green-600" : "bg-orange-500"
                 }`}
