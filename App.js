@@ -566,6 +566,7 @@ export default function App() {
             participants={participants}
             selectedGenres={genreFilters}
             selectedSort={sortOption}
+            setSelectedGenres={setGenreFilters}
             selectedOrder={sortOrder}
             yearRange={yearRange}
             setYearRange={setYearRange}
