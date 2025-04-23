@@ -178,7 +178,6 @@ export default function Catalog(props) {
     setPage(1);
     setHasMore(true);
     getMovies(1, true);
-    setSelectedMovies([]);
   }, [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder, getMovies]);
 
   const loadNextPage = () => {
@@ -255,16 +254,22 @@ export default function Catalog(props) {
 
   const selectedCount = Object.values(selectedMovies).filter(Boolean).length;
 
-  const toggleSelectMovie = (id) => {
-    if (!selectedMovies[id] && selectedCount >= maxNumber) {
-      setLimitModalVisible(true);
-      return;
+  const toggleSelectMovie = (movie) => {
+    if (!(selectedMovies.find(item => item.id === movie.id)) && selectedCount >= maxNumber) {
+        setLimitModalVisible(true);
+        return;
     }
-    setSelectedMovies((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
-  const removeFromCart = (id) => {
-    setSelectedMovies((prev) => ({ ...prev, [id]: false }));
+    if (selectedMovies.find(item => item.id === movie.id)) {
+        console.log("Remove")
+        setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));
+    } else {
+        console.log("Add")
+        setSelectedMovies((prev) => ([...prev, movie]));
+    }
+};
+  const removeFromCart = (movie) => {
+      setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));;
   };
 
   const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
@@ -325,7 +330,7 @@ export default function Catalog(props) {
               renderItem={({ item }) => (
                 <FlipCard
                   movie={item}
-                  isSelected={selectedMovies[item.id]}
+                  isSelected={selectedMovies.find(movie => item.id === movie.id)}
                   toggleSelectMovie={toggleSelectMovie}
                 />
               )}
@@ -643,7 +648,7 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
     <View className="m-2 w-[160px]">
       <TouchableOpacity
         onPress={handleFlip}
-        className={`rounded-xl overflow-hidden h-[240px] ${isSelected ? "border-4 border-green-400" : ""
+        className={`rounded-xl overflow-hidden h-[240px] ${isSelected ? "border-4 border-red-400" : ""
           }`}
         activeOpacity={1}
       >
@@ -693,11 +698,11 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
       {/* + Button BELOW the card */}
       <TouchableOpacity
         onPress={() => toggleSelectMovie(movie)}
-        className={`mt-2 rounded-full px-4 py-2 self-center ${isSelected ? "bg-green-600" : "bg-orange-500"
+        className={`mt-2 rounded-full px-4 py-2 self-center ${isSelected ? "bg-red-600" : "bg-orange-500"
           }`}
       >
         <Text className="text-white font-bold text-center text-sm">
-          {isSelected ? "✓ Selected" : "+"}
+          {isSelected ? "-" : "+"}
         </Text>
       </TouchableOpacity>
     </View>
