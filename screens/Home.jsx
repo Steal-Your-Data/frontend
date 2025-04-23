@@ -152,11 +152,11 @@ function Home(props) {
             entering={FadeInUp.duration(600)}
             className="bg-white/90 rounded-2xl shadow-xl w-full max-w-md p-6 border border-orange-100 mb-6"
           >
-            <Text className="text-orange-600 text-xl font-extrabold mb-4">✨ Don't know what to watch?</Text>
+            <Text className="text-orange-600 text-xl font-extrabold mb-4">✨ Can't decide what to watch?</Text>
 
             <View className="mb-4">
               <Text className="text-orange-700 font-bold mb-1">👯 Invite Friends</Text>
-              <Text className="text-gray-700 text-sm">Create a session. Everyone joins, votes, and vibes together.</Text>
+              <Text className="text-gray-700 text-sm">Create a session. Everyone joins, selects, and vibes together.</Text>
             </View>
 
             <View className="mb-4">

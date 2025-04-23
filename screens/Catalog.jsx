@@ -256,20 +256,20 @@ export default function Catalog(props) {
 
   const toggleSelectMovie = (movie) => {
     if (!(selectedMovies.find(item => item.id === movie.id)) && selectedCount >= maxNumber) {
-        setLimitModalVisible(true);
-        return;
+      setLimitModalVisible(true);
+      return;
     }
 
     if (selectedMovies.find(item => item.id === movie.id)) {
-        console.log("Remove")
-        setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));
+      console.log("Remove")
+      setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));
     } else {
-        console.log("Add")
-        setSelectedMovies((prev) => ([...prev, movie]));
+      console.log("Add")
+      setSelectedMovies((prev) => ([...prev, movie]));
     }
-};
+  };
   const removeFromCart = (movie) => {
-      setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));;
+    setSelectedMovies(selectedMovies.filter(item => item.id !== movie.id));;
   };
 
   const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
@@ -375,12 +375,18 @@ export default function Catalog(props) {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                   <View className="flex-row items-center mb-4 bg-gray-100 p-3 rounded-xl">
-                    <Image
+                    {item.poster_path ? (
+                      <Image
                       source={{
                         uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
                       }}
                       className="w-12 h-20 rounded mr-3"
                     />
+                    ) : (
+                      <View className="w-12 h-20 rounded mr-3 justify-center items-center bg-gray-200">
+                        <Text className="text-gray-500 text-xs text-center px-1">No image</Text>
+                      </View>
+                    )}
                     <Text className="flex-1 font-semibold text-base">
                       {item.title}
                     </Text>
@@ -623,9 +629,11 @@ const styles = StyleSheet.create({
 
 const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
   const isFlipped = useSharedValue(0);
+  const [showDescription, setShowDescription] = useState(false);
 
   const handleFlip = () => {
     isFlipped.value = isFlipped.value ? 0 : 1;
+    setShowDescription(false);
   };
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
@@ -665,7 +673,7 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
               resizeMode="cover"
             />
           ) : (
-            <View className="w-full h-[200px] justify-center items-center bg-gray-200">
+            <View className="w-full h-[200px] rounded-t-xl justify-center items-center bg-gray-200">
               <Text className="text-gray-500">No image</Text>
             </View>
           )}
@@ -686,12 +694,31 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
           style={[backAnimatedStyle]}
           className="absolute w-full h-full bg-gray-200 justify-center items-center p-4 rounded-xl"
         >
-          <Text
-            className="text-sm text-gray-700 text-center"
-            numberOfLines={6}
-          >
-            {movie.overview || "No description available."}
-          </Text>
+          <View>
+            <Text className="text-sm text-gray-700 text-center mt-4">
+              Genre{movie.genres.includes('-') && 's'}: {movie.genres.replaceAll("-", ", ")}{"\n"}
+              Year: {movie.release_date.slice(0, 4) || "No year available."}{"\n"}
+            </Text>
+            {movie.overview ? (
+              showDescription ? (
+                <ScrollView style={{ maxHeight: 150 }} className="mb-4">
+                  <Text className="text-sm text-gray-700 text-center">
+                    {movie.overview}
+                  </Text>
+                </ScrollView>
+              ) : (
+                <TouchableOpacity onPress={() => setShowDescription(true)}>
+                  <Text className="text-sm text-blue-600 text-center underline mb-4">
+                    Read description
+                  </Text>
+                </TouchableOpacity>
+              )
+            ) : (
+              <Text className="text-sm text-gray-500 text-center mb-4">
+                No description available.
+              </Text>
+            )}
+          </View>
         </Animated.View>
       </TouchableOpacity>
 

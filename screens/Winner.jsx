@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -14,7 +14,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import GradientBackground from '../components/GradientBackground';
 import "../global.css";
 
-export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}) {
+export default function Winner({ finalVotes, setGoWinner, setGoHome, fetchWinner }) {
     const [movie, setMovie] = useState([]);
     const [winningMovies, setWinningMovies] = useState([]);
     const [finalistMovies, setFinalistMovies] = useState([]);
@@ -125,9 +125,9 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
 
     if (loading) {
         return (
-            <View style={[styles.flexCenter, {flex: 1, backgroundColor: '#000'}]}>
-                <ActivityIndicator size="large" color="#FFA500"/>
-                <Text style={{color: 'white', marginTop: 16, fontSize: 16}}>
+            <View style={[styles.flexCenter, { flex: 1, backgroundColor: '#000' }]}>
+                <ActivityIndicator size="large" color="#FFA500" />
+                <Text style={{ color: 'white', marginTop: 16, fontSize: 16 }}>
                     Calculating Winner...
                 </Text>
             </View>
@@ -136,7 +136,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
 
     return (
         <GradientBackground>
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <Text style={styles.header}>🏆 Winner 🏆</Text>
                     {winningMovies.length > 1 && !spinCompleted && !selectedMovie && (
@@ -155,7 +155,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                                 <Animated.View
                                     style={{
                                         flexDirection: 'row',
-                                        transform: [{translateX: spinAnim}],
+                                        transform: [{ translateX: spinAnim }],
                                     }}
                                 >
                                     {[...Array(8)].flatMap(() => winningMovies).map((m, idx) => (
@@ -168,11 +168,18 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                                                 }
                                             }}
                                         >
-                                            <Image
-                                                source={{uri: `https://image.tmdb.org/t/p/w500${m.movie?.poster_path}`}}
-                                                style={styles.itemPoster}
-                                                resizeMode="cover"
-                                            />
+                                            {m.movie.poster_path ? (
+                                                <Image
+                                                    source={{ uri: `https://image.tmdb.org/t/p/w500${m.movie.poster_path}` }}
+                                                    style={styles.itemPoster}
+                                                    resizeMode="cover"
+                                                />
+                                            ) : (
+                                                <View style={[styles.itemPoster, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#e5e7eb' }]}>
+                                                    <Text className="text-gray-500 text-center">No image</Text>
+                                                </View>
+                                            )}
+
                                         </View>
                                     ))}
                                 </Animated.View>
@@ -184,15 +191,22 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                         <Animated.View
                             style={[
                                 styles.movieCard,
-                                {transform: [{scale: scaleAnim}]},
+                                { transform: [{ scale: scaleAnim }] },
                             ]}
                         >
-                            <Image
-                                source={{
-                                    uri: `https://image.tmdb.org/t/p/w500${selectedMovie?.movie?.poster_path}`,
-                                }}
-                                style={styles.poster}
-                            />
+                            {selectedMovie.movie.poster_path ? (
+                                <Image
+                                    source={{
+                                        uri: `https://image.tmdb.org/t/p/w500${selectedMovie.movie.poster_path}`,
+                                    }}
+                                    style={styles.poster}
+                                />
+                            ) : (
+                                <View className="w-64 h-96 rounded-[10px] mb-4 justify-center items-center bg-gray-200">
+                                    <Text className="text-gray-500">No image</Text>
+                                </View>
+                            )}
+
                             <Text style={styles.title}>
                                 {selectedMovie?.movie?.title}
                             </Text>
@@ -209,7 +223,7 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                         <Text style={styles.returnButtonText}>Return to Home</Text>
                     </TouchableOpacity>
 
-                    { (winningMovies.length === 1 || spinCompleted) && finalistMovies && (
+                    {(winningMovies.length === 1 || spinCompleted) && finalistMovies && (
                         <View style={styles.finalistsContainer}>
                             <Text style={styles.finalistsHeader}>All Finalists</Text>
                             {finalistMovies
@@ -217,28 +231,35 @@ export default function Winner({finalVotes, setGoWinner, setGoHome, fetchWinner}
                                 .sort((a, b) => b.votes - a.votes)
                                 .slice(0, 2)
                                 .map((film) => (
-                                <View style={styles.finalistItem} key={film.movie.id}>
-                                    <Image
-                                        source={{
-                                            uri: `https://image.tmdb.org/t/p/w500${film.movie?.poster_path}`,
-                                        }}
-                                        style={styles.finalistImage}
-                                    />
-                                    <View style={styles.finalistInfo}>
-                                        <Text style={styles.finalistTitle}>{film.movie.title}</Text>
-                                        <Text style={styles.finalistVotes}>
-                                            {film.votes} {film.votes === 1 ? 'vote' : 'votes'}
-                                        </Text>
+                                    <View style={styles.finalistItem} key={film.movie.id}>
+                                        {film.movie.poster_path ? (
+                                            <Image
+                                                source={{
+                                                    uri: `https://image.tmdb.org/t/p/w500${film.movie.poster_path}`,
+                                                }}
+                                                style={styles.finalistImage}
+                                            />
+                                        ) : (
+                                            <View style={[styles.finalistImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#e5e7eb' }]}>
+                                                <Text className="text-gray-500 text-xs text-center">No image</Text>
+                                            </View>
+                                        )}
+
+                                        <View style={styles.finalistInfo}>
+                                            <Text style={styles.finalistTitle}>{film.movie.title}</Text>
+                                            <Text style={styles.finalistVotes}>
+                                                {film.votes} {film.votes === 1 ? 'vote' : 'votes'}
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
-                            ))}
+                                ))}
                         </View>
                     )}
                 </ScrollView>
 
                 <ConfettiCannon
                     count={100}
-                    origin={{x: 200, y: -20}}
+                    origin={{ x: 200, y: -20 }}
                     fadeOut
                     autoStart={false}
                     ref={confettiRef}

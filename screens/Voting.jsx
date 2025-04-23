@@ -16,7 +16,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   const [voted, setVoted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [movies, setMovies] = useState([]);
-  const [timer, setTimer] = useState(15); // 15 seconds
+  const [timer, setTimer] = useState(20); // 20 seconds
 
   // timer
   useEffect(() => {
@@ -136,18 +136,32 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
           Vote on this Movie
         </Text>
 
-        <Image
-          source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
-          className="w-48 h-72 rounded-xl mb-4"
-        />
+        {movie.poster_path ? (
+          <Image
+            source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
+            className="w-48 h-72 rounded-xl mb-2"
+          />
+        ):(
+          <View className="w-48 h-72 rounded-xl mb-2 justify-center items-center bg-gray-200">
+            <Text className="text-gray-500">No image</Text>
+          </View>
+        )}
 
-        <Text className="text-white text-xl font-semibold text-center mb-2">
-          {movie.title}
-        </Text>
-
-        <Text className="text-gray-300 text-sm text-center mb-6">
-          {movie.overview}
-        </Text>
+        <View className="bg-black bg-opacity-80 rounded-xl w-full max-w-4xl my-4 px-2 justify-center items-center">
+          <Text className="text-white text-xl font-semibold text-center my-2">
+            {movie.title}
+          </Text>
+          
+          {movie.overview ? (
+            <Text className="text-white text-sm text-center mb-3">
+              {movie.overview}
+            </Text>
+          ):(
+            <Text className="text-white text-sm text-center mb-3">
+              No description available.
+            </Text>
+          )}
+        </View>
 
         <View className="flex-row justify-around w-full max-w-md">
           <TouchableOpacity
