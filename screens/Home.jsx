@@ -181,7 +181,7 @@ function Home(props) {
           </Animated.View>
 
           {/* Footer */}
-          <Text className="text-white text-sm text-center mt-10 opacity-60 italic">
+          <Text className="text-white text-sm text-center mt-3 opacity-60 italic">
             CineMatch • Match. Watch. Vibe.
           </Text>
 

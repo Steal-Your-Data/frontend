@@ -281,16 +281,21 @@ export default function Catalog(props) {
           <StatusBar style="light" />
 
           <View className="px-4">
-            <Text className="text-white text-3xl font-black text-center mb-4">
+            {/* Timer */}
+            <View style={styles.timerContainer}>
+                <Text style={styles.timerText}>⏳ {formatTime(timer)}</Text>
+            </View>
+
+            <Text className="text-white text-3xl font-black text-center mt-3 mb-1">
               Movie Catalog
             </Text>
 
-            <Text className="text-white text-lg font-semibold text-center mb-2">
+            <Text className="text-white text-lg font-semibold text-center mb-3">
               Select movies you want to watch
             </Text>
 
             <TextInput
-              className="bg-white text-black px-4 py-2 rounded-lg mb-4"
+              className="bg-white text-black px-4 py-2 rounded-lg"
               placeholder="Search movies..."
               placeholderTextColor="#888"
               value={searchQuery}
@@ -298,12 +303,7 @@ export default function Catalog(props) {
             />
           </View>
 
-          {/* Timer */}
-          <View style={styles.timerContainer}>
-            <Text style={styles.timerText}>{formatTime(timer)}</Text>
-          </View>
-
-          <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
+          <View style={{ paddingHorizontal: 16, marginTop: 5, marginBottom: 5 }}>
             <TouchableOpacity
               style={styles.filterToggle}
               onPress={() => setFilterVisible(true)}
@@ -314,7 +314,7 @@ export default function Catalog(props) {
 
 
           {loading ? (
-            <ActivityIndicator size="large" color="orange" className="mt-4" />
+            <ActivityIndicator size="large" color="orange" className="mt-2" />
           ) : (
             <FlatList
               data={movies}
@@ -414,7 +414,7 @@ export default function Catalog(props) {
             onBackdropPress={() => setLimitModalVisible(false)}
           >
             <View className="bg-white p-6 rounded-xl items-center">
-              <Text className="text-lg font-bold text-red-600 mb-2">
+              <Text className="text-lg font-bold text-red-600 mb-2 text-center">
                 🚨 Selection Limit Reached
               </Text>
               <Text className="text-base text-center mb-4">
@@ -552,11 +552,11 @@ const styles = StyleSheet.create({
   },
   timerContainer: {
     position: "absolute",
-    top: 20,
-    left: 20,
+    left: 5,
+    top: 10,
     backgroundColor: "#f97316",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     borderRadius: 999
   },
   timerText: {
@@ -679,10 +679,10 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
           )}
 
           {/* Title section with semi-transparent background */}
-          <View className="px-2 py-2 rounded-b-xl min-h-[50px] justify-center"
+          <View className="rounded-b-xl min-h-[50px] justify-center"
             style={{ backgroundColor: 'rgba(10, 15, 36, 0.6)' }}>
             <Text
-              className="text-white text-center text-sm font-semibold"
+              className="text-white text-center text-sm px-2 pb-3 font-semibold"
               numberOfLines={2}
             >
               {movie.title}
@@ -708,7 +708,7 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
                 </ScrollView>
               ) : (
                 <TouchableOpacity onPress={() => setShowDescription(true)}>
-                  <Text className="text-sm text-blue-600 text-center underline mb-4">
+                  <Text className="text-sm text-[#1E90FF] text-center underline mb-4">
                     Read description
                   </Text>
                 </TouchableOpacity>

@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     tieText: {
-        color: 'orange',
+        color: '#fbd38d',
         fontSize: 16,
         textAlign: 'center',
         marginBottom: 8,
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     returnButton: {
-        backgroundColor: 'orange',
+        backgroundColor: '#f97316',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 15,

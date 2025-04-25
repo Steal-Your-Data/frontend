@@ -66,7 +66,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
       } else {
         setCurrentIndex(currentIndex + 1);
         setVoted(false);
-        setTimer(15);
+        setTimer(20);
       }
     }, 1000);
   };
@@ -98,8 +98,8 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   const styles = StyleSheet.create({
     timerContainer: {
         position: "absolute",
-        top: 20,
-        left: 20,
+        top: 15,
+        left: 10,
         backgroundColor: "#f97316",
         paddingVertical: 10,
         paddingHorizontal: 20,
@@ -147,7 +147,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
           </View>
         )}
 
-        <View className="bg-black bg-opacity-80 rounded-xl w-full max-w-4xl my-4 px-2 justify-center items-center">
+        <View className="bg-black bg-opacity-75 rounded-xl w-full max-w-4xl my-4 px-2 justify-center items-center">
           <Text className="text-white text-xl font-semibold text-center my-2">
             {movie.title}
           </Text>

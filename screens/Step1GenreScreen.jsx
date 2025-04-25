@@ -30,11 +30,11 @@ export default function Step1GenreScreen({ onNext, sessionCode, participantID })
         <Pressable
           key={genre}
           onPress={() => handleSelectGenre(genre)}
-          className={`w-[15%] aspect-square mx-[0.5%] my-1 rounded-md items-center justify-center ${
+          className={`w-[20%] sm:w-[18%] md:w-[15%] lg:w-[15%] aspect-square mx-1 my-1 rounded-md items-center justify-center ${
             selectedGenres.includes(genre) ? "bg-orange-400" : "bg-gray-100"
           }`}
         >
-          <Text className="text-black text-center text-[11px] font-semibold leading-tight">
+          <Text className="text-xs text-black text-center font-semibold leading-tight">
             {genre}
           </Text>
         </Pressable>
