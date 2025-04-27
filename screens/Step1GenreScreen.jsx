@@ -38,7 +38,7 @@ export default function Step1GenreScreen({ onNext, sessionCode, participantID })
             selectedGenres.includes(genre) ? "bg-orange-400" : "bg-gray-100"
           }`}
         >
-          <Text className="text-xs text-black text-center font-semibold leading-tight">
+          <Text className="text-lg text-black text-center font-semibold leading-tight">
             {genre}
           </Text>
         </Pressable>
