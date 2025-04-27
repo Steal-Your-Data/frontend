@@ -10,6 +10,10 @@ export default function Step1GenreScreen({ onNext, sessionCode, participantID })
   };
 
   const handleSelectGenre = (genre) => {
+    if (selectedGenres.length >= 3 && !selectedGenres.includes(genre)) {
+      return;
+    }
+
     setSelectedGenres((prev) =>
       prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
     );
@@ -19,7 +23,7 @@ export default function Step1GenreScreen({ onNext, sessionCode, participantID })
   return (
     <View className="flex-1 justify-center items-center bg-black px-6">
       <Text className="text-gray-400 text-lg mb-2">Step 1 of 3</Text>
-      <Text className="text-white text-2xl font-bold mb-8">Choose a genre</Text>
+      <Text className="text-white text-2xl font-bold mb-8">Choose up to 3 genres</Text>
 
       <View className="flex flex-row flex-wrap justify-center mb-12">
       {[
