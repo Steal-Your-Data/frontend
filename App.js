@@ -44,6 +44,15 @@ export default function App() {
     const [sortOrder, setSortOrder] = useState("");
     const [yearRange, setYearRange] = useState({ from: "", to: "" });
 
+    useEffect(() => {
+        try{
+            window.onbeforeunload = function() {
+                return "Are you sure you want to leave?";
+            }
+        } catch (error) {
+
+        }
+    }, []);
 
     // Listen for user_joined and user_left events
     useEffect(() => {
