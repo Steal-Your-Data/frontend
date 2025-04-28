@@ -19,7 +19,7 @@ export default function Step2TypeScreen({ onNext, sessionCode, participantID }) 
         What kind of movies are you looking for?
       </Text>
 
-      {["Latest releases", "Popular movies", "Any"].map((type) => (
+      {["Latest releases", "Popular movies"].map((type) => (
         <Pressable 
           key={type} 
           onPress={() => setSelectedType(type)}
