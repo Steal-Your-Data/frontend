@@ -56,8 +56,8 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                         onBlur={() => {
                             const year = parseInt(toYear);
 
-                            if (year > 2025) {
-                                setToYear("2025");
+                            if (year >  new Date().getFullYear() ) {
+                                setToYear(new Date().getFullYear().toString());
                             }
                         }}
                         maxLength={4}
