@@ -36,9 +36,8 @@ export default function Catalog(props) {
   const [timer, setTimer] = useState(180); // three minutes (in seconds)
   const [isFilterVisible, setFilterVisible] = useState(false);
   const [isSortVisible, setSortVisible] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [onlyInTheater, setOnlyInTheater] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
   const [selectedOrder, setSelectedOrder] = useState("");
 
   const sortList = ["popularity", "title", "release_date"];
@@ -49,7 +48,7 @@ export default function Catalog(props) {
     "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
   ]; // Replace with actual list
   const languageList = ["en", "la"]; // Replace with actual list
-  const releaseYears = Array.from({ length: 30 }, (_, i) => 2024 - i); // past 30 years
+  const releaseYears = Array.from({ length: 30 }, (_, i) => 2025 - i); // past 30 years
   const [selectedGenres, setSelectedGenres] = useState(props.selectedGenres || []);
 
   const toggleGenre = (genre) => {
@@ -132,8 +131,8 @@ export default function Catalog(props) {
       if (props.yearRange?.to)
         params.append("release_year_max", props.yearRange.to);
 
-      if (selectedSort) params.append("sort_by", selectedSort);
-      if (selectedOrder) params.append("order", selectedOrder);
+      if (props.sortOption) params.append("sort_by", props.sortOption);
+      if (props.sortOrder) params.append("order", props.sortOrder);
       if (selectedLanguage) params.append("language", selectedLanguage);
       if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
 
@@ -143,8 +142,8 @@ export default function Catalog(props) {
     [
       searchQuery,
       selectedGenres,
-      selectedSort,
-      selectedOrder,
+      props.sortOption,
+      props.sortOrder,
       selectedLanguage,
       onlyInTheater,
       props.yearRange,
@@ -178,7 +177,7 @@ export default function Catalog(props) {
     setPage(1);
     setHasMore(true);
     getMovies(1, true);
-  }, [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder, getMovies]);
+  }, [searchQuery, props.selectedGenres, props.yearRange, props.sortOption, props.sortOrder, getMovies]);
 
   const loadNextPage = () => {
     if (loading || !hasMore) return;
@@ -228,8 +227,10 @@ export default function Catalog(props) {
 
     if (selectedLanguage) params.append("language", selectedLanguage);
     if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
-    if (sortList) params.append("sort_by", selectedSort);
-    if (sortOrderList) params.append("order", selectedOrder);
+    
+    //todo: look into that
+    if (sortList) params.append("sort_by", props.sortOption);
+    if (sortOrderList) params.append("order", props.sortOrder);
 
     if (props.yearRange?.from) params.append("release_year_min", props.yearRange.from);
     if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
@@ -524,8 +525,8 @@ export default function Catalog(props) {
                 <Text className="text-white mt-4">Sort By:</Text>
                 <View style={styles.dropdown}>
                   <select
-                    value={selectedSort}
-                    onChange={(e) => setSelectedSort(e.target.value)}
+                    value={props.sortOption}
+                    onChange={(e) => props.setSortOption(e.target.value)}
                     style={styles.selectBox}
                   >
                     <option value="">-- Select --</option>
@@ -541,8 +542,8 @@ export default function Catalog(props) {
                 <Text className="text-white mt-4">Order:</Text>
                 <View style={styles.dropdown}>
                   <select
-                    value={selectedOrder}
-                    onChange={(e) => setSelectedOrder(e.target.value)}
+                    value={props.sortOrder}
+                    onChange={(e) => props.setSortOrder(e.target.value)}
                     style={styles.selectBox}
                   >
                     <option value="">-- Select --</option>
