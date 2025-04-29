@@ -550,8 +550,20 @@ export default function App() {
         return (
             <Step2TypeScreen
                 onNext={({ sortBy, order }) => {
-                    setSortOption(sortBy);
-                    setSortOrder(order);
+                    // onNext({ sortBy: sort, order });
+
+
+                    setSortOption(sortBy); // popularity / release_date
+                    setSortOrder(order); // asc/ desc
+
+                    if(sortBy === "release_date") {
+                        setYearRange({ from:  new Date().getFullYear().toString(), to: new Date().getFullYear().toString() });
+                        setSortOption("popularity");
+
+                        setStepScreen(null);
+                        setGoCatalog(true);
+                        return;
+                    }
                     setStepScreen("Step3");
                 }}
                 sessionCode={sessionCode}
@@ -582,6 +594,12 @@ export default function App() {
             selectedOrder={sortOrder}
             yearRange={yearRange}
             setYearRange={setYearRange}
+
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+            sortOption={sortOption}
+            setSortOption={setSortOption}
+
         />
     } else if (goWaiting) {
         return (

@@ -6,7 +6,7 @@ export default function Step2TypeScreen({ onNext, sessionCode, participantID }) 
 
   const handleNext = () => {
     const sort = selectedType === "Latest releases" ? "release_date" :
-                 selectedType === "Popular classics" ? "popularity" : "";
+                 selectedType === "Popular movies" ? "popularity" : "";
     const order = "desc"; // Assuming always descending for now
   
     onNext({ sortBy: sort, order });  // Send sort config
@@ -19,7 +19,7 @@ export default function Step2TypeScreen({ onNext, sessionCode, participantID }) 
         What kind of movies are you looking for?
       </Text>
 
-      {["Latest releases", "Popular classics", "Any"].map((type) => (
+      {["Latest releases", "Popular movies"].map((type) => (
         <Pressable 
           key={type} 
           onPress={() => setSelectedType(type)}

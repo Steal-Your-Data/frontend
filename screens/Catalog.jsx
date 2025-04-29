@@ -35,10 +35,9 @@ export default function Catalog(props) {
   const { width } = Dimensions.get("window");
   const [timer, setTimer] = useState(180); // three minutes (in seconds)
   const [isFilterVisible, setFilterVisible] = useState(false);
-
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [isSortVisible, setSortVisible] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [onlyInTheater, setOnlyInTheater] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
   const [selectedOrder, setSelectedOrder] = useState("");
 
   const sortList = ["popularity", "title", "release_date"];
@@ -49,7 +48,7 @@ export default function Catalog(props) {
     "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
   ]; // Replace with actual list
   const languageList = ["en", "la"]; // Replace with actual list
-  const releaseYears = Array.from({ length: 30 }, (_, i) => 2024 - i); // past 30 years
+  const releaseYears = Array.from({ length: 30 }, (_, i) => 2025 - i); // past 30 years
   const [selectedGenres, setSelectedGenres] = useState(props.selectedGenres || []);
 
   const toggleGenre = (genre) => {
@@ -132,8 +131,8 @@ export default function Catalog(props) {
       if (props.yearRange?.to)
         params.append("release_year_max", props.yearRange.to);
 
-      if (selectedSort) params.append("sort_by", selectedSort);
-      if (selectedOrder) params.append("order", selectedOrder);
+      if (props.sortOption) params.append("sort_by", props.sortOption);
+      if (props.sortOrder) params.append("order", props.sortOrder);
       if (selectedLanguage) params.append("language", selectedLanguage);
       if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
 
@@ -143,8 +142,8 @@ export default function Catalog(props) {
     [
       searchQuery,
       selectedGenres,
-      selectedSort,
-      selectedOrder,
+      props.sortOption,
+      props.sortOrder,
       selectedLanguage,
       onlyInTheater,
       props.yearRange,
@@ -178,7 +177,7 @@ export default function Catalog(props) {
     setPage(1);
     setHasMore(true);
     getMovies(1, true);
-  }, [searchQuery, props.selectedGenres, props.yearRange, props.selectedSort, props.selectedOrder, getMovies]);
+  }, [searchQuery, props.selectedGenres, props.yearRange, props.sortOption, props.sortOrder, getMovies]);
 
   const loadNextPage = () => {
     if (loading || !hasMore) return;
@@ -228,8 +227,10 @@ export default function Catalog(props) {
 
     if (selectedLanguage) params.append("language", selectedLanguage);
     if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
-    if (sortList) params.append("sort_by", selectedSort);
-    if (sortOrderList) params.append("order", selectedOrder);
+    
+    //todo: look into that
+    if (sortList) params.append("sort_by", props.sortOption);
+    if (sortOrderList) params.append("order", props.sortOrder);
 
     if (props.yearRange?.from) params.append("release_year_min", props.yearRange.from);
     if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
@@ -303,12 +304,18 @@ export default function Catalog(props) {
             />
           </View>
 
-          <View style={{ paddingHorizontal: 16, marginTop: 5, marginBottom: 5 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10, marginHorizontal: 16 }}>
+            <TouchableOpacity
+              style={styles.filterToggle}
+              onPress={() => setSortVisible(true)}
+            >
+              <Text style={{ color: "white", fontWeight: "bold" }}>Sort</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.filterToggle}
               onPress={() => setFilterVisible(true)}
             >
-              <Text style={{ color: "white", fontWeight: "bold" }}>☰ Filters</Text>
+              <Text style={{ color: "white", fontWeight: "bold" }}>Filter</Text>
             </TouchableOpacity>
           </View>
 
@@ -438,7 +445,7 @@ export default function Catalog(props) {
           >
             <View style={styles.filterDrawer}>
               <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-                <Text style={styles.filterTitle}>Filter Movies 🎛️</Text>
+                <Text style={styles.filterTitle}>Filter Movies</Text>
 
                 {/* Genres */}
                 <Text className="text-white font-bold mt-4 mb-2">Genres</Text>
@@ -488,12 +495,38 @@ export default function Catalog(props) {
                   </select>
                 </View>
 
+                {/* Apply Button */}
+                <TouchableOpacity
+                  style={styles.applyButton}
+                  onPress={() => {
+                    props.setSelectedGenres(selectedGenres);
+                    setPage(1);
+                    getMovies(1, true);
+                    setFilterVisible(false);
+                  }}
+                >
+                  <Text style={{ color: "white", fontWeight: "bold" }}>Apply Filters</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </Modal>
+          <Modal
+            isVisible={isSortVisible}
+            animationIn="slideInLeft"
+            animationOut="slideOutLeft"
+            onBackdropPress={() => setSortVisible(false)}
+            style={{ margin: 0, justifyContent: "flex-end", alignItems: "flex-start" }}
+          >
+            <View style={[styles.filterDrawer, { borderTopRightRadius: 20, borderBottomRightRadius: 20 }]}>
+              <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+                <Text style={styles.filterTitle}>Sort Movies</Text>
+
                 {/* Sort By */}
-                <Text className="text-white mt-4">Sort:</Text>
+                <Text className="text-white mt-4">Sort By:</Text>
                 <View style={styles.dropdown}>
                   <select
-                    value={selectedSort}
-                    onChange={(e) => setSelectedSort(e.target.value)}
+                    value={props.sortOption}
+                    onChange={(e) => props.setSortOption(e.target.value)}
                     style={styles.selectBox}
                   >
                     <option value="">-- Select --</option>
@@ -506,11 +539,11 @@ export default function Catalog(props) {
                 </View>
 
                 {/* Sort Order */}
-                <Text className="text-white mt-4">Sort Order:</Text>
+                <Text className="text-white mt-4">Order:</Text>
                 <View style={styles.dropdown}>
                   <select
-                    value={selectedOrder}
-                    onChange={(e) => setSelectedOrder(e.target.value)}
+                    value={props.sortOrder}
+                    onChange={(e) => props.setSortOrder(e.target.value)}
                     style={styles.selectBox}
                   >
                     <option value="">-- Select --</option>
@@ -519,17 +552,16 @@ export default function Catalog(props) {
                   </select>
                 </View>
 
-                {/* Apply Button */}
+                {/* Apply Sort Button */}
                 <TouchableOpacity
                   style={styles.applyButton}
                   onPress={() => {
-                    props.setSelectedGenres(selectedGenres);
                     setPage(1);
                     getMovies(1, true);
-                    setFilterVisible(false);
+                    setSortVisible(false);
                   }}
                 >
-                  <Text style={{ color: "white", fontWeight: "bold" }}>Apply Filters</Text>
+                  <Text style={{ color: "white", fontWeight: "bold" }}>Apply Sort</Text>
                 </TouchableOpacity>
               </ScrollView>
             </View>
@@ -567,10 +599,11 @@ const styles = StyleSheet.create({
   filterToggle: {
     backgroundColor: "#f97316",
     paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 999,
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 10,
+    marginHorizontal: 5,
+    flex: 1,
   },
   applyButton: {
     backgroundColor: "#f97316",
