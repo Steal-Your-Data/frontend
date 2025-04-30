@@ -47,7 +47,33 @@ export default function Catalog(props) {
     "Drama", "Family", "Fantasy", "History", "Horror", "Music",
     "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
   ]; // Replace with actual list
-  const languageList = ["en", "la"]; // Replace with actual list
+  const languageList = {
+    "Abkhazian": "ab", "Afar": "aa", "Afrikaans": "af", "Akan": "ak", "Albanian": "sq", "Amharic": "am", 
+    "Arabic": "ar", "Aragonese": "an", "Armenian": "hy", "Assamese": "as", "Avaric": "av", "Aymara": "ay", "Azerbaijani": "az", 
+    "Bambara": "bm", "Bashkir": "ba", "Basque": "eu", "Belarusian": "be", "Bengali": "bn", "Bislama": "bi", "Bokmål, Norwegian": "nb", 
+    "Bosnian": "bs", "Breton": "br", "Bulgarian": "bg", "Burmese": "my", "Catalan": "ca", "Central Khmer": "km", "Chamorro": "ch", 
+    "Chechen": "ce", "Chinese": "zh", "Chichewa": "ny", "Chuvash": "cv", "Cornish": "kw", "Corsican": "co", "Cree": "cr", "Croatian": "hr",
+    "Czech": "cs", "Danish": "da", "Divehi": "dv", "Dutch": "nl", "Dzongkha": "dz", "English": "en", "Esperanto": "eo", "Estonian": "et",
+    "Faroese": "fo", "Fijian": "fj", "Finnish": "fi", "French": "fr", "Fulah": "ff", "Gaelic": "gd", "Galician": "gl", "Ganda": "lg", 
+    "Georgian": "ka", "German": "de", "Greek": "el", "Guarani": "gn", "Gujarati": "gu", "Haitian": "ht", "Hausa": "ha", "Hebrew": "he",
+    "Herero": "hz", "Hindi": "hi", "Hiri Motu": "ho", "Hungarian": "hu", "Icelandic": "is", "Igbo": "ig", "Indonesian": "id",
+    "Interlingua": "ia",  "Interlingue": "ie", "Inuktitut": "iu", "Inupiaq": "ik", "Irish": "ga", "Italian": "it", "Japanese": "ja",
+    "Javanese": "jv", "Kalaallisut": "kl", "Kannada": "kn", "Kashmiri": "ks", "Kazakh": "kk", "Kikuyu": "ki", "Kinyarwanda": "rw",
+    "Kirghiz": "ky", "Komi": "kv", "Kongo": "kg", "Korean": "ko", "Kuanyama": "kj", "Kurdish": "ku", "Lao": "lo", "Latin": "la",
+    "Latvian": "lv", "Limburgan": "li", "Lingala": "ln", "Lithuanian": "lt", "Luxembourgish": "lb", "Macedonian": "mk", "Malagasy": "mg",
+    "Malay": "ms", "Malayalam": "ml", "Maltese": "mt", "Manx": "gv", "Maori": "mi", "Marathi": "mr", "Marshallese": "mh", "Mongolian": "mn",
+    "Navajo": "nv", "Ndebele, North": "nd", "Ndebele, South": "nr", "Nepali": "ne", "Norwegian": "no", "Norwegian Nynorsk": "nn",
+    "Occitan": "oc", "Ojibwa": "oj", "Oriya": "or", "Oromo": "om", "Ossetian": "os", "Panjabi": "pa", "Persian": "fa", "Polish": "pl",
+    "Portuguese": "pt", "Pushto": "ps", "Quechua": "qu", "Romansh": "rm", "Romanian": "ro", "Russian": "ru", "Rundi": "rn", "Samoan": "sm",
+    "Sango": "sg", "Sanskrit": "sa", "Sardinian": "sc", "Serbian": "sr", "Shona": "sn", "Sindhi": "sd", "Sinhala": "si", "Slovak": "sk",
+    "Slovenian": "sl", "Somali": "so", "Sotho, Southern": "st", "Spanish": "es", "Sundanese": "su", "Swahili": "sw", "Swati": "ss",
+    "Swedish": "sv", "Tagalog": "tl", "Tahitian": "ty", "Tajik": "tg", "Tamil": "ta", "Tatar": "tt", "Telugu": "te", "Thai": "th",
+    "Tibetan": "bo", "Tigrinya": "ti", "Tonga": "to", "Tsonga": "ts", "Tswana": "tn", "Turkish": "tr", "Turkmen": "tk", "Twi": "tw",
+    "Uighur": "ug", "Ukrainian": "uk", "Urdu": "ur", "Uzbek": "uz", "Venda": "ve", "Vietnamese": "vi", "Welsh": "cy", "Western Frisian": "fy",
+    "Wolof": "wo", "Xhosa": "xh", "Yiddish": "yi", "Yoruba": "yo", "Zulu": "zu"
+  }
+  
+  
   const releaseYears = Array.from({ length: 30 }, (_, i) => 2025 - i); // past 30 years
   const [selectedGenres, setSelectedGenres] = useState(props.selectedGenres || []);
 
@@ -465,9 +491,12 @@ export default function Catalog(props) {
                     style={styles.selectBox}
                   >
                     <option value="">-- Select --</option>
-                    {languageList.map((lang) => (
-                      <option key={lang} value={lang}>{lang}</option>
-                    ))}
+                    {
+                    // languageList.map((lang) => (
+                    //   <option key={lang} value={lang}>{lang}</option>
+                    // ))
+                    Object.keys(languageList).map((key) => (<option value={languageList[key]}>{key}</option>))
+                    }
                   </select>
                 </View>
 
