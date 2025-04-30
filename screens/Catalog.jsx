@@ -74,7 +74,7 @@ export default function Catalog(props) {
   }
   
   
-  const releaseYears = Array.from({ length: 30 }, (_, i) => 2025 - i); // past 30 years
+  const releaseYears = Array.from({ length: 175 }, (_, i) => 2025 - i); // past 30 years
   const [selectedGenres, setSelectedGenres] = useState(props.selectedGenres || []);
 
   const toggleGenre = (genre) => {
@@ -124,10 +124,9 @@ export default function Catalog(props) {
     // Send users to voting page when timer hits zero
     if (seconds == 0) {
       if (Object.keys(selectedMovies).length === 0) {
-        console.log("User did not select a movie");
-        console.log("Use this movie id: ", movies[0].id);
-        setSelectedMovies((prev) => ({ ...prev, [movies[0].id]: !prev[movies[0].id] }));
-        props.handleSendMovies(selectedMovies);
+        // console.log("User did not select a movie");
+        // console.log("Use this movie id: ", movies[0].id);
+        props.handleSendMovies([]);
       } else {
         props.handleSendMovies(selectedMovies);
       }
