@@ -689,7 +689,7 @@ const FlipCard = ({ movie, isSelected, toggleSelectMovie }) => {
     <View className="m-2 w-[160px]">
       <TouchableOpacity
         onPress={handleFlip}
-        className={`rounded-xl overflow-hidden h-[240px] ${isSelected ? "border-4 border-red-400" : ""
+        className={`rounded-2xl overflow-hidden h-[240px] ${isSelected ? "border-4 border-red-400" : ""
           }`}
         activeOpacity={1}
       >
