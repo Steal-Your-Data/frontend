@@ -100,10 +100,8 @@ export default function App() {
 
         socket.on('No_Movies', (data) => {
             console.log('No movies added to session:', data.session_id);
-            setInSession(false);
-            setGoVoting(false);
             setGoWaiting(false);
-            setGoHome(true);
+            setGoVoting(true);
         });
         
         socket.on('selection_complete', (data) => {
@@ -628,6 +626,7 @@ export default function App() {
             handleYes={handleYes}
             handleFinalVote={handleFinalVote}
             fetchMovies={fetchMovies}
+            setGoHome={setGoHome}
           />
         );
     } else if (goWinner) {

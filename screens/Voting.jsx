@@ -11,7 +11,7 @@ import {
 import GradientBackground from '../components/GradientBackground'; // ✅ custom background
 import "../global.css";
 
-function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFinalVote, fetchMovies }) {
+function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFinalVote, fetchMovies, setGoHome }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [votes, setVotes] = useState({});
   const [voted, setVoted] = useState(false);
@@ -21,7 +21,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
 
   // timer
   useEffect(() => {
-    if (timer === 0 && !voted) {
+    if (timer === 0 && !voted && !(!Array.isArray(movies) || movies.length === 0)) {
       handleVote(movies[currentIndex].id, "no");
     }
   
@@ -34,7 +34,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     }, 1000);
   
     return () => clearInterval(interval);
-  }, [timer, voted, currentIndex, movies]);
+  }, [timer, voted, votes, currentIndex, movies]);
   
 
   useEffect(() => {
@@ -72,6 +72,11 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     }, 1000);
   };
 
+  const handleReturnHome = () => {
+    setGoVoting(false);
+    setGoHome(true);
+};
+
   if (loading) {
     return (
       <GradientBackground>
@@ -83,11 +88,17 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     );
   }
 
-  if (movies.length === 0) {
+  if (!Array.isArray(movies) || movies.length === 0) {
     return (
       <GradientBackground>
-        <View className="flex-1 justify-center items-center px-6">
-          <Text className="text-red-500 text-lg font-semibold">No movies available.</Text>
+        <View className="flex-1 justify-center items-center p-6">
+          <View className="bg-black bg-opacity-75 rounded-2xl shadow-md w-full max-w-lg p-6 justify-center items-center">
+            <Text className="text-red-500 text-4xl font-semibold mb-6 text-center">No movies were selected.</Text>
+
+            <TouchableOpacity className="bg-orange-600 px-6 py-3 rounded-xl" onPress={handleReturnHome}>
+              <Text className="text-white font-bold text-lg">Return to Home</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </GradientBackground>
     );
