@@ -30,8 +30,8 @@ export default function Step1GenreScreen({ onNext }) {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-gray-400 text-lg mt-4">Step 1 of 3</Text>
-          <Text className="text-white text-2xl font-bold my-6 text-center">
+          <Text className="text-gray-400 text-lg mt-6 mb-2">Step 1 of 3</Text>
+          <Text className="text-white text-3xl font-bold mb-6 text-center">
             Choose up to 3 genres
           </Text>
 
@@ -44,7 +44,7 @@ export default function Step1GenreScreen({ onNext }) {
                         selectedGenres.includes(genre) ? "bg-orange-400" : "bg-gray-100"
                     }`}
                 >
-                  <Text className="text-lg text-black text-center font-semibold leading-tight lg:text-2xl">
+                  <Text className="text-lg text-black text-center font-semibold leading-tight lg:text-2xl flex-wrap">
                     {genre}
                   </Text>
                 </Pressable>

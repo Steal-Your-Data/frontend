@@ -89,7 +89,7 @@ function Home(props) {
             entering={FadeInUp.duration(600)}
             className="bg-orange-50 rounded-2xl shadow-2xl w-full max-w-md p-6 items-center border border-white/30 mb-6"
           >
-            <Text className="text-gray-800 text-lg font-semibold text-center mb-2">
+            <Text className="text-gray-800 text-xl font-semibold text-center mb-2">
               What are you in the mood for?
             </Text>
             <Text className="text-gray-500 text-sm text-center mb-4 leading-relaxed">
@@ -185,7 +185,7 @@ function Home(props) {
             CineMatch • Match. Watch. Vibe.
           </Text>
 
-          <Text className="text-white text-xs text-center mt-2 opacity-60">
+          <Text className="text-white text-xs text-center mt-2 mb-8 opacity-60">
             Your watch party awaits 🍿
           </Text>
         </View>

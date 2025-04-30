@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: 'center',
         paddingHorizontal: 16,
-        paddingTop: 80,
+        paddingTop: 40,
         paddingBottom: 40,
     },
     header: {
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
         color: '#fbd38d',
         fontSize: 16,
         textAlign: 'center',
-        marginBottom: 8,
+        marginBottom: 12,
     },
     spinnerContainer: {
         width: '100%',

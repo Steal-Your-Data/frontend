@@ -37,12 +37,12 @@ export default function Step3TimePeriodScreen({ onNext, sessionCode, participant
     <View className="flex-1 justify-center items-center bg-black px-6">
       <Text className="text-gray-400 text-lg mb-2">Step 3 of 3</Text>
 
-      <Text className="text-white text-3xl font-extrabold mb-6 text-center">
+      <Text className="text-white text-3xl font-bold mb-6 text-center">
         What time period are you interested in?
       </Text>
 
       <View className="items-center w-full mb-16">
-        <Text className="text-orange-400 text-2xl font-extrabold mb-4 tracking-wide">
+        <Text className="text-orange-500 text-2xl font-extrabold mb-4 tracking-wide">
           {range[0]} — {range[1]}
         </Text>
 
@@ -50,8 +50,8 @@ export default function Step3TimePeriodScreen({ onNext, sessionCode, participant
         <View style={{ width: width * 0.8, alignItems: 'center' }}>
           {/* Top year labels (above thumbs) */}
           <View style={styles.labelRow}>
-            <Text style={styles.thumbLabel}>{range[0]}</Text>
-            <Text style={styles.thumbLabel}>{range[1]}</Text>
+            <Text style={styles.thumbLabel}>1850</Text>
+            <Text style={styles.thumbLabel}>{MAX_YEAR}</Text>
           </View>
 
           {/* Actual slider */}
@@ -94,7 +94,7 @@ export default function Step3TimePeriodScreen({ onNext, sessionCode, participant
 
       <Pressable
         onPress={handleFinish}
-        className="bg-orange-500 px-16 py-4 rounded-full"
+        className="bg-orange-500 px-12 py-3 rounded-full"
         style={({ pressed }) => [
           {
             transform: [{ scale: pressed ? 1.05 : 1 }],

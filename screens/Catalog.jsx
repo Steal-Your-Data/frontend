@@ -284,7 +284,12 @@ export default function Catalog(props) {
           <View className="px-4">
             {/* Timer */}
             <View style={styles.timerContainer}>
-                <Text style={styles.timerText}>⏳ {formatTime(timer)}</Text>
+                <Text 
+                  className="text-base sm:text-lg md:text-xl lg:text-2xl"
+                  style={styles.timerText}
+                >
+                  ⏳ {formatTime(timer)}
+                </Text>
             </View>
 
             <Text className="text-white text-3xl font-black text-center mt-3 mb-1">
@@ -353,7 +358,7 @@ export default function Catalog(props) {
             style={styles.cartButton}
             onPress={() => setCartVisible(true)}
           >
-            <Text className="text-white font-bold text-sm">
+            <Text className="text-white font-bold text-base">
               🎥 Selection ({selectedCount} / {maxNumber})
             </Text>
           </TouchableOpacity>
@@ -593,7 +598,6 @@ const styles = StyleSheet.create({
   },
   timerText: {
     color: "white",
-    fontSize: 16,
     fontWeight: "bold"
   },
   filterToggle: {
@@ -604,6 +608,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 5,
     flex: 1,
+    marginBottom: 15
   },
   applyButton: {
     backgroundColor: "#f97316",

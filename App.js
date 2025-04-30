@@ -98,6 +98,12 @@ export default function App() {
             setFinishedUsers(data.done_participants); // update the number of participants who have finished
         });
 
+        socket.on('No_Movies', (data) => {
+            console.log('No movies added to session:', data.session_id);
+            setGoWaiting(false);
+            setGoVoting(true);
+        });
+        
         socket.on('selection_complete', (data) => {
             console.log('Selection Completed:', data);
             setGoVoting(true); // Move all clients to the Voting page
@@ -106,6 +112,7 @@ export default function App() {
 
         return () => {
             socket.off('selection_progress');
+            socket.off('No_Movies');
             socket.off('selection_complete'); // Cleanup listener
         };
     }, []);
@@ -619,6 +626,7 @@ export default function App() {
             handleYes={handleYes}
             handleFinalVote={handleFinalVote}
             fetchMovies={fetchMovies}
+            setGoHome={setGoHome}
           />
         );
     } else if (goWinner) {
