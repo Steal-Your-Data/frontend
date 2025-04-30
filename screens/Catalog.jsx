@@ -74,7 +74,7 @@ export default function Catalog(props) {
   }
   
   
-  const releaseYears = Array.from({ length: 175 }, (_, i) => 2025 - i); // past 30 years
+  const releaseYears = Array.from({ length: 176 }, (_, i) => 2025 - i); // past 30 years
   const [selectedGenres, setSelectedGenres] = useState(props.selectedGenres || []);
 
   const toggleGenre = (genre) => {
