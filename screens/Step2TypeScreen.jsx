@@ -15,7 +15,7 @@ export default function Step2TypeScreen({ onNext, sessionCode, participantID }) 
   return (
     <View className="flex-1 justify-center items-center bg-black px-6">
       <Text className="text-gray-400 text-lg mb-2">Step 2 of 3</Text>
-      <Text className="text-white text-2xl font-bold mb-8 text-center">
+      <Text className="text-white text-3xl font-bold mb-8 text-center">
         What kind of movies are you looking for?
       </Text>
 
@@ -23,7 +23,7 @@ export default function Step2TypeScreen({ onNext, sessionCode, participantID }) 
         <Pressable 
           key={type} 
           onPress={() => setSelectedType(type)}
-          className={`bg-gray-100 p-4 w-full rounded-lg items-center mb-4 ${selectedType === type ? 'bg-orange-300' : ''}`}        >
+          className={`bg-gray-100 p-4 w-full max-w-4xl rounded-lg items-center mb-4 ${selectedType === type ? 'bg-orange-300' : ''}`}        >
           <Text className="text-black text-lg">{type}</Text>
         </Pressable>
       ))}
