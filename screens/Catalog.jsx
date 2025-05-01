@@ -21,6 +21,8 @@ import Animated, {
     interpolate,
 } from "react-native-reanimated";
 import "../global.css";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { Picker } from "@react-native-picker/picker";   // replaces every <select>
 import GradientBackground from '../components/GradientBackground';
 
 export default function Catalog(props) {
@@ -39,7 +41,8 @@ export default function Catalog(props) {
     const [selectedLanguage, setSelectedLanguage] = useState("en");
     const [onlyInTheater, setOnlyInTheater] = useState("");
     const [selectedOrder, setSelectedOrder] = useState("");
-
+    const MAX_YEAR = 2025;
+    const [range, setRange] = useState([2000, MAX_YEAR]);   // slider values
     const sortList = ["popularity", "title", "release_date"];
     const sortOrderList = ["asc", "desc"];
     const genresList = [
@@ -646,23 +649,32 @@ export default function Catalog(props) {
                                         </select>
                                     </View>
 
-                                    {/* Release Year */}
-                                    <Text className="text-white mt-4">Release Year:</Text>
-                                    <View style={styles.dropdown}>
-                                        <select
-                                            value={props.yearRange?.from === props.yearRange?.to ? props.yearRange.from : ""}
-                                            onChange={(e) => props.setYearRange({
-                                                from: e.target.value,
-                                                to: e.target.value
-                                            })}
-                                            style={styles.selectBox}
-                                        >
-                                            <option value="">-- Select --</option>
-                                            {releaseYears.map((year) => (
-                                                <option key={year} value={year}>{year}</option>
-                                            ))}
-                                        </select>
+                                    <View>
+                                    {/* Release Year Row */}
+                                    <View style={styles.rangeRow}>
+                                      <Text style={styles.sectionHeading}>Release Year Range    </Text>
+                                      <Text style={styles.rangeLabel}>{`${range[0]} — ${range[1]}`}</Text>
                                     </View>
+
+                                    {/* Slider */}
+                                    <View style={{ alignItems: "center", marginVertical: 16 }}>
+                                      <MultiSlider
+                                        values={range}
+                                        min={1850}
+                                        max={MAX_YEAR}
+                                        onValuesChange={setRange}
+                                        sliderLength={width * 0.7}
+                                        trackStyle={styles.sliderTrack}
+                                        selectedStyle={{ backgroundColor: "#FFA500" }}
+                                        unselectedStyle={{ backgroundColor: "#333" }}
+                                        markerStyle={styles.sliderMarker}
+                                      />
+                                      <View style={styles.labelRow}>
+                                        <Text style={styles.thumbLabel}>1850</Text>
+                                        <Text style={styles.thumbLabel}>{MAX_YEAR}</Text>
+                                      </View>
+                                    </View>
+                                  </View>
 
                                     {/* In Theaters */}
                                     <Text className="text-white mt-4">In Theaters:</Text>
@@ -686,6 +698,7 @@ export default function Catalog(props) {
                                             setPage(1);
                                             getMovies(1, true);
                                             setFilterVisible(false);
+                                            props.setYearRange?.({ from: range[0], to: range[1] });
                                         }}
                                     >
                                         <Text style={{color: "white", fontWeight: "bold"}}>Apply Filters</Text>
@@ -858,7 +871,43 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 16,
-    }
+    },
+    rangeRow: {
+      flexDirection: "row",
+      //justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 20,
+    },
+    sectionHeading: {
+      color: "#fff",
+      fontWeight: "700",
+      fontSize: 16,
+    },
+    rangeLabel: {
+      backgroundColor: "#f97316",
+      color: "#fff",
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 20,
+      fontWeight: "bold",
+      overflow: "hidden",
+    },
+    sliderTrack: { height: 8, borderRadius: 10, backgroundColor: "#555" },
+    sliderMarker: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: "#FFA500",
+      borderWidth: 2,
+      borderColor: "#fff",
+    },
+    labelRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      paddingHorizontal: 4,
+    },
+    thumbLabel: { color: "#aaa", fontSize: 12 },
 });
 
 const FlipCard = ({movie, isSelected, toggleSelectMovie}) => {
