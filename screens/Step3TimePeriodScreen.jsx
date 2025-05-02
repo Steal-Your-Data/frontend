@@ -34,6 +34,9 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
         }).start();
     };
 
+    const isMobile = width < 768;
+    const sliderLength = width * (isMobile ? 0.67 : 0.76);
+
     return (
         <GradientBackground>
             <SafeAreaView className="flex-1 bg-transparent">
@@ -51,11 +54,6 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
 
                         {/* Slider and Number Labels */}
                         <View style={{width: width * 0.8, alignItems: 'center'}}>
-                            {/* Top year labels (above thumbs) */}
-                            <View style={styles.labelRow}>
-                                <Text style={styles.thumbLabel}>1850</Text>
-                                <Text style={styles.thumbLabel}>{MAX_YEAR}</Text>
-                            </View>
 
                             {/* Actual slider */}
                             <MultiSlider
@@ -64,7 +62,7 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                                 max={MAX_YEAR}
                                 onValuesChange={setRange}
                                 enableLabel={false}
-                                sliderLength={width * 0.8}
+                                sliderLength={sliderLength}
                                 trackStyle={{
                                     height: 8,
                                     borderRadius: 10,
@@ -92,6 +90,12 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                                 onValuesChangeStart={onDragStart}
                                 onValuesChangeFinish={onDragEnd}
                             />
+
+                            {/* Bottom year labels (above thumbs) */}
+                            <View style={styles.labelRow}>
+                                <Text style={styles.thumbLabel}>1850</Text>
+                                <Text style={styles.thumbLabel}>{MAX_YEAR}</Text>
+                            </View>
                         </View>
                     </View>
 
@@ -125,7 +129,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8,
-        paddingHorizontal: 8,
+        paddingHorizontal: 4,
     },
     thumbLabel: {
         color: 'white',

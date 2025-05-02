@@ -235,7 +235,7 @@ export default function Catalog(props) {
     };
 
     const renderGenreChips = () => (
-        <View style={styles.chipContainer}>
+        <View style={styles.chipContainer} className="w-full md:w-4/5">
             {genresList.map((genre) => (
                 <TouchableOpacity
                     key={genre}
@@ -448,6 +448,8 @@ export default function Catalog(props) {
     };
 
     const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
+    const isMobile = width < 768;
+    const sliderLength = width * (isMobile ? 0.6 : 0.7);
 
     return (
         <GradientBackground>
@@ -467,7 +469,7 @@ export default function Catalog(props) {
                                 </Text>
                             </View>
 
-                            <Text className="text-white text-3xl font-black text-center mt-3 mb-1">
+                            <Text className="text-white text-2xl md:text-3xl font-black text-center mt-3 mb-1">
                                 Movie Catalog
                             </Text>
 
@@ -631,7 +633,7 @@ export default function Catalog(props) {
                                     {renderGenreChips()}
 
                                     {/* Language */}
-                                    <Text className="text-white mt-4">Language:</Text>
+                                    <Text className="text-white mt-4 font-bold">Language:</Text>
                                     <View style={styles.dropdown}>
                                         <select
                                             value={selectedLanguage}
@@ -651,7 +653,7 @@ export default function Catalog(props) {
 
                                     <View>
                                     {/* Release Year Row */}
-                                    <View style={styles.rangeRow}>
+                                    <View style={styles.rangeRow} className="flex-col items-start md:flex-row md:items-center md:justify-start">
                                       <Text style={styles.sectionHeading}>Release Year Range    </Text>
                                       <Text style={styles.rangeLabel}>{`${range[0]} — ${range[1]}`}</Text>
                                     </View>
@@ -663,13 +665,13 @@ export default function Catalog(props) {
                                         min={1850}
                                         max={MAX_YEAR}
                                         onValuesChange={setRange}
-                                        sliderLength={width * 0.7}
+                                        sliderLength={sliderLength}
                                         trackStyle={styles.sliderTrack}
                                         selectedStyle={{ backgroundColor: "#FFA500" }}
                                         unselectedStyle={{ backgroundColor: "#333" }}
                                         markerStyle={styles.sliderMarker}
                                       />
-                                      <View style={styles.labelRow}>
+                                      <View style={styles.labelRow} className="w-full md:w-[95%]">
                                         <Text style={styles.thumbLabel}>1850</Text>
                                         <Text style={styles.thumbLabel}>{MAX_YEAR}</Text>
                                       </View>
@@ -677,7 +679,7 @@ export default function Catalog(props) {
                                   </View>
 
                                     {/* In Theaters */}
-                                    <Text className="text-white mt-4">In Theaters:</Text>
+                                    <Text className="text-white mt-4 font-bold">In Theaters:</Text>
                                     <View style={styles.dropdown}>
                                         <select
                                             value={onlyInTheater}
@@ -720,7 +722,7 @@ export default function Catalog(props) {
                                     <Text style={styles.filterTitle}>Sort Movies</Text>
 
                                     {/* Sort By */}
-                                    <Text className="text-white mt-4">Sort By:</Text>
+                                    <Text className="text-white mt-4 font-bold">Sort By:</Text>
                                     <View style={styles.dropdown}>
                                         <select
                                             value={props.sortOption}
@@ -737,7 +739,7 @@ export default function Catalog(props) {
                                     </View>
 
                                     {/* Sort Order */}
-                                    <Text className="text-white mt-4">Order:</Text>
+                                    <Text className="text-white mt-4 font-bold">Order:</Text>
                                     <View style={styles.dropdown}>
                                         <select
                                             value={props.sortOrder}
@@ -769,9 +771,7 @@ export default function Catalog(props) {
                 </View>
                 <View className="p-6 bg-orange-50/10 border-t border-white/20">
                     <TouchableOpacity
-                        className={`rounded-full px-12 py-3 ${
-                            selectedCount > 0 ? "bg-orange-500" : "bg-gray-600"
-                        }`}
+                        className={"rounded-full px-12 py-3 bg-orange-500"}
                         //style={styles.cartButton}
                         onPress={() => setCartVisible(true)}
                     >
@@ -798,8 +798,8 @@ const styles = StyleSheet.create({
     },
     timerContainer: {
         position: "absolute",
-        left: 5,
-        top: 10,
+        left: 3,
+        top: 5,
         backgroundColor: "#f97316",
         paddingVertical: 7,
         paddingHorizontal: 10,
@@ -873,15 +873,16 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     rangeRow: {
-      flexDirection: "row",
-      //justifyContent: "space-between",
+      //flexDirection: "row",
+      justifyContent: "left",
       alignItems: "center",
-      marginTop: 20,
+      marginTop: 10,
     },
     sectionHeading: {
       color: "#fff",
       fontWeight: "700",
       fontSize: 16,
+      marginTop: 10
     },
     rangeLabel: {
       backgroundColor: "#f97316",
@@ -891,8 +892,13 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       fontWeight: "bold",
       overflow: "hidden",
+      marginTop: 10
     },
-    sliderTrack: { height: 8, borderRadius: 10, backgroundColor: "#555" },
+    sliderTrack: { 
+        height: 8,
+        borderRadius: 10,
+        backgroundColor: "#555"
+    },
     sliderMarker: {
       width: 22,
       height: 22,
@@ -904,10 +910,12 @@ const styles = StyleSheet.create({
     labelRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      width: "100%",
       paddingHorizontal: 4,
     },
-    thumbLabel: { color: "#aaa", fontSize: 12 },
+    thumbLabel: {
+        color: "#aaa",
+        fontSize: 12
+    },
 });
 
 const FlipCard = ({movie, isSelected, toggleSelectMovie}) => {
