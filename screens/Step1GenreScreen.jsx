@@ -82,14 +82,16 @@ export default function Step1GenreScreen({onNext}) {
 
                 {/* footer with sticky button */}
                 <View className="p-6 bg-orange-50/10 border-t border-white/20">
-                    <Pressable
-                        onPress={handleNext}
-                        disabled={selectedGenres.length === 0}
-                        className={`rounded-full px-12 py-3 ${
-                            selectedGenres.length ? "bg-orange-500" : "bg-gray-600"
-                        }`}
+                <Pressable
+                    onPress={handleNext}
+                    disabled={selectedGenres.length === 0}
+                    className={`rounded-full px-12 py-4 shadow-lg ${
+                        selectedGenres.length
+                        ? "bg-orange-500"
+                        : "bg-gray-300"
+                    }`}
                     >
-                        <Text className="text-white font-bold text-lg text-center">Next</Text>
+                    <Text className="text-black font-bold text-lg text-center">Next</Text>
                     </Pressable>
                 </View>
             </SafeAreaView>
