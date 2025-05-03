@@ -59,23 +59,21 @@ export default function Step1GenreScreen({onNext}) {
                                 <Pressable
                                     key={genre}
                                     onPress={() => handleSelectGenre(genre)}
-                                    className={`w-[30%] sm:w-[18%] md:w-[15%] lg:w-[15%] aspect-square m-1 rounded-2xl items-center justify-center overflow-hidden wrap-anywhere border shadow-lg ${
+                                    className={`w-[30%] sm:w-[18%] md:w-[15%] lg:w-[15%] aspect-square m-2 rounded-2xl items-center justify-center border-2 ${
                                         isSelected
-                                            ? "bg-orange-500/90 border-orange-300"
-                                            : "bg-white/10 border-white/20"
+                                        ? "bg-orange-500 border-orange-300"
+                                        : "bg-white/90 border-gray-300"
                                     }`}
-                                >
+                                    >
                                     <Text
-                                        style={{
-                                            overflowWrap: "anywhere",
-                                        }}
-                                        className={`text-center font-semibold leading-tight lg:text-xl wrap-anywhere ${
-                                            isSelected ? "text-black" : "text-white/80"
+                                        className={`text-center font-bold text-base md:text-lg ${
+                                        isSelected ? "text-black" : "text-black"
                                         }`}
                                     >
                                         {genre}
                                     </Text>
-                                </Pressable>
+                                    </Pressable>
+
                             );
                         })}
                     </View>
