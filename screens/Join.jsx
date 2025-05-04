@@ -15,23 +15,20 @@ function Join(props) {
 
   const isDisabled = code.trim() === "" || name.trim() === "";
 
-  // handles joining
-  const onJoining = () => {
+  // sets error message and handles joining
+  const onJoining = async () => {
     if (code.length !== 6) {
       setError("Session code must be six digits");
       return;
     }
-
+  
     setError("");
-    props.handleJoinSession(code, name);
-  }
-
-  // sets error messages
-  useEffect(() => {
-    if (props.joinError !== "") {
+  
+    const success = await props.handleJoinSession(code, name);
+    if (!success && props.joinError) {
       setError(props.joinError);
     }
-  }, [props.joinError]);
+  };
   
   return (
     <GradientBackground>

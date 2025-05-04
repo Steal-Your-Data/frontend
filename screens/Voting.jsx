@@ -77,7 +77,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     setGoHome(true);
 };
 
-  if (loading) {
+  if (loading && movies.length === 0) {
     return (
       <GradientBackground>
         <View className="flex-1 justify-center items-center px-6">
@@ -92,8 +92,8 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     return (
       <GradientBackground>
         <View className="flex-1 justify-center items-center p-6">
-          <View className="bg-white/90 rounded-2xl shadow-md w-full max-w-lg p-6 justify-center items-center">
-            <Text className="text-red-500 text-4xl font-semibold mb-6 text-center">No movies were selected.</Text>
+          <View className="bg-white/90 rounded-xl shadow-md w-full max-w-lg p-4 justify-center items-center">
+            <Text className="text-red-500 text-4xl font-semibold mb-4 text-center">No movies were selected.</Text>
 
             <TouchableOpacity className="bg-orange-600 px-6 py-3 rounded-xl" onPress={handleReturnHome}>
               <Text className="text-white font-bold text-lg">Return to Home</Text>

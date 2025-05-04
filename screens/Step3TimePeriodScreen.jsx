@@ -103,7 +103,7 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                 <View className="p-6 bg-orange-50/10 border-t border-white/20">
                     <Pressable
                         onPress={handleFinish}
-                        className={"bg-orange-500 px-12 py-3 rounded-full"}
+                        className={"bg-orange-500 px-12 py-4 rounded-full"}
                         style={({pressed}) => [
                             {
                                 transform: [{scale: pressed ? 1.05 : 1}],
