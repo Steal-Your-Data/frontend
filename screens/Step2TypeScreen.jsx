@@ -50,7 +50,7 @@ export default function Step2TypeScreen({onNext, sessionCode, participantID}) {
                         onPress={handleNext}
                         disabled={selectedType.length === 0}
                         className={`rounded-full px-12 py-4 shadow-xl ${
-                            selectedType.length ? "bg-orange-500" : "bg-gray-300"
+                            selectedType.length ? "bg-orange-500" : "bg-gray-500"
                         }`}
                     >
                         <Text className="text-black font-bold text-lg text-center">Next</Text>

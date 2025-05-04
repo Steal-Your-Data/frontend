@@ -85,7 +85,7 @@ export default function Step1GenreScreen({onNext}) {
                         onPress={handleNext}
                         disabled={selectedGenres.length === 0}
                         className={`flex-1 rounded-full px-6 py-4 shadow-lg ${
-                            selectedGenres.length ? "bg-orange-500" : "bg-gray-300"
+                            selectedGenres.length ? "bg-orange-500" : "bg-gray-500"
                         }`}
                     >
                         <Text className="text-black font-bold text-lg text-center">Next</Text>
