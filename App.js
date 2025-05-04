@@ -54,6 +54,20 @@ export default function App() {
         }
     }, []);
 
+    useEffect(() => {
+        const onHostChange = (data) => {
+            console.log("Host changed:", data);
+            setHostName(data.new_host_name);
+        }
+
+        socket.on("host_changed", onHostChange);
+
+        return () => {
+            socket.off("host_changed", onHostChange);
+        }
+
+    }, []);
+
     // Listen for user_joined and user_left events
     useEffect(() => {
         const handleUserJoined = (data) => {
