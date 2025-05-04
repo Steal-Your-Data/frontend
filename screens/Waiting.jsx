@@ -3,9 +3,6 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import io from 'socket.io-client';
 import "../global.css";
 
-const socket = io('https://backend-production-e0e1.up.railway.app', {
-  transports: ['websocket'],
-});
 
 function Waiting({ finishedUsers, participants }) {
   return (
@@ -17,7 +14,7 @@ function Waiting({ finishedUsers, participants }) {
       <ActivityIndicator size="large" color="#FFA500" />
 
       <Text className="text-white text-lg mt-6">
-        {finishedUsers}/{participants.length} people have finished
+        {finishedUsers}/{participants} people have finished
       </Text>
     </View>
   );
