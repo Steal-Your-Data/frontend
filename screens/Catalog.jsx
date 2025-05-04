@@ -289,7 +289,7 @@ export default function Catalog(props) {
     const buildEndpoint = useCallback(
         (pageNumber) => {
             if (searchQuery.trim()) {
-                return `http://127.0.0.1:5000/movies/search_API?query=${encodeURIComponent(
+                return `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(
                     searchQuery.trim()
                 )}&page=${pageNumber}`;
             }
@@ -311,7 +311,7 @@ export default function Catalog(props) {
             if (onlyInTheater) params.append("only_in_theater", onlyInTheater);
 
             params.append("page", pageNumber);
-            return `http://127.0.0.1:5000/movies/filter_and_sort_V2?${params.toString()}`;
+            return `https://backend-production-e0e1.up.railway.app/movies/filter_and_sort_V2?${params.toString()}`;
         },
         [
             searchQuery,
@@ -365,8 +365,8 @@ export default function Catalog(props) {
         try {
             setLoading(true);
             const endpoint = query
-                ? `http://127.0.0.1:5000/movies/search_API?query=${encodeURIComponent(query)}`
-                : `http://127.0.0.1:5000/movies/get_all_movies`;
+                ? `https://backend-production-e0e1.up.railway.app/movies/search_API?query=${encodeURIComponent(query)}`
+                : `https://backend-production-e0e1.up.railway.app/movies/get_all_movies`;
 
             const response = await fetch(endpoint);
             const data = await response.json();
@@ -409,7 +409,7 @@ export default function Catalog(props) {
         if (props.yearRange?.to) params.append("release_year_max", props.yearRange.to);
 
         try {
-            const response = await fetch(`http://127.0.0.1:5000/movies/filter_and_sort_V2?${params.toString()}`);
+            const response = await fetch(`https://backend-production-e0e1.up.railway.app/movies/filter_and_sort_V2?${params.toString()}`);
             const filtered = await response.json();
             setMovies(filtered); // Or call a handler from App.js like handleFilter(filtered)
         } catch (error) {
