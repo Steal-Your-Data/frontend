@@ -163,6 +163,21 @@ export default function App() {
         };
     }, []);
 
+    // Check for duplicate names in the session (fix same name participant can start the session)
+    useEffect(() => {
+        const handleNameExists = (data) => {
+            console.log("Duplicate name attempted:", data.name);
+            setJoinError("This name is already taken. Please choose another one.");
+        };
+    
+        socket.on("name_exists", handleNameExists);
+    
+        return () => {
+            socket.off("name_exists", handleNameExists);
+        };
+    }, []);
+    
+
     const fetchMovies = useCallback(async () => {
         try {
             // Step 1: Fetch movie IDs from the pocket with session_id and participant_id

@@ -6,7 +6,7 @@ import "../global.css";
 function Join(props) {
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
 
   const handleInputCode = (text) => {
     const numericText = text.replace(/[^0-9]/g, "");
@@ -15,18 +15,24 @@ function Join(props) {
 
   const isDisabled = code.trim() === "" || name.trim() === "";
 
+  useEffect(() => {
+    if (props.joinError) {
+      setLocalError(props.joinError);
+    }
+  }, [props.joinError]);
+
   // sets error message and handles joining
   const onJoining = async () => {
     if (code.length !== 6) {
-      setError("Session code must be six digits");
+      setLocalError("Session code must be six digits");
       return;
     }
   
-    setError("");
+    setLocalError("");
   
     const success = await props.handleJoinSession(code, name);
     if (!success && props.joinError) {
-      setError(props.joinError);
+      setLocalError(props.joinError);
     }
   };
   
@@ -54,17 +60,21 @@ function Join(props) {
 
           <TextInput
             value={name}
-            onChangeText={setName}
+            onChangeText={(text) => {
+              setName(text);
+              setLocalError(""); // Clear error as user types
+            }}
             placeholder="Your Name"
             placeholderTextColor="#999"
             className="border border-gray-300 rounded-md px-4 py-3 text-base w-full mb-4"
           />
 
-          {error !== "" && (
-            <Text className="text-red-500 text-base font-bold mb-2">
-              {error}
+          {localError !== "" && (
+            <Text className="text-red-500 text-sm mb-2 self-start pl-1">
+              {localError}
             </Text>
           )}
+
 
           <Pressable
             style={[
