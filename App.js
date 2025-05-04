@@ -11,9 +11,9 @@ import Step1GenreScreen from './screens/Step1GenreScreen';
 import Step2TypeScreen from './screens/Step2TypeScreen';
 import Step3TimePeriodScreen from './screens/Step3TimePeriodScreen';
 import io from 'socket.io-client';  // Used for interacting with backend
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
- 
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+
 const socket = io('https://backend-production-e0e1.up.railway.app', {
 
     transports: ['websocket'],  // Ensure WebSocket is used for real-time communication
@@ -42,16 +42,30 @@ export default function App() {
     const [genreFilters, setGenreFilters] = useState([]);
     const [sortOption, setSortOption] = useState("");
     const [sortOrder, setSortOrder] = useState("");
-    const [yearRange, setYearRange] = useState({ from: "", to: "" });
+    const [yearRange, setYearRange] = useState({from: "", to: ""});
 
     useEffect(() => {
-        try{
-            window.onbeforeunload = function() {
+        try {
+            window.onbeforeunload = function () {
                 return "Are you sure you want to leave?";
             }
         } catch (error) {
 
         }
+    }, []);
+
+    useEffect(() => {
+        const onHostChange = (data) => {
+            console.log("Host changed:", data);
+            setHostName(data.new_host_name);
+        }
+
+        socket.on("host_changed", onHostChange);
+
+        return () => {
+            socket.off("host_changed", onHostChange);
+        }
+
     }, []);
 
     // Listen for user_joined and user_left events
@@ -103,7 +117,7 @@ export default function App() {
             setGoWaiting(false);
             setGoVoting(true);
         });
-        
+
         socket.on('selection_complete', (data) => {
             console.log('Selection Completed:', data);
             setGoVoting(true); // Move all clients to the Voting page
@@ -285,7 +299,6 @@ export default function App() {
                 },
                 body: JSON.stringify({session_id: sessionCode, name: name})
             });
-
 
 
             const joinSession = (sessionCode, name) => {
@@ -538,19 +551,35 @@ export default function App() {
         );
     } else if (inSession) {
         return (
-          <Session
-            sessionCode={sessionCode}
-            hostName={hostName}
-            name={name}
-            participants={participants}
-            handleStartSession={handleStartSession}
-            handleLeaveSession={handleLeaveSession}
-          />
+            <Session
+                sessionCode={sessionCode}
+                hostName={hostName}
+                name={name}
+                participants={participants}
+                handleStartSession={handleStartSession}
+                handleLeaveSession={handleLeaveSession}
+            />
         );
     } else if (stepScreen === "Step1") {
         return (
             <Step1GenreScreen
                 onNext={(genres) => {
+                    //if empty array, skip to catalog
+                    if (genres.length === 0) {
+                        setSortOption("popularity"); // popularity / release_date
+                        setSortOrder("desc"); // asc/ desc
+
+                        setYearRange({
+                            from: 1850,
+                            to: new Date().getFullYear().toString()
+                        });
+                        setSortOption("popularity");
+
+                        setStepScreen(null);
+                        setGoCatalog(true);
+                        return;
+                    }
+
                     setGenreFilters(genres);
                     setStepScreen("Step2");
                 }}
@@ -561,15 +590,18 @@ export default function App() {
     } else if (stepScreen === "Step2") {
         return (
             <Step2TypeScreen
-                onNext={({ sortBy, order }) => {
+                onNext={({sortBy, order}) => {
                     // onNext({ sortBy: sort, order });
 
 
                     setSortOption(sortBy); // popularity / release_date
                     setSortOrder(order); // asc/ desc
 
-                    if(sortBy === "release_date") {
-                        setYearRange({ from:  new Date().getFullYear().toString(), to: new Date().getFullYear().toString() });
+                    if (sortBy === "release_date") {
+                        setYearRange({
+                            from: new Date().getFullYear().toString(),
+                            to: new Date().getFullYear().toString()
+                        });
                         setSortOption("popularity");
 
                         setStepScreen(null);
@@ -615,55 +647,55 @@ export default function App() {
         />
     } else if (goWaiting) {
         return (
-          <Waiting
-            setGoWaiting={setGoWaiting}
-            setGoVoting={setGoVoting}
-            participants={participants}
-            finishedUsers={finishedUsers}
-          />
+            <Waiting
+                setGoWaiting={setGoWaiting}
+                setGoVoting={setGoVoting}
+                participants={participants}
+                finishedUsers={finishedUsers}
+            />
         );
     } else if (goVoting) {
         return (
-          <Voting
-            setGoVoting={setGoVoting}
-            setGoWinner={setGoWinner}
-            setFinalVotes={setFinalVotes}
-            handleYes={handleYes}
-            handleFinalVote={handleFinalVote}
-            fetchMovies={fetchMovies}
-            setGoHome={setGoHome}
-          />
+            <Voting
+                setGoVoting={setGoVoting}
+                setGoWinner={setGoWinner}
+                setFinalVotes={setFinalVotes}
+                handleYes={handleYes}
+                handleFinalVote={handleFinalVote}
+                fetchMovies={fetchMovies}
+                setGoHome={setGoHome}
+            />
         );
     } else if (goWinner) {
         return (
-          <Winner
-            finalVotes={finalVotes}
-            setGoWinner={setGoWinner}
-            setGoHome={setGoHome}
-            fetchWinner={fetchWinner}
-          />
+            <Winner
+                finalVotes={finalVotes}
+                setGoWinner={setGoWinner}
+                setGoHome={setGoHome}
+                fetchWinner={fetchWinner}
+            />
         );
     }
-    
+
     // Wrap Home + Step screens in NavigationContainer
     return (
         <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home">
-              {(props) => (
-                <Home
-                  {...props}
-                  setIsHosting={setIsHosting}
-                  setIsJoining={setIsJoining}
-                  setGoCatalog={setGoCatalog}
-                  setGoWaiting={setGoWaiting}
-                />
-              )}
-            </Stack.Screen>
-            <Stack.Screen name="Step1" component={Step1GenreScreen} />
-            <Stack.Screen name="Step2" component={Step2TypeScreen} />
-            <Stack.Screen name="Step3" component={Step3TimePeriodScreen} />
-          </Stack.Navigator>
+            <Stack.Navigator screenOptions={{headerShown: false}}>
+                <Stack.Screen name="Home">
+                    {(props) => (
+                        <Home
+                            {...props}
+                            setIsHosting={setIsHosting}
+                            setIsJoining={setIsJoining}
+                            setGoCatalog={setGoCatalog}
+                            setGoWaiting={setGoWaiting}
+                        />
+                    )}
+                </Stack.Screen>
+                <Stack.Screen name="Step1" component={Step1GenreScreen}/>
+                <Stack.Screen name="Step2" component={Step2TypeScreen}/>
+                <Stack.Screen name="Step3" component={Step3TimePeriodScreen}/>
+            </Stack.Navigator>
         </NavigationContainer>
     );
 }
