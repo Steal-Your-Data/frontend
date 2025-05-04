@@ -86,10 +86,10 @@ export default function Step1GenreScreen({onNext}) {
                         onPress={handleNext}
                         disabled={selectedGenres.length === 0}
                         className={`rounded-full px-12 py-3 ${
-                            selectedGenres.length ? "bg-orange-500" : "bg-gray-600"
+                            selectedGenres.length ? "bg-orange-500" : "bg-gray-500"
                         }`}
                     >
-                        <Text className="text-white font-bold text-lg text-center">Next</Text>
+                        <Text className="text-black font-bold text-lg text-center">Next</Text>
                     </Pressable>
                 </View>
             </SafeAreaView>

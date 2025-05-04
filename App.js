@@ -319,9 +319,8 @@ export default function App() {
                 setInSession(true);
                 setJoinError("");
             } else {
-                // FIX: not receiving error messages for sessions already started
                 console.error("Error joining session:", data.message || data.error);
-                setJoinError(data.message || data.error || "Failed to join session.");
+                setJoinError(data.message || data.error || "Failed to join session");
             }
         } catch (error) {
             console.error("Error:", error);
@@ -530,7 +529,13 @@ export default function App() {
     if (isHosting) {
         return <Host handleHostSession={handleHostSession} setIsHosting={setIsHosting}/>;
     } else if (isJoining) {
-        return <Join handleJoinSession={handleJoinSession} setIsJoining={setIsJoining} joinError={joinError}/>;
+        return (
+        <Join
+            handleJoinSession={handleJoinSession}
+            setIsJoining={setIsJoining}
+            joinError={joinError}
+            />
+        );
     } else if (inSession) {
         return (
           <Session

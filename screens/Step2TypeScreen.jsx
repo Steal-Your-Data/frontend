@@ -42,10 +42,10 @@ export default function Step2TypeScreen({onNext, sessionCode, participantID}) {
                         onPress={handleNext}
                         disabled={selectedType.length === 0}
                         className={`rounded-full px-12 py-3 ${
-                            selectedType.length ? "bg-orange-500" : "bg-gray-600"
+                            selectedType.length ? "bg-orange-500" : "bg-gray-500"
                         }`}
                     >
-                        <Text className="text-white font-bold text-lg text-center">Next</Text>
+                        <Text className="text-black font-bold text-lg text-center">Next</Text>
                     </Pressable>
                 </View>
             </SafeAreaView>
