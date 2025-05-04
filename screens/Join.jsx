@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, TouchableOpacity, StyleSheet } from "react-native";
 import GradientBackground from "../components/GradientBackground";
 import "../global.css";
@@ -15,20 +15,21 @@ function Join(props) {
 
   const isDisabled = code.trim() === "" || name.trim() === "";
 
-  // sets error messages
-  const onJoining = () => {
+  // sets error message and handles joining
+  const onJoining = async () => {
     if (code.length !== 6) {
       setError("Session code must be six digits");
       return;
-    } else if (props.joinError !== "") {
-      setError(props.joinError);
-      return;
-    } else {
-      setError("");
-      props.handleJoinSession(code, name);
     }
-  }
-
+  
+    setError("");
+  
+    const success = await props.handleJoinSession(code, name);
+    if (!success && props.joinError) {
+      setError(props.joinError);
+    }
+  };
+  
   return (
     <GradientBackground>
       <View className="flex-1 justify-center items-center px-4">
@@ -60,7 +61,7 @@ function Join(props) {
           />
 
           {error !== "" && (
-            <Text className="text-red-500 text-sm mb-4">
+            <Text className="text-red-500 text-base font-bold mb-2">
               {error}
             </Text>
           )}

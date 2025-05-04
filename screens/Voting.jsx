@@ -77,7 +77,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     setGoHome(true);
 };
 
-  if (loading) {
+  if (loading && movies.length === 0) {
     return (
       <GradientBackground>
         <View className="flex-1 justify-center items-center px-6">
@@ -92,8 +92,8 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
     return (
       <GradientBackground>
         <View className="flex-1 justify-center items-center p-6">
-          <View className="bg-black bg-opacity-75 rounded-2xl shadow-md w-full max-w-lg p-6 justify-center items-center">
-            <Text className="text-red-500 text-4xl font-semibold mb-6 text-center">No movies were selected.</Text>
+          <View className="bg-white/90 rounded-xl shadow-md w-full max-w-lg p-4 justify-center items-center">
+            <Text className="text-red-500 text-4xl font-semibold mb-4 text-center">No movies were selected.</Text>
 
             <TouchableOpacity className="bg-orange-600 px-6 py-3 rounded-xl" onPress={handleReturnHome}>
               <Text className="text-white font-bold text-lg">Return to Home</Text>
@@ -110,11 +110,11 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   const styles = StyleSheet.create({
     timerContainer: {
         position: "absolute",
-        top: 15,
-        left: 10,
+        top: 5,
+        left: 3,
         backgroundColor: "#f97316",
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         borderRadius: 999
     },
     timerText: {
@@ -126,7 +126,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
   return (
     <GradientBackground>
       <ScrollView>
-        <View className="flex-1 justify-center items-center px-6 py-20">
+        <View className="flex-1 justify-center items-center px-6 pt-20 pb-2">
           {/* Progress Indicator */}
           <View className="w-full max-w-md mb-6">
             <Text className="text-white text-sm text-center mb-2">
@@ -140,7 +140,7 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
           {/* Timer */}
           <View style={styles.timerContainer}>
             <Text
-              className="text-base sm:text-lg md:text-xl lg:text-2xl"
+              className="text-lg md:text-xl lg:text-2xl"
               style={styles.timerText}
             >
               ⏳ {timer}
@@ -162,17 +162,17 @@ function Voting({ setGoVoting, setGoWinner, setFinalVotes, handleYes, handleFina
             </View>
           )}
 
-          <View className="bg-black bg-opacity-75 rounded-xl w-full max-w-4xl my-4 px-2 justify-center items-center">
-            <Text className="text-white text-xl font-semibold text-center my-2">
+          <View className="bg-white/90 bg-opacity-75 rounded-xl w-full max-w-4xl my-4 px-2 justify-center items-center">
+            <Text className="text-black text-xl font-semibold text-center my-2">
               {movie.title}
             </Text>
             
             {movie.overview ? (
-              <Text className="text-white text-sm text-center mb-3">
+              <Text className="text-black text-sm text-center mb-3">
                 {movie.overview}
               </Text>
             ):(
-              <Text className="text-white text-sm text-center mb-3">
+              <Text className="text-black text-sm text-center mb-3">
                 No description available.
               </Text>
             )}

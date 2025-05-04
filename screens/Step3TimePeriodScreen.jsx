@@ -34,6 +34,9 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
         }).start();
     };
 
+    const isMobile = width < 768;
+    const sliderLength = width * (isMobile ? 0.67 : 0.76);
+
     return (
         <GradientBackground>
             <SafeAreaView className="flex-1 bg-transparent">
@@ -44,18 +47,13 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                         What time period are you interested in?
                     </Text>
 
-                    <View className="items-center w-full mb-16">
-                        <Text className="text-orange-500 text-2xl font-extrabold mb-4 tracking-wide">
+                    <View className="items-center w-full mb-8">
+                        <Text className="bg-orange-500 text-white text-xl px-3 py-2 rounded-full font-extrabold overflow-hidden mb-1">
                             {range[0]} — {range[1]}
                         </Text>
 
                         {/* Slider and Number Labels */}
                         <View style={{width: width * 0.8, alignItems: 'center'}}>
-                            {/* Top year labels (above thumbs) */}
-                            <View style={styles.labelRow}>
-                                <Text style={styles.thumbLabel}>1850</Text>
-                                <Text style={styles.thumbLabel}>{MAX_YEAR}</Text>
-                            </View>
 
                             {/* Actual slider */}
                             <MultiSlider
@@ -64,7 +62,7 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                                 max={MAX_YEAR}
                                 onValuesChange={setRange}
                                 enableLabel={false}
-                                sliderLength={width * 0.8}
+                                sliderLength={sliderLength}
                                 trackStyle={{
                                     height: 8,
                                     borderRadius: 10,
@@ -92,6 +90,12 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                                 onValuesChangeStart={onDragStart}
                                 onValuesChangeFinish={onDragEnd}
                             />
+
+                            {/* Bottom year labels (above thumbs) */}
+                            <View style={styles.labelRow}>
+                                <Text style={styles.thumbLabel} className="bg-white/90 rounded-full px-2 py-1">1850</Text>
+                                <Text style={styles.thumbLabel} className="bg-white/90 rounded-full px-2 py-1">{MAX_YEAR}</Text>
+                            </View>
                         </View>
                     </View>
 
@@ -99,7 +103,7 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                 <View className="p-6 bg-orange-50/10 border-t border-white/20">
                     <Pressable
                         onPress={handleFinish}
-                        className={"bg-orange-500 px-12 py-3 rounded-full"}
+                        className={"bg-orange-500 px-12 py-4 rounded-full"}
                         style={({pressed}) => [
                             {
                                 transform: [{scale: pressed ? 1.05 : 1}],
@@ -111,7 +115,7 @@ export default function Step3TimePeriodScreen({onNext, sessionCode, participantI
                             },
                         ]}
                     >
-                        <Text className="text-white font-bold text-lg text-center">Finish</Text>
+                        <Text className="text-black font-bold text-lg text-center">Finish</Text>
                     </Pressable>
                 </View>
             </SafeAreaView>
@@ -124,14 +128,12 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8,
-        paddingHorizontal: 8,
+        paddingHorizontal: 4,
     },
     thumbLabel: {
-        color: 'white',
+        color: 'black',
         fontSize: 16,
         fontWeight: '700',
-        marginBottom: 4,
     },
     marker: {
         height: 26,
