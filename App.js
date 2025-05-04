@@ -43,6 +43,9 @@ export default function App() {
     const [sortOption, setSortOption] = useState("");
     const [sortOrder, setSortOrder] = useState("");
     const [yearRange, setYearRange] = useState({from: "", to: ""});
+    const [selectionProgresDoneParticipants, setSelectionProgressDoneParticipants] = useState(0);
+    const [selectionProgressTotalParticipants, setSelectionProgressTotalParticipants] = useState(0);
+    const [waitingState, setWaitingState] = useState(1); //1 = for selection, 2 = for voting
 
     useEffect(() => {
         try {
@@ -108,7 +111,13 @@ export default function App() {
 
     useEffect(() => {
         socket.on('selection_progress', (data) => {
-            console.log('Selection progress:', data);
+            console.log("WAITING STATE IS" , waitingState)
+            if(waitingState !== 1)
+                return;
+
+            setSelectionProgressDoneParticipants(data.done_participants); // update the number of participants who have finished
+            setSelectionProgressTotalParticipants(data.total_participants); // update the number of participants who have finished
+
             setFinishedUsers(data.done_participants); // update the number of participants who have finished
         });
 
@@ -129,15 +138,23 @@ export default function App() {
             socket.off('No_Movies');
             socket.off('selection_complete'); // Cleanup listener
         };
-    }, []);
+    }, [waitingState]);
 
     useEffect(() => {
         socket.on('voting_progress', (data) => {
+            console.log("WAITING STATE IS" , waitingState)
+            if(waitingState !== 2)
+                return;
+
             console.log('Voting progress:', data);
+            setSelectionProgressDoneParticipants(data.done_participants); // update the number of participants who have finished
+            setSelectionProgressTotalParticipants(data.total_participants); // update the number of participants who have finished
+
             setFinishedUsers(data.done_participants); // update the number of participants who have finished
         });
 
         socket.on('voting_complete', (data) => {
+
             console.log('Voting Completed:', data);
             setGoWinner(true); // Move all clients to the Winner page
             setGoWaiting(false);
@@ -147,7 +164,7 @@ export default function App() {
             socket.off('voting_progress')
             socket.off('voting_complete'); // Cleanup listener
         };
-    }, []);
+    }, [waitingState]);
 
     // This useEffect is for switching Session for nonHost participants
     useEffect(() => {
@@ -415,6 +432,9 @@ export default function App() {
             if (data.total_participants !== data.done_participants) {
                 console.log(data.message);
                 setGoWaiting(true);
+                setWaitingState(2)
+                setSelectionProgressTotalParticipants(data.total_participants);
+                setSelectionProgressDoneParticipants(data.done_participants);
                 setGoVoting(false);
             } else if (data.total_participants === data.done_participants) {
                 console.log(data.message);
@@ -522,6 +542,10 @@ export default function App() {
             if (data.total_participants !== data.done_participants) {
                 console.log(data.message);
                 setGoWaiting(true);
+                setWaitingState(1)
+                setSelectionProgressTotalParticipants(data.total_participants);
+                setSelectionProgressDoneParticipants(data.done_participants);
+
                 setGoCatalog(false);
             } else if (data.total_participants === data.done_participants) {
                 console.log(data.message);
@@ -645,8 +669,8 @@ export default function App() {
             <Waiting
                 setGoWaiting={setGoWaiting}
                 setGoVoting={setGoVoting}
-                participants={participants}
-                finishedUsers={finishedUsers}
+                participants={selectionProgressTotalParticipants}
+                finishedUsers={selectionProgresDoneParticipants}
             />
         );
     } else if (goVoting) {
